@@ -10,6 +10,7 @@ function RootComponent() {
     <React.Fragment>
       <div>Hello "__root"!</div>
       <Outlet />
+      <div>Footer</div>
     </React.Fragment>
   );
 }
