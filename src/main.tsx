@@ -16,6 +16,7 @@ declare module "@tanstack/react-router" {
   }
 }
 
+// biome-ignore lint/style/noNonNullAssertion: We don't expect this to fail
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RouterProvider router={router} />
