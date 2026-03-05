@@ -1,7 +1,10 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "includes": ["**", "!src/routeTree.gen.ts"]
+    "includes": [
+      "**",
+      "!src/routeTree.gen.ts"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -27,6 +30,14 @@
         "noExplicitAny": "warn"
       }
     },
-    "includes": ["**", "!dist"]
+    "includes": [
+      "**",
+      "!dist"
+    ]
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
   }
 }

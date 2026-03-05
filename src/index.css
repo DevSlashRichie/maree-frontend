@@ -1,1 +1,63 @@
 @import "tailwindcss";
+
+@theme {
+  /* Colores personalizados del HTML */
+  --color-primary: #3A4042;
+  --color-secondary: #EAE6DF;
+  --color-background-light: #F7F5F0;
+  --color-background-dark: #1F1D1B;
+  --color-card-light: #FFFFFF;
+  --color-card-dark: #2C2A28;
+  --color-text-main: #2D2A26;
+  --color-text-light: #F2EFE9;
+  --color-accent: #5E6C75;
+  --color-pink-soft: #E8D5D5;
+  --color-pink-powder: #F2E4E4;
+  --color-pink-logo: #eedcdc;
+
+  /* Fuentes */
+  --font-display: "Playfair Display", serif;
+  --font-body: "Lato", sans-serif;
+
+  /* Radios de borde extra */
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+}
+
+/* Clases utilitarias personalizadas (lo que tenías en <style>) */
+@utility scrollbar-hide {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@utility texture-bg {
+  background-image: linear-gradient(to bottom, #EAE6DF, #E8D5D5);
+}
+
+@utility arched-img {
+  border-radius: 50% 50% 0 0 / 20% 20% 0 0;
+  overflow: hidden;
+}
+
+@utility watermark-bg {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E8D5D5' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12c0 5.523 4.477 10 10 10s10-4.477 10-10S17.523 2 12 2 2 6.477 2 12z'/%3E%3Cpath d='M12 2v20'/%3E%3Cpath d='M2 12h20'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+    opacity: 0.15;
+    z-index: 0;
+    pointer-events: none;
+  }
+}
