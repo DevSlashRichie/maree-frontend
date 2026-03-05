@@ -1,3 +1,5 @@
+import cn from "classnames";
+
 interface TextProps {
   children: React.ReactNode;
   className?: string;
@@ -5,7 +7,11 @@ interface TextProps {
 
 export const Heading = ({ children, className = "" }: TextProps) => (
   <h1
-    className={`font-display text-[4rem] tracking-[0.1em] text-text-main uppercase leading-none ${className}`}
+    className={cn(
+      "font-display tracking-[0.1em] text-text-main uppercase leading-none",
+      className,
+      "text-xl",
+    )}
   >
     {children}
   </h1>

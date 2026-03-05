@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MenuRouteImport } from './routes/menu'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
@@ -20,6 +21,11 @@ import { Route as AdminReportsRouteImport } from './routes/admin/reports'
 const MenuRoute = MenuRouteImport.update({
   id: '/menu',
   path: '/menu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
+  '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/': typeof AdminIndexRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
+  '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin': typeof AdminIndexRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
+  '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/': typeof AdminIndexRoute
@@ -87,17 +96,26 @@ export interface FileRouteTypes {
     | '/admin'
     | '/about'
     | '/cart'
+    | '/login'
     | '/menu'
     | '/admin/reports'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/cart' | '/menu' | '/admin/reports' | '/admin'
+  to:
+    | '/'
+    | '/about'
+    | '/cart'
+    | '/login'
+    | '/menu'
+    | '/admin/reports'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/about'
     | '/cart'
+    | '/login'
     | '/menu'
     | '/admin/reports'
     | '/admin/'
@@ -108,6 +126,7 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   CartRoute: typeof CartRoute
+  LoginRoute: typeof LoginRoute
   MenuRoute: typeof MenuRoute
 }
 
@@ -118,6 +137,13 @@ declare module '@tanstack/react-router' {
       path: '/menu'
       fullPath: '/menu'
       preLoaderRoute: typeof MenuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -184,6 +210,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   CartRoute: CartRoute,
+  LoginRoute: LoginRoute,
   MenuRoute: MenuRoute,
 }
 export const routeTree = rootRouteImport
