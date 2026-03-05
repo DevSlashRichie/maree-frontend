@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { MenuHero } from "@/components/layers/menu-hero";
 import { Button } from "../components/ui/button"; 
 import { FoodCard } from "../components/ui/card";
 import { Heading, Subheading } from "../components/ui/typography";
@@ -9,6 +10,8 @@ export const Route = createFileRoute("/menu")({
 
 function RouteComponent() {
   return (
+    <>
+    <MenuHero />
     <div className="texture-bg min-h-screen pb-20">
       <header className="py-12 text-center">
         <Heading>Nuestro Menú</Heading>
@@ -38,5 +41,6 @@ function RouteComponent() {
         </div>
       </main>
     </div>
+    </>
   );
 }
