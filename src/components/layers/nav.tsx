@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
-export function MobileNav() {
+export function Nav() {
   const navItems = [
     { to: "/menu", label: "Menú", icon: "restaurant_menu" },
     { to: "/order", label: "Order", icon: "shopping_bag" },
