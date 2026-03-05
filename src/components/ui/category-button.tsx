@@ -4,7 +4,11 @@ interface CategoryButtonProps {
   onClick?: () => void;
 }
 
-export function CategoryButton({ label, isActive, onClick }: CategoryButtonProps) {
+export function CategoryButton({
+  label,
+  isActive,
+  onClick,
+}: CategoryButtonProps) {
   return (
     <button
       type="button"

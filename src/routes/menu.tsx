@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { CategoryFilters } from "@/components/layers/category-filters";
 import { MenuHero } from "@/components/layers/menu-hero";
 import { FoodCard } from "@/components/ui/card";
 import { Subheading } from "@/components/ui/typography";
-import { CategoryFilters } from "@/components/layers/category-filters";
 
 const MENU_DATA = [
   {
@@ -11,16 +11,18 @@ const MENU_DATA = [
     title: "Fresa Pasión",
     price: "$95.00",
     description: "Queso crema dulce, mermelada y fresa fresca.",
-    image: "https://images.unsplash.com/photo-1519676867240-f03562e64548?q=80&w=500",
+    image:
+      "https://images.unsplash.com/photo-1519676867240-f03562e64548?q=80&w=500",
     category: "Crepas Dulces",
-    badge: "POPULAR"
+    badge: "POPULAR",
   },
   {
     id: 2,
     title: "Clásica Salada",
     price: "$110.00",
     description: "Jamón serrano, queso mozzarella y arúgula.",
-    image: "https://images.unsplash.com/photo-1621317911081-00ec931f6044?q=80&w=500",
+    image:
+      "https://images.unsplash.com/photo-1621317911081-00ec931f6044?q=80&w=500",
     category: "Crepas Saladas",
   },
   {
@@ -28,9 +30,10 @@ const MENU_DATA = [
     title: "Waffle Frutos Rojos",
     price: "$85.00",
     description: "Waffle artesanal con miel de agave y berries.",
-    image: "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500",
+    image:
+      "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500",
     category: "Waffles",
-  }
+  },
 ];
 
 export const Route = createFileRoute("/menu")({
@@ -43,20 +46,21 @@ const CATEGORIES = [
   "Waffles",
   "Bebidas Calientes",
   "Bebidas Frías",
-  "Especiales"
+  "Especiales",
 ];
 
 function RouteComponent() {
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0]);
 
-  const filteredItems = MENU_DATA.filter(item => item.category === activeCategory);
+  const filteredItems = MENU_DATA.filter(
+    (item) => item.category === activeCategory,
+  );
 
   return (
     <>
       <MenuHero />
       <div className="texture-bg min-h-screen pb-20">
-
-        <CategoryFilters 
+        <CategoryFilters
           categories={CATEGORIES}
           activeCategory={activeCategory}
           onCategoryChange={setActiveCategory}
@@ -77,7 +81,9 @@ function RouteComponent() {
                   description={item.description}
                   image={item.image}
                   badge={item.badge}
-                  onAdd={() => console.log(`Agregado al carrito: ${item.title}`)}
+                  onAdd={() =>
+                    console.log(`Agregado al carrito: ${item.title}`)
+                  }
                 />
               ))
             ) : (

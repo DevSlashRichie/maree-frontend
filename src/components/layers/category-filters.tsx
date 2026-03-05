@@ -1,15 +1,15 @@
 import { CategoryButton } from "@/components/ui/category-button";
 
 interface CategoryFiltersProps {
-  categories: string[];           
-  activeCategory: string;       
-  onCategoryChange: (category: string) => void; 
+  categories: string[];
+  activeCategory: string;
+  onCategoryChange: (category: string) => void;
 }
 
-export function CategoryFilters({ 
-  categories, 
-  activeCategory, 
-  onCategoryChange 
+export function CategoryFilters({
+  categories,
+  activeCategory,
+  onCategoryChange,
 }: CategoryFiltersProps) {
   return (
     <div className="relative mb-14 bg-white rounded-2xl p-4 shadow-md border border-pink-soft/30">
@@ -19,7 +19,7 @@ export function CategoryFilters({
             key={cat}
             label={cat}
             isActive={activeCategory === cat}
-            onClick={() => onCategoryChange(cat)} 
+            onClick={() => onCategoryChange(cat)}
           />
         ))}
       </div>
