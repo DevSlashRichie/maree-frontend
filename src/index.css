@@ -2,30 +2,27 @@
 
 @theme {
   /* Colores personalizados del HTML */
-  --color-primary: #3A4042;
-  --color-secondary: #EAE6DF;
-  --color-background-light: #F7F5F0;
-  --color-background-dark: #1F1D1B;
-  --color-card-light: #FFFFFF;
-  --color-card-dark: #2C2A28;
-  --color-text-main: #2D2A26;
-  --color-text-light: #F2EFE9;
-  --color-accent: #5E6C75;
-  --color-pink-soft: #E8D5D5;
-  --color-pink-powder: #F2E4E4;
+  --color-primary: #3a4042;
+  --color-secondary: #eae6df;
+  --color-background-light: #f7f5f0;
+  --color-background-dark: #1f1d1b;
+  --color-card-light: #ffffff;
+  --color-card-dark: #2c2a28;
+  --color-text-main: #2d2a26;
+  --color-text-light: #f2efe9;
+  --color-accent: #5e6c75;
+  --color-pink-soft: #e8d5d5;
+  --color-pink-powder: #f2e4e4;
   --color-pink-logo: #eedcdc;
 
-  /* Fuentes */
   --font-display: "Playfair Display", serif;
   --font-body: "Lato", sans-serif;
 
-  /* Radios de borde extra */
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
   --radius-3xl: 2rem;
 }
 
-/* Clases utilitarias personalizadas (lo que tenías en <style>) */
 @utility scrollbar-hide {
   &::-webkit-scrollbar {
     display: none;
@@ -35,7 +32,7 @@
 }
 
 @utility texture-bg {
-  background-image: linear-gradient(to bottom, #EAE6DF, #E8D5D5);
+  background-image: linear-gradient(to bottom, #eae6df, #e8d5d5);
 }
 
 @utility arched-img {
@@ -46,7 +43,7 @@
 @utility watermark-bg {
   position: relative;
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     left: 50%;
