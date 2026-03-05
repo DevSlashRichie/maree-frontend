@@ -28,5 +28,10 @@
       }
     },
     "includes": ["**", "!dist"]
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
   }
 }
