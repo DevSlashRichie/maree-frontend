@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type GetUsersMe200 = {
+export interface User {
   id: string;
   firstName: string;
   lastName: string;
@@ -13,4 +13,4 @@ export type GetUsersMe200 = {
   /** @nullable */
   email: string | null;
   createdAt: string;
-};
+}

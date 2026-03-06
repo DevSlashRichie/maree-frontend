@@ -4,10 +4,10 @@
  * Maree Backend API
  * OpenAPI spec version: 1.0.0
  */
-import type { PostAuthLoginBodyMethod } from "./postAuthLoginBodyMethod";
+import type { LoginMethod } from "./loginMethod";
 
-export type PostAuthLoginBody = {
+export interface Login {
   /** @minLength 1 */
   identity: string;
-  method: PostAuthLoginBodyMethod;
-};
+  method: LoginMethod;
+}

@@ -2,8 +2,7 @@ import { defineConfig } from "orval";
 
 export default defineConfig({
   mareeSwr: {
-    input:
-      "https://maree.kindmeadow-92ce4777.centralus.azurecontainerapps.io/docs/openapi.json",
+    input: "http://localhost:8383/docs/openapi.json",
     output: {
       target: "./src/lib/api.ts",
       schemas: "./src/lib/schemas",
@@ -12,8 +11,7 @@ export default defineConfig({
     },
   },
   mareeZod: {
-    input:
-      "https://maree.kindmeadow-92ce4777.centralus.azurecontainerapps.io/docs/openapi.json",
+    input: "http://localhost:8383/docs/openapi.json",
     output: {
       target: "./src/lib/zods.ts",
       client: "zod",

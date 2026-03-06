@@ -5,15 +5,16 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export * from "./getUsersMe200";
+export * from "./error";
 export * from "./getUsersMe404";
-export * from "./postAuthLogin200";
+export * from "./login";
+export * from "./loginMethod";
 export * from "./postAuthLogin400";
 export * from "./postAuthLogin403";
-export * from "./postAuthLoginBody";
-export * from "./postAuthLoginBodyMethod";
 export * from "./postAuthRegister201";
 export * from "./postAuthRegister400";
 export * from "./postAuthRegister409";
 export * from "./postAuthRegister500";
-export * from "./postAuthRegisterBody";
+export * from "./registerUserRequest";
+export * from "./token";
+export * from "./user";

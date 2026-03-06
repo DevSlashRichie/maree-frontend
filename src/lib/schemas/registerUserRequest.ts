@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PostAuthRegisterBody = {
+export interface RegisterUserRequest {
   firstName: string;
   lastName: string;
   /** @minLength 6 */
@@ -14,4 +14,4 @@ export type PostAuthRegisterBody = {
   /** @minLength 6 */
   password?: string;
   role?: string;
-};
+}

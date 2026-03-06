@@ -11,26 +11,21 @@ import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
 
 import type {
-  GetUsersMe200,
-  GetUsersMe404,
-  PostAuthLogin200,
-  PostAuthLogin400,
-  PostAuthLogin403,
-  PostAuthLoginBody,
+  Error,
+  Login,
   PostAuthRegister201,
-  PostAuthRegister400,
-  PostAuthRegister409,
-  PostAuthRegister500,
-  PostAuthRegisterBody,
+  RegisterUserRequest,
+  Token,
+  User,
 } from "./schemas";
 
 export type getUsersMeResponse200 = {
-  data: GetUsersMe200;
+  data: User;
   status: 200;
 };
 
 export type getUsersMeResponse404 = {
-  data: GetUsersMe404;
+  data: Error;
   status: 404;
 };
 
@@ -73,7 +68,7 @@ export type GetUsersMeQueryResult = NonNullable<
   Awaited<ReturnType<typeof getUsersMe>>
 >;
 
-export const useGetUsersMe = <TError = Promise<GetUsersMe404>>(options?: {
+export const useGetUsersMe = <TError = Promise<Error>>(options?: {
   swr?: SWRConfiguration<Awaited<ReturnType<typeof getUsersMe>>, TError> & {
     swrKey?: Key;
     enabled?: boolean;
@@ -100,17 +95,17 @@ export const useGetUsersMe = <TError = Promise<GetUsersMe404>>(options?: {
 };
 
 export type postAuthLoginResponse200 = {
-  data: PostAuthLogin200;
+  data: Token;
   status: 200;
 };
 
 export type postAuthLoginResponse400 = {
-  data: PostAuthLogin400;
+  data: Error;
   status: 400;
 };
 
 export type postAuthLoginResponse403 = {
-  data: PostAuthLogin403;
+  data: Error;
   status: 403;
 };
 
@@ -133,14 +128,14 @@ export const getPostAuthLoginUrl = () => {
 };
 
 export const postAuthLogin = async (
-  postAuthLoginBody: PostAuthLoginBody,
+  login: Login,
   options?: RequestInit,
 ): Promise<postAuthLoginResponse> => {
   const res = await fetch(getPostAuthLoginUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(postAuthLoginBody),
+    body: JSON.stringify(login),
   });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
@@ -154,7 +149,7 @@ export const postAuthLogin = async (
 };
 
 export const getPostAuthLoginMutationFetcher = (options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: PostAuthLoginBody }) => {
+  return (_: Key, { arg }: { arg: Login }) => {
     return postAuthLogin(arg, options);
   };
 };
@@ -164,14 +159,12 @@ export type PostAuthLoginMutationResult = NonNullable<
   Awaited<ReturnType<typeof postAuthLogin>>
 >;
 
-export const usePostAuthLogin = <
-  TError = Promise<PostAuthLogin400 | PostAuthLogin403>,
->(options?: {
+export const usePostAuthLogin = <TError = Promise<Error>>(options?: {
   swr?: SWRMutationConfiguration<
     Awaited<ReturnType<typeof postAuthLogin>>,
     TError,
     Key,
-    PostAuthLoginBody,
+    Login,
     Awaited<ReturnType<typeof postAuthLogin>>
   > & { swrKey?: string };
   fetch?: RequestInit;
@@ -195,17 +188,17 @@ export type postAuthRegisterResponse201 = {
 };
 
 export type postAuthRegisterResponse400 = {
-  data: PostAuthRegister400;
+  data: Error;
   status: 400;
 };
 
 export type postAuthRegisterResponse409 = {
-  data: PostAuthRegister409;
+  data: Error;
   status: 409;
 };
 
 export type postAuthRegisterResponse500 = {
-  data: PostAuthRegister500;
+  data: Error;
   status: 500;
 };
 
@@ -229,14 +222,14 @@ export const getPostAuthRegisterUrl = () => {
 };
 
 export const postAuthRegister = async (
-  postAuthRegisterBody: PostAuthRegisterBody,
+  registerUserRequest: RegisterUserRequest,
   options?: RequestInit,
 ): Promise<postAuthRegisterResponse> => {
   const res = await fetch(getPostAuthRegisterUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(postAuthRegisterBody),
+    body: JSON.stringify(registerUserRequest),
   });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
@@ -250,7 +243,7 @@ export const postAuthRegister = async (
 };
 
 export const getPostAuthRegisterMutationFetcher = (options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: PostAuthRegisterBody }) => {
+  return (_: Key, { arg }: { arg: RegisterUserRequest }) => {
     return postAuthRegister(arg, options);
   };
 };
@@ -260,16 +253,12 @@ export type PostAuthRegisterMutationResult = NonNullable<
   Awaited<ReturnType<typeof postAuthRegister>>
 >;
 
-export const usePostAuthRegister = <
-  TError = Promise<
-    PostAuthRegister400 | PostAuthRegister409 | PostAuthRegister500
-  >,
->(options?: {
+export const usePostAuthRegister = <TError = Promise<Error>>(options?: {
   swr?: SWRMutationConfiguration<
     Awaited<ReturnType<typeof postAuthRegister>>,
     TError,
     Key,
-    PostAuthRegisterBody,
+    RegisterUserRequest,
     Awaited<ReturnType<typeof postAuthRegister>>
   > & { swrKey?: string };
   fetch?: RequestInit;
