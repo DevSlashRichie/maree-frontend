@@ -26,7 +26,7 @@ export function withAuth<P extends object>(
           const { data: user, status } = await getUsersMe();
 
           if (user && status === 200) {
-            setAuth(user.id);
+            setAuth(user);
             setWasAuthenticated(true);
           } else {
             // No valid session
