@@ -9,7 +9,8 @@
     "check": "bunx biome check",
     "check:write": "bunx biome check --write",
     "preview": "vite preview",
-    "prepare": "husky"
+    "prepare": "husky",
+    "orval:general": "bunx orval"
   },
   "dependencies": {
     "@biomejs/biome": "^2.4.2",
