@@ -13,6 +13,7 @@ export const GetUsersMeResponse = zod.object({
   phone: zod.string(),
   email: zod.string().nullable(),
   createdAt: zod.string().datetime({}),
+  role: zod.string(),
 });
 
 export const postAuthLoginBodyMethodTwoValueMin = 6;

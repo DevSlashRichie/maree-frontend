@@ -11,16 +11,16 @@ import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
 
 import type {
+  Actor,
   BackendError,
   Login,
   PostAuthRegister201,
   RegisterUserRequest,
   Token,
-  User,
 } from "./schemas";
 
 export type getUsersMeResponse200 = {
-  data: User;
+  data: Actor;
   status: 200;
 };
 
