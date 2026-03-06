@@ -11,7 +11,7 @@ import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
 
 import type {
-  Error,
+  BackendError,
   Login,
   PostAuthRegister201,
   RegisterUserRequest,
@@ -25,7 +25,7 @@ export type getUsersMeResponse200 = {
 };
 
 export type getUsersMeResponse404 = {
-  data: Error;
+  data: BackendError;
   status: 404;
 };
 
@@ -68,7 +68,7 @@ export type GetUsersMeQueryResult = NonNullable<
   Awaited<ReturnType<typeof getUsersMe>>
 >;
 
-export const useGetUsersMe = <TError = Promise<Error>>(options?: {
+export const useGetUsersMe = <TError = Promise<BackendError>>(options?: {
   swr?: SWRConfiguration<Awaited<ReturnType<typeof getUsersMe>>, TError> & {
     swrKey?: Key;
     enabled?: boolean;
@@ -100,12 +100,12 @@ export type postAuthLoginResponse200 = {
 };
 
 export type postAuthLoginResponse400 = {
-  data: Error;
+  data: BackendError;
   status: 400;
 };
 
 export type postAuthLoginResponse403 = {
-  data: Error;
+  data: BackendError;
   status: 403;
 };
 
@@ -159,7 +159,7 @@ export type PostAuthLoginMutationResult = NonNullable<
   Awaited<ReturnType<typeof postAuthLogin>>
 >;
 
-export const usePostAuthLogin = <TError = Promise<Error>>(options?: {
+export const usePostAuthLogin = <TError = Promise<BackendError>>(options?: {
   swr?: SWRMutationConfiguration<
     Awaited<ReturnType<typeof postAuthLogin>>,
     TError,
@@ -188,17 +188,17 @@ export type postAuthRegisterResponse201 = {
 };
 
 export type postAuthRegisterResponse400 = {
-  data: Error;
+  data: BackendError;
   status: 400;
 };
 
 export type postAuthRegisterResponse409 = {
-  data: Error;
+  data: BackendError;
   status: 409;
 };
 
 export type postAuthRegisterResponse500 = {
-  data: Error;
+  data: BackendError;
   status: 500;
 };
 
@@ -253,7 +253,7 @@ export type PostAuthRegisterMutationResult = NonNullable<
   Awaited<ReturnType<typeof postAuthRegister>>
 >;
 
-export const usePostAuthRegister = <TError = Promise<Error>>(options?: {
+export const usePostAuthRegister = <TError = Promise<BackendError>>(options?: {
   swr?: SWRMutationConfiguration<
     Awaited<ReturnType<typeof postAuthRegister>>,
     TError,

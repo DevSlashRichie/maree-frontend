@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from "./backendError";
 export * from "./error";
 export * from "./getUsersMe404";
 export * from "./login";

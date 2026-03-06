@@ -1,9 +1,9 @@
+import { Navigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { Navigate } from "@tanstack/react-router";
 import { getUsersMe } from "@/lib/api";
-import { useAuthStore } from "./use-auth-store";
 import { sessionEvents } from "@/lib/sessionEvents";
+import { useAuthStore } from "./use-auth-store";
 
 export function withAuth<P extends object>(
   Component: React.ComponentType<P>,
