@@ -9,9 +9,9 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <div className="texture-bg dark:bg-background-dark text-text-main dark:text-text-light font-body transition-colors duration-300 pb-20">
+    <div className="texture-bg dark:bg-background-dark text-text-main dark:text-text-light font-body transition-colors duration-300 pb-20 min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-1">
         <Outlet />
       </main>
       <Footer />
