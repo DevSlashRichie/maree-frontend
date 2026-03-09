@@ -96,15 +96,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/about'
     | '/cart'
-<<<<<<< HEAD
     | '/login'
-=======
->>>>>>> 8bfdfc2962e8154ddcd4bc70122ec19857691b2f
     | '/menu'
     | '/admin/reports'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-<<<<<<< HEAD
   to:
     | '/'
     | '/about'
@@ -113,19 +109,13 @@ export interface FileRouteTypes {
     | '/menu'
     | '/admin/reports'
     | '/admin'
-=======
-  to: '/' | '/about' | '/cart' | '/menu' | '/admin/reports' | '/admin'
->>>>>>> 8bfdfc2962e8154ddcd4bc70122ec19857691b2f
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/about'
     | '/cart'
-<<<<<<< HEAD
     | '/login'
-=======
->>>>>>> 8bfdfc2962e8154ddcd4bc70122ec19857691b2f
     | '/menu'
     | '/admin/reports'
     | '/admin/'
