@@ -43,7 +43,7 @@ export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
                 {memberName}
               </p>
               <p className="text-gray-500 text-xs font-mono">
-                Phone: {memberId}
+                Teléfono: {memberId}
               </p>
             </div>
             <button
@@ -92,7 +92,7 @@ export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
           <p className="font-display text-lg text-charcoal dark:text-white">
             {memberName}
           </p>
-          <p className="text-sm text-gray-500 font-mono">ID: {memberId}</p>
+          <p className="text-sm text-gray-500 font-mono">Teléfono: {memberId}</p>
         </div>
       </Modal>
     </div>

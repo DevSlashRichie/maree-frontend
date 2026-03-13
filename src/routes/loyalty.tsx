@@ -1,6 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Coffee, UtensilsCrossed } from "lucide-react";
-import { useState } from "react";
+import {
+  Cake,
+  ChevronLeft,
+  ChevronRight,
+  Coffee,
+  IceCream,
+  Utensils,
+  UtensilsCrossed,
+} from "lucide-react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { HistoryItem } from "@/components/ui/history-item";
 import { LoyaltyCard } from "@/components/ui/loyalty-card";
@@ -28,6 +36,29 @@ const REWARDS_DATA = [
     icon: Coffee,
     isAvailable: false,
     points: 50,
+  },
+  {
+    id: 3,
+    title: "Bebida de Temporada",
+    description: "Prueba nuestra bebida especial del mes totalmente gratis.",
+    icon: IceCream,
+    isAvailable: true,
+  },
+  {
+    id: 4,
+    title: "Postre Especial",
+    description: "Un postre artesanal hecho en casa para endulzar tu día.",
+    icon: Cake,
+    isAvailable: false,
+    points: 75,
+  },
+  {
+    id: 5,
+    title: "Combo Pareja",
+    description: "Descuento especial en nuestro combo para dos personas.",
+    icon: Utensils,
+    isAvailable: false,
+    points: 150,
   },
 ];
 
@@ -59,18 +90,28 @@ function RouteComponent() {
   const [selectedReward, setSelectedReward] = useState<
     (typeof REWARDS_DATA)[0] | null
   >(null);
-
-  const [selectedRewardOpen, setSelectedRewardOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleRedeemClick = (reward: (typeof REWARDS_DATA)[0]) => {
     setSelectedReward(reward);
-    setSelectedRewardOpen(true);
+    setIsConfirmModalOpen(true);
+  };
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 340; // Card width + gap
+      scrollContainerRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
   };
 
   const confirmRedemption = () => {
     if (selectedReward) {
       console.log(`Confirmado: Canjeando ${selectedReward.title}`);
-      setSelectedRewardOpen(false);
+      setIsConfirmModalOpen(false);
     }
   };
 
@@ -88,30 +129,49 @@ function RouteComponent() {
               />
             </div>
 
-            <div className="md:col-span-7 space-y-8">
+            <div className="md:col-span-7 space-y-2 overflow-x-auto">
               <section>
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="font-display text-2xl text-charcoal dark:text-white">
                     Recompensas Disponibles
                   </h3>
-                  <button
-                    type="button"
-                    className="text-xs uppercase tracking-wider text-primary hover:text-charcoal transition-colors"
-                  >
-                    Ver todas
-                  </button>
+                  <div className="hidden md:flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => scroll("left")}
+                      className="p-1 rounded-full border border-accent/20 hover:bg-accent/10 text-accent transition-colors cursor-pointer"
+                      aria-label="Anterior"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scroll("right")}
+                      className="p-1 rounded-full border border-accent/20 hover:bg-accent/10 text-accent transition-colors cursor-pointer"
+                      aria-label="Siguiente"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div
+                  ref={scrollContainerRef}
+                  className="flex overflow-x-auto gap-4 pb-6 snap-x snap-mandatory scrollbar-hide px-4 sm:mx-0 sm:px-0"
+                >
                   {REWARDS_DATA.map((reward) => (
-                    <RewardCard
+                    <div
                       key={reward.id}
-                      title={reward.title}
-                      description={reward.description}
-                      icon={reward.icon}
-                      isAvailable={reward.isAvailable}
-                      points={reward.points}
-                      onRedeem={() => handleRedeemClick(reward)}
-                    />
+                      className="min-w-[280px] sm:min-w-[320px] snap-start"
+                    >
+                      <RewardCard
+                        title={reward.title}
+                        description={reward.description}
+                        icon={reward.icon}
+                        isAvailable={reward.isAvailable}
+                        points={reward.points}
+                        onRedeem={() => handleRedeemClick(reward)}
+                      />
+                    </div>
                   ))}
                 </div>
               </section>
@@ -135,7 +195,7 @@ function RouteComponent() {
                   <div className="p-3 bg-gray-50 dark:bg-charcoal/30 text-center border-t border-accent/20 dark:border-charcoal">
                     <button
                       type="button"
-                      className="text-xs text-gray-500 hover:text-charcoal dark:text-gray-400 dark:hover:text-white font-bold uppercase tracking-widest transition-colors"
+                      className="text-xs text-gray-500 hover:text-charcoal dark:text-gray-400 dark:hover:text-white font-bold uppercase tracking-widest transition-colors cursor-pointer"
                     >
                       Ver historial completo
                     </button>
@@ -147,15 +207,10 @@ function RouteComponent() {
         </main>
       </div>
 
+      {/* Modal de Confirmación */}
       <Modal
-        isOpen={selectedRewardOpen}
-        onClose={() => {
-          setSelectedRewardOpen(false);
-        }}
-        afterClose={() => {
-          setSelectedReward(null);
-          setSelectedRewardOpen(false);
-        }}
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
         title="Confirmar Canje"
         description="¿Estás seguro de que deseas canjear esta recompensa?"
       >
@@ -182,10 +237,8 @@ function RouteComponent() {
             </Button>
             <button
               type="button"
-              onClick={() => {
-                setSelectedRewardOpen(false);
-              }}
-              className="w-full py-3 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-charcoal transition-colors"
+              onClick={() => setIsConfirmModalOpen(false)}
+              className="w-full py-3 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-charcoal transition-colors cursor-pointer"
             >
               Cancelar
             </button>

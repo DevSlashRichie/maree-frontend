@@ -19,17 +19,15 @@ export function RewardCard({
 }: RewardCardProps) {
   return (
     <div
-      className={`bg-card-light dark:bg-card-dark p-5 rounded-xl border border-accent/30 dark:border-charcoal hover:shadow-md transition-shadow group cursor-pointer ${
-        !isAvailable ? "opacity-75" : ""
-      }`}
+      className={`bg-card-light dark:bg-card-dark p-5 rounded-xl border border-accent/30 dark:border-charcoal hover:shadow-md transition-shadow group cursor-pointer ${!isAvailable ? "opacity-75" : ""
+        }`}
     >
       <div className="flex justify-between items-start mb-4">
         <div
-          className={`p-3 rounded-full ${
-            isAvailable
+          className={`p-3 rounded-full ${isAvailable
               ? "bg-secondary/20 text-charcoal dark:text-white"
               : "bg-primary/20 text-primary"
-          }`}
+            }`}
         >
           <Icon className="w-5 h-5" />
         </div>
@@ -39,7 +37,7 @@ export function RewardCard({
           </span>
         ) : (
           <span className="text-[10px] bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400 px-2 py-1 rounded-full font-bold uppercase tracking-wider">
-            {points} Puntos
+            {points} Visitas
           </span>
         )}
       </div>

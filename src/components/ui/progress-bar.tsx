@@ -9,9 +9,9 @@ export function ProgressBar({ current, total, label }: ProgressBarProps) {
 
   return (
     <div className="bg-card-light dark:bg-card-dark rounded-xl p-6 shadow-sm border border-accent/20 dark:border-charcoal flex flex-col gap-5">
-      <div className="flex justify-between items-end">
+      <div className="flex justify-between items-start">
         <h3 className="font-display text-xl text-charcoal dark:text-gray-200">
-          Progreso de Recompensas
+          Progreso para tu siguiente Recompensa
         </h3>
         <div className="flex flex-col text-xs text-right">
           <span className="text-primary font-bold">
