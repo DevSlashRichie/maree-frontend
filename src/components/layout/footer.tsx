@@ -26,8 +26,20 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-4">
             {socials.map((s) => (
-              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="text-text-main/30 hover:text-text-main/60 transition-colors duration-200">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" >
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                className="text-text-main/30 hover:text-text-main/60 transition-colors duration-200"
+              >
+                <svg
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
                   <path d={s.icon} />
                 </svg>
               </a>
