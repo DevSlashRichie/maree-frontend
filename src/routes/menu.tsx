@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { CategoryFilters } from "@/components/layers/category-filters";
-import { MenuHero } from "@/components/layers/menu-hero";
+import { CategoryFilters } from "@/components/layout/category-filters";
+import { MenuHero } from "@/components/layout/menu-hero";
 import { FoodCard } from "@/components/ui/card";
 import { Subheading } from "@/components/ui/typography";
 

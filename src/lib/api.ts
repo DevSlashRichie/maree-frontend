@@ -13,86 +13,17 @@ import useSWRMutation from "swr/mutation";
 import type {
   Actor,
   BackendError,
+  GetV1ProductsParams,
+  GetV1Rewards200Item,
   Login,
   PostAuthRegister201,
+  ProductList,
+  RedeemResult,
+  RedeemReward,
+  RedemptionHistoryItem,
   RegisterUserRequest,
   Token,
 } from "./schemas";
-
-export type getUsersMeResponse200 = {
-  data: Actor;
-  status: 200;
-};
-
-export type getUsersMeResponse404 = {
-  data: BackendError;
-  status: 404;
-};
-
-export type getUsersMeResponseSuccess = getUsersMeResponse200 & {
-  headers: Headers;
-};
-export type getUsersMeResponseError = getUsersMeResponse404 & {
-  headers: Headers;
-};
-
-export type getUsersMeResponse =
-  | getUsersMeResponseSuccess
-  | getUsersMeResponseError;
-
-export const getGetUsersMeUrl = () => {
-  return `/users/@me`;
-};
-
-export const getUsersMe = async (
-  options?: RequestInit,
-): Promise<getUsersMeResponse> => {
-  const res = await fetch(getGetUsersMeUrl(), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getUsersMeResponse["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getUsersMeResponse;
-};
-
-export const getGetUsersMeKey = () => [`/users/@me`] as const;
-
-export type GetUsersMeQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getUsersMe>>
->;
-
-export const useGetUsersMe = <TError = Promise<BackendError>>(options?: {
-  swr?: SWRConfiguration<Awaited<ReturnType<typeof getUsersMe>>, TError> & {
-    swrKey?: Key;
-    enabled?: boolean;
-  };
-  fetch?: RequestInit;
-}) => {
-  const { swr: swrOptions, fetch: fetchOptions } = options ?? {};
-
-  const isEnabled = swrOptions?.enabled !== false;
-  const swrKey =
-    swrOptions?.swrKey ?? (() => (isEnabled ? getGetUsersMeKey() : null));
-  const swrFn = () => getUsersMe(fetchOptions);
-
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(
-    swrKey,
-    swrFn,
-    swrOptions,
-  );
-
-  return {
-    swrKey,
-    ...query,
-  };
-};
 
 export type postAuthLoginResponse200 = {
   data: Token;
@@ -124,7 +55,7 @@ export type postAuthLoginResponse =
   | postAuthLoginResponseError;
 
 export const getPostAuthLoginUrl = () => {
-  return `/auth/login`;
+  return `http://localhost:8383/auth/login`;
 };
 
 export const postAuthLogin = async (
@@ -153,7 +84,8 @@ export const getPostAuthLoginMutationFetcher = (options?: RequestInit) => {
     return postAuthLogin(arg, options);
   };
 };
-export const getPostAuthLoginMutationKey = () => [`/auth/login`] as const;
+export const getPostAuthLoginMutationKey = () =>
+  [`http://localhost:8383/auth/login`] as const;
 
 export type PostAuthLoginMutationResult = NonNullable<
   Awaited<ReturnType<typeof postAuthLogin>>
@@ -218,7 +150,7 @@ export type postAuthRegisterResponse =
   | postAuthRegisterResponseError;
 
 export const getPostAuthRegisterUrl = () => {
-  return `/auth/register`;
+  return `http://localhost:8383/auth/register`;
 };
 
 export const postAuthRegister = async (
@@ -247,7 +179,8 @@ export const getPostAuthRegisterMutationFetcher = (options?: RequestInit) => {
     return postAuthRegister(arg, options);
   };
 };
-export const getPostAuthRegisterMutationKey = () => [`/auth/register`] as const;
+export const getPostAuthRegisterMutationKey = () =>
+  [`http://localhost:8383/auth/register`] as const;
 
 export type PostAuthRegisterMutationResult = NonNullable<
   Awaited<ReturnType<typeof postAuthRegister>>
@@ -267,6 +200,471 @@ export const usePostAuthRegister = <TError = Promise<BackendError>>(options?: {
 
   const swrKey = swrOptions?.swrKey ?? getPostAuthRegisterMutationKey();
   const swrFn = getPostAuthRegisterMutationFetcher(fetchOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions);
+
+  return {
+    swrKey,
+    ...query,
+  };
+};
+
+export type getV1UsersMeResponse200 = {
+  data: Actor;
+  status: 200;
+};
+
+export type getV1UsersMeResponse404 = {
+  data: BackendError;
+  status: 404;
+};
+
+export type getV1UsersMeResponseSuccess = getV1UsersMeResponse200 & {
+  headers: Headers;
+};
+export type getV1UsersMeResponseError = getV1UsersMeResponse404 & {
+  headers: Headers;
+};
+
+export type getV1UsersMeResponse =
+  | getV1UsersMeResponseSuccess
+  | getV1UsersMeResponseError;
+
+export const getGetV1UsersMeUrl = () => {
+  return `http://localhost:8383/v1/users/@me`;
+};
+
+export const getV1UsersMe = async (
+  options?: RequestInit,
+): Promise<getV1UsersMeResponse> => {
+  const res = await fetch(getGetV1UsersMeUrl(), {
+    ...options,
+    method: "GET",
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getV1UsersMeResponse["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as getV1UsersMeResponse;
+};
+
+export const getGetV1UsersMeKey = () =>
+  [`http://localhost:8383/v1/users/@me`] as const;
+
+export type GetV1UsersMeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getV1UsersMe>>
+>;
+
+export const useGetV1UsersMe = <TError = Promise<BackendError>>(options?: {
+  swr?: SWRConfiguration<Awaited<ReturnType<typeof getV1UsersMe>>, TError> & {
+    swrKey?: Key;
+    enabled?: boolean;
+  };
+  fetch?: RequestInit;
+}) => {
+  const { swr: swrOptions, fetch: fetchOptions } = options ?? {};
+
+  const isEnabled = swrOptions?.enabled !== false;
+  const swrKey =
+    swrOptions?.swrKey ?? (() => (isEnabled ? getGetV1UsersMeKey() : null));
+  const swrFn = () => getV1UsersMe(fetchOptions);
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(
+    swrKey,
+    swrFn,
+    swrOptions,
+  );
+
+  return {
+    swrKey,
+    ...query,
+  };
+};
+
+export type getV1ProductsResponse200 = {
+  data: ProductList;
+  status: 200;
+};
+
+export type getV1ProductsResponse400 = {
+  data: BackendError;
+  status: 400;
+};
+
+export type getV1ProductsResponseSuccess = getV1ProductsResponse200 & {
+  headers: Headers;
+};
+export type getV1ProductsResponseError = getV1ProductsResponse400 & {
+  headers: Headers;
+};
+
+export type getV1ProductsResponse =
+  | getV1ProductsResponseSuccess
+  | getV1ProductsResponseError;
+
+export const getGetV1ProductsUrl = (params?: GetV1ProductsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `http://localhost:8383/v1/products?${stringifiedParams}`
+    : `http://localhost:8383/v1/products`;
+};
+
+export const getV1Products = async (
+  params?: GetV1ProductsParams,
+  options?: RequestInit,
+): Promise<getV1ProductsResponse> => {
+  const res = await fetch(getGetV1ProductsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getV1ProductsResponse["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as getV1ProductsResponse;
+};
+
+export const getGetV1ProductsKey = (params?: GetV1ProductsParams) =>
+  [`http://localhost:8383/v1/products`, ...(params ? [params] : [])] as const;
+
+export type GetV1ProductsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getV1Products>>
+>;
+
+export const useGetV1Products = <TError = Promise<BackendError>>(
+  params?: GetV1ProductsParams,
+  options?: {
+    swr?: SWRConfiguration<
+      Awaited<ReturnType<typeof getV1Products>>,
+      TError
+    > & { swrKey?: Key; enabled?: boolean };
+    fetch?: RequestInit;
+  },
+) => {
+  const { swr: swrOptions, fetch: fetchOptions } = options ?? {};
+
+  const isEnabled = swrOptions?.enabled !== false;
+  const swrKey =
+    swrOptions?.swrKey ??
+    (() => (isEnabled ? getGetV1ProductsKey(params) : null));
+  const swrFn = () => getV1Products(params, fetchOptions);
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(
+    swrKey,
+    swrFn,
+    swrOptions,
+  );
+
+  return {
+    swrKey,
+    ...query,
+  };
+};
+
+export type postV1ProductsResponse201 = {
+  data: ProductList;
+  status: 201;
+};
+
+export type postV1ProductsResponseSuccess = postV1ProductsResponse201 & {
+  headers: Headers;
+};
+
+export type postV1ProductsResponse = postV1ProductsResponseSuccess;
+
+export const getPostV1ProductsUrl = () => {
+  return `http://localhost:8383/v1/products`;
+};
+
+export const postV1Products = async (
+  productList: ProductList,
+  options?: RequestInit,
+): Promise<postV1ProductsResponse> => {
+  const res = await fetch(getPostV1ProductsUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(productList),
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: postV1ProductsResponse["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as postV1ProductsResponse;
+};
+
+export const getPostV1ProductsMutationFetcher = (options?: RequestInit) => {
+  return (_: Key, { arg }: { arg: ProductList }) => {
+    return postV1Products(arg, options);
+  };
+};
+export const getPostV1ProductsMutationKey = () =>
+  [`http://localhost:8383/v1/products`] as const;
+
+export type PostV1ProductsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postV1Products>>
+>;
+
+export const usePostV1Products = <TError = Promise<unknown>>(options?: {
+  swr?: SWRMutationConfiguration<
+    Awaited<ReturnType<typeof postV1Products>>,
+    TError,
+    Key,
+    ProductList,
+    Awaited<ReturnType<typeof postV1Products>>
+  > & { swrKey?: string };
+  fetch?: RequestInit;
+}) => {
+  const { swr: swrOptions, fetch: fetchOptions } = options ?? {};
+
+  const swrKey = swrOptions?.swrKey ?? getPostV1ProductsMutationKey();
+  const swrFn = getPostV1ProductsMutationFetcher(fetchOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions);
+
+  return {
+    swrKey,
+    ...query,
+  };
+};
+
+export type getV1RewardsResponse200 = {
+  data: GetV1Rewards200Item[];
+  status: 200;
+};
+
+export type getV1RewardsResponseSuccess = getV1RewardsResponse200 & {
+  headers: Headers;
+};
+
+export type getV1RewardsResponse = getV1RewardsResponseSuccess;
+
+export const getGetV1RewardsUrl = () => {
+  return `http://localhost:8383/v1/rewards`;
+};
+
+export const getV1Rewards = async (
+  options?: RequestInit,
+): Promise<getV1RewardsResponse> => {
+  const res = await fetch(getGetV1RewardsUrl(), {
+    ...options,
+    method: "GET",
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getV1RewardsResponse["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as getV1RewardsResponse;
+};
+
+export const getGetV1RewardsKey = () =>
+  [`http://localhost:8383/v1/rewards`] as const;
+
+export type GetV1RewardsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getV1Rewards>>
+>;
+
+export const useGetV1Rewards = <TError = Promise<unknown>>(options?: {
+  swr?: SWRConfiguration<Awaited<ReturnType<typeof getV1Rewards>>, TError> & {
+    swrKey?: Key;
+    enabled?: boolean;
+  };
+  fetch?: RequestInit;
+}) => {
+  const { swr: swrOptions, fetch: fetchOptions } = options ?? {};
+
+  const isEnabled = swrOptions?.enabled !== false;
+  const swrKey =
+    swrOptions?.swrKey ?? (() => (isEnabled ? getGetV1RewardsKey() : null));
+  const swrFn = () => getV1Rewards(fetchOptions);
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(
+    swrKey,
+    swrFn,
+    swrOptions,
+  );
+
+  return {
+    swrKey,
+    ...query,
+  };
+};
+
+export type getV1RewardsHistoryResponse200 = {
+  data: RedemptionHistoryItem[];
+  status: 200;
+};
+
+export type getV1RewardsHistoryResponseSuccess =
+  getV1RewardsHistoryResponse200 & {
+    headers: Headers;
+  };
+
+export type getV1RewardsHistoryResponse = getV1RewardsHistoryResponseSuccess;
+
+export const getGetV1RewardsHistoryUrl = () => {
+  return `http://localhost:8383/v1/rewards/history`;
+};
+
+export const getV1RewardsHistory = async (
+  options?: RequestInit,
+): Promise<getV1RewardsHistoryResponse> => {
+  const res = await fetch(getGetV1RewardsHistoryUrl(), {
+    ...options,
+    method: "GET",
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getV1RewardsHistoryResponse["data"] = body
+    ? JSON.parse(body)
+    : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as getV1RewardsHistoryResponse;
+};
+
+export const getGetV1RewardsHistoryKey = () =>
+  [`http://localhost:8383/v1/rewards/history`] as const;
+
+export type GetV1RewardsHistoryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getV1RewardsHistory>>
+>;
+
+export const useGetV1RewardsHistory = <TError = Promise<unknown>>(options?: {
+  swr?: SWRConfiguration<
+    Awaited<ReturnType<typeof getV1RewardsHistory>>,
+    TError
+  > & { swrKey?: Key; enabled?: boolean };
+  fetch?: RequestInit;
+}) => {
+  const { swr: swrOptions, fetch: fetchOptions } = options ?? {};
+
+  const isEnabled = swrOptions?.enabled !== false;
+  const swrKey =
+    swrOptions?.swrKey ??
+    (() => (isEnabled ? getGetV1RewardsHistoryKey() : null));
+  const swrFn = () => getV1RewardsHistory(fetchOptions);
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(
+    swrKey,
+    swrFn,
+    swrOptions,
+  );
+
+  return {
+    swrKey,
+    ...query,
+  };
+};
+
+export type postV1RewardsRedeemResponse200 = {
+  data: RedeemResult;
+  status: 200;
+};
+
+export type postV1RewardsRedeemResponse400 = {
+  data: BackendError;
+  status: 400;
+};
+
+export type postV1RewardsRedeemResponseSuccess =
+  postV1RewardsRedeemResponse200 & {
+    headers: Headers;
+  };
+export type postV1RewardsRedeemResponseError =
+  postV1RewardsRedeemResponse400 & {
+    headers: Headers;
+  };
+
+export type postV1RewardsRedeemResponse =
+  | postV1RewardsRedeemResponseSuccess
+  | postV1RewardsRedeemResponseError;
+
+export const getPostV1RewardsRedeemUrl = () => {
+  return `http://localhost:8383/v1/rewards/redeem`;
+};
+
+export const postV1RewardsRedeem = async (
+  redeemReward: RedeemReward,
+  options?: RequestInit,
+): Promise<postV1RewardsRedeemResponse> => {
+  const res = await fetch(getPostV1RewardsRedeemUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(redeemReward),
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: postV1RewardsRedeemResponse["data"] = body
+    ? JSON.parse(body)
+    : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as postV1RewardsRedeemResponse;
+};
+
+export const getPostV1RewardsRedeemMutationFetcher = (
+  options?: RequestInit,
+) => {
+  return (_: Key, { arg }: { arg: RedeemReward }) => {
+    return postV1RewardsRedeem(arg, options);
+  };
+};
+export const getPostV1RewardsRedeemMutationKey = () =>
+  [`http://localhost:8383/v1/rewards/redeem`] as const;
+
+export type PostV1RewardsRedeemMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postV1RewardsRedeem>>
+>;
+
+export const usePostV1RewardsRedeem = <
+  TError = Promise<BackendError>,
+>(options?: {
+  swr?: SWRMutationConfiguration<
+    Awaited<ReturnType<typeof postV1RewardsRedeem>>,
+    TError,
+    Key,
+    RedeemReward,
+    Awaited<ReturnType<typeof postV1RewardsRedeem>>
+  > & { swrKey?: string };
+  fetch?: RequestInit;
+}) => {
+  const { swr: swrOptions, fetch: fetchOptions } = options ?? {};
+
+  const swrKey = swrOptions?.swrKey ?? getPostV1RewardsRedeemMutationKey();
+  const swrFn = getPostV1RewardsRedeemMutationFetcher(fetchOptions);
 
   const query = useSWRMutation(swrKey, swrFn, swrOptions);
 
