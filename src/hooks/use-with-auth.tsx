@@ -1,7 +1,7 @@
 import { Navigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { getUsersMe } from "@/lib/api";
+import { getV1UsersMe } from "@/lib/api";
 import { sessionEvents } from "@/lib/sessionEvents";
 import { useAuthStore } from "./use-auth-store";
 
@@ -23,7 +23,7 @@ export function withAuth<P extends object>(
         }
 
         try {
-          const { data: user, status } = await getUsersMe();
+          const { data: user, status } = await getV1UsersMe();
 
           if (user && status === 200) {
             setAuth(user);
