@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Coffee, UtensilsCrossed } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { HistoryItem } from "@/components/ui/history-item";
 import { LoyaltyCard } from "@/components/ui/loyalty-card";
+import { Modal } from "@/components/ui/modal";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { RewardCard } from "@/components/ui/reward-card";
 
@@ -53,6 +56,24 @@ const HISTORY_DATA = [
 ];
 
 function RouteComponent() {
+  const [selectedReward, setSelectedReward] = useState<
+    (typeof REWARDS_DATA)[0] | null
+  >(null);
+
+  const [selectedRewardOpen, setSelectedRewardOpen] = useState(false);
+
+  const handleRedeemClick = (reward: (typeof REWARDS_DATA)[0]) => {
+    setSelectedReward(reward);
+    setSelectedRewardOpen(true);
+  };
+
+  const confirmRedemption = () => {
+    if (selectedReward) {
+      console.log(`Confirmado: Canjeando ${selectedReward.title}`);
+      setSelectedRewardOpen(false);
+    }
+  };
+
   return (
     <div className="mt-5">
       <div className="texture-bg min-h-screen pb-20">
@@ -89,7 +110,7 @@ function RouteComponent() {
                       icon={reward.icon}
                       isAvailable={reward.isAvailable}
                       points={reward.points}
-                      onRedeem={() => console.log(`Canjeando: ${reward.title}`)}
+                      onRedeem={() => handleRedeemClick(reward)}
                     />
                   ))}
                 </div>
@@ -125,6 +146,52 @@ function RouteComponent() {
           </div>
         </main>
       </div>
+
+      <Modal
+        isOpen={selectedRewardOpen}
+        onClose={() => {
+          setSelectedRewardOpen(false);
+        }}
+        afterClose={() => {
+          setSelectedReward(null);
+          setSelectedRewardOpen(false);
+        }}
+        title="Confirmar Canje"
+        description="¿Estás seguro de que deseas canjear esta recompensa?"
+      >
+        <div className="space-y-6">
+          {selectedReward && (
+            <div className="bg-secondary/10 p-4 rounded-xl border border-accent/20">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-accent/20 rounded-full text-accent">
+                  <selectedReward.icon className="w-5 h-5" />
+                </div>
+                <h4 className="font-display font-bold text-charcoal dark:text-white">
+                  {selectedReward.title}
+                </h4>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                {selectedReward.description}
+              </p>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3">
+            <Button onClick={confirmRedemption} className="w-full">
+              Confirmar Canje
+            </Button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRewardOpen(false);
+              }}
+              className="w-full py-3 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-charcoal transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

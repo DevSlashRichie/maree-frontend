@@ -10,7 +10,8 @@ import { Fragment, type ReactNode } from "react";
 
 interface ModalProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
+  afterClose?: () => void;
   title?: string;
   description?: string;
   children: ReactNode;
@@ -20,6 +21,7 @@ interface ModalProps {
 export function Modal({
   isOpen,
   onClose,
+  afterClose,
   title,
   description,
   children,
@@ -33,9 +35,18 @@ export function Modal({
     "2xl": "max-w-2xl",
   };
 
+  const handleOnClose = () => {
+    onClose?.();
+    if (afterClose) {
+      setTimeout(() => {
+        afterClose();
+      }, 350);
+    }
+  };
+
   return (
     <Transition show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" className="relative z-50" onClose={handleOnClose}>
         <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
