@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colores personalizados del HTML */
   --color-primary: #3a4042;
   --color-secondary: #eae6df;
   --color-background-light: #f7f5f0;
@@ -57,4 +56,8 @@
     z-index: 0;
     pointer-events: none;
   }
+}
+
+@utility footer-bg {
+  background-color: #e8d5d5;
 }
