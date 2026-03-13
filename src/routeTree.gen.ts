@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MenuRouteImport } from './routes/menu'
+import { Route as LoyaltyRouteImport } from './routes/loyalty'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AboutRouteImport } from './routes/about'
@@ -21,6 +22,11 @@ import { Route as AdminReportsRouteImport } from './routes/admin/reports'
 const MenuRoute = MenuRouteImport.update({
   id: '/menu',
   path: '/menu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoyaltyRoute = LoyaltyRouteImport.update({
+  id: '/loyalty',
+  path: '/loyalty',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/login': typeof LoginRoute
+  '/loyalty': typeof LoyaltyRoute
   '/menu': typeof MenuRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/': typeof AdminIndexRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/login': typeof LoginRoute
+  '/loyalty': typeof LoyaltyRoute
   '/menu': typeof MenuRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin': typeof AdminIndexRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/login': typeof LoginRoute
+  '/loyalty': typeof LoyaltyRoute
   '/menu': typeof MenuRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/': typeof AdminIndexRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/cart'
     | '/login'
+    | '/loyalty'
     | '/menu'
     | '/admin/reports'
     | '/admin/'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/cart'
     | '/login'
+    | '/loyalty'
     | '/menu'
     | '/admin/reports'
     | '/admin'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/cart'
     | '/login'
+    | '/loyalty'
     | '/menu'
     | '/admin/reports'
     | '/admin/'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   CartRoute: typeof CartRoute
   LoginRoute: typeof LoginRoute
+  LoyaltyRoute: typeof LoyaltyRoute
   MenuRoute: typeof MenuRoute
 }
 
@@ -137,6 +150,13 @@ declare module '@tanstack/react-router' {
       path: '/menu'
       fullPath: '/menu'
       preLoaderRoute: typeof MenuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loyalty': {
+      id: '/loyalty'
+      path: '/loyalty'
+      fullPath: '/loyalty'
+      preLoaderRoute: typeof LoyaltyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -211,6 +231,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   CartRoute: CartRoute,
   LoginRoute: LoginRoute,
+  LoyaltyRoute: LoyaltyRoute,
   MenuRoute: MenuRoute,
 }
 export const routeTree = rootRouteImport

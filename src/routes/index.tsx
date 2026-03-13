@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { CategoryFilters } from "@/components/layers/category-filters";
-import { MenuHero } from "@/components/layers/menu-hero";
 import { FoodCard } from "@/components/ui/card";
 import { Subheading } from "@/components/ui/typography";
 import { useGetV1Products } from "@/lib/api";
+import { MenuHero } from "@/components/layout/menu-hero";
+import { CategoryFilters } from "@/components/layout/category-filters";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,

@@ -31,9 +31,9 @@ export function Footer() {
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={s.label}
                 className="text-text-main/30 hover:text-text-main/60 transition-colors duration-200"
               >
+                <span className="sr-only">{s.label}</span>
                 <svg
                   className="w-4 h-4"
                   viewBox="0 0 24 24"
