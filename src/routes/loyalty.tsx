@@ -121,9 +121,9 @@ function RouteComponent() {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [historySearch, setHistorySearch] = useState("");
-  const [historyFilter, setHistoryFilter] = useState<"all" | "redeemed" | "gift">(
-    "all",
-  );
+  const [historyFilter, setHistoryFilter] = useState<
+    "all" | "redeemed" | "gift"
+  >("all");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleRedeemClick = (reward: (typeof REWARDS_DATA)[0]) => {
