@@ -60,7 +60,7 @@ export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
       <div className="flex flex-col gap-2">
         <button
           type="button"
-          className="w-full bg-black dark:bg-white text-white dark:text-black rounded-xl py-3 px-4 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all active:scale-95 group border border-transparent dark:border-gray-200"
+          className="w-full bg-black dark:bg-white text-white dark:text-black rounded-xl py-3 px-4 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all active:scale-95 group border border-transparent dark:border-gray-200 cursor-pointer"
         >
           <Apple className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span className="font-medium tracking-wide text-sm">
@@ -70,7 +70,7 @@ export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
 
         <button
           type="button"
-          className="w-full bg-[#4285F4] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all active:scale-95 group border border-transparent"
+          className="w-full bg-[#4285F4] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all active:scale-95 group border border-transparent cursor-pointer"
         >
           <Wallet className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span className="font-medium tracking-wide text-sm">
@@ -92,7 +92,9 @@ export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
           <p className="font-display text-lg text-charcoal dark:text-white">
             {memberName}
           </p>
-          <p className="text-sm text-gray-500 font-mono">Teléfono: {memberId}</p>
+          <p className="text-sm text-gray-500 font-mono">
+            Teléfono: {memberId}
+          </p>
         </div>
       </Modal>
     </div>
