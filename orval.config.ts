@@ -8,6 +8,9 @@ export default defineConfig({
       schemas: "./src/lib/schemas",
       client: "swr",
       biome: true,
+      baseUrl: {
+        getBaseUrlFromSpecification: true,
+      },
     },
   },
   mareeZod: {
