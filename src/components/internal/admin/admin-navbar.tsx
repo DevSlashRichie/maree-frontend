@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 
 const adminNavItems = [
   { to: "/admin", label: "Dashboard", icon: "dashboard" },
+  { to: "/admin/rewards", label: "Recompensas", icon: "card_giftcard" },
   { to: "/admin/reports", label: "Reportes", icon: "bar_chart" },
 ];
 

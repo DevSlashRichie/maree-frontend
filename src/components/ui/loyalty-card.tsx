@@ -25,11 +25,8 @@ export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
               <h2 className="font-display text-3xl text-white tracking-widest">
                 MARÉE
               </h2>
-              <p className="text-[10px] text-secondary tracking-[0.2em] mt-1 uppercase">
-                — Love at first crêpe —
-              </p>
             </div>
-            <span className="bg-accent/20 backdrop-blur-sm text-accent px-2 py-0.5 rounded text-[10px] uppercase tracking-wider border border-accent/30 text-right">
+            <span className="bg-accent/20 backdrop-blur-sm text-gray-200 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider border border-accent/30 text-right">
               Premium Member
             </span>
           </div>
@@ -60,7 +57,7 @@ export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
       <div className="flex flex-col gap-2">
         <button
           type="button"
-          className="w-full bg-black dark:bg-white text-white dark:text-black rounded-xl py-3 px-4 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all active:scale-95 group border border-transparent dark:border-gray-200 cursor-pointer"
+          className="w-full bg-black text-white rounded-xl py-3 px-4 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all active:scale-95 group border border-transparent dark:border-gray-200 cursor-pointer"
         >
           <Apple className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span className="font-medium tracking-wide text-sm">
