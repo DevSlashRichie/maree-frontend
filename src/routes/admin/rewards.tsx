@@ -181,9 +181,9 @@ function RouteComponent() {
               description: formData.description,
               icon: formData.icon,
               isAvailable: formData.isAvailable,
-              points: formData.points ? parseInt(formData.points) : null,
+              points: formData.points ? parseInt(formData.points, 10) : null,
               discountType: formData.discountType,
-              discountValue: parseInt(formData.discountValue),
+              discountValue: parseInt(formData.discountValue, 10),
               applicableProducts:
                 formData.hasProductRestriction && formData.applicableProducts
                   ? [formData.applicableProducts]
@@ -199,9 +199,9 @@ function RouteComponent() {
         description: formData.description,
         icon: formData.icon,
         isAvailable: formData.isAvailable,
-        points: formData.points ? parseInt(formData.points) : null,
+        points: formData.points ? parseInt(formData.points, 10) : null,
         discountType: formData.discountType,
-        discountValue: parseInt(formData.discountValue),
+        discountValue: parseInt(formData.discountValue, 10),
         applicableProducts:
           formData.hasProductRestriction && formData.applicableProducts
             ? [formData.applicableProducts]
@@ -412,9 +412,9 @@ function RouteComponent() {
               <div className="border-t border-gray-200 pt-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-text-main mb-2">
+                    <p className="block text-sm font-medium text-text-main mb-2">
                       Tipo de descuento
-                    </label>
+                    </p>
                     <div className="flex gap-2">
                       <button
                         type="button"
@@ -544,7 +544,7 @@ function RouteComponent() {
                         className={cn(
                           "mt-1 bg-white border border-gray-200 rounded-xl shadow-lg focus:outline-none empty:invisible",
                           "w-(--input-width) [--anchor-gap:--spacing(1)] empty:invisible",
-                          "transition duration-100 ease-in data-leave:data-closed:opacity-0"
+                          "transition duration-100 ease-in data-leave:data-closed:opacity-0",
                         )}
                         transition
                         anchor="bottom"
