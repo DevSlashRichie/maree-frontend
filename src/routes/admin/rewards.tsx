@@ -176,19 +176,19 @@ function RouteComponent() {
         rewards.map((r) =>
           r.id === editingReward.id
             ? {
-              ...r,
-              title: formData.title,
-              description: formData.description,
-              icon: formData.icon,
-              isAvailable: formData.isAvailable,
-              points: formData.points ? parseInt(formData.points, 10) : null,
-              discountType: formData.discountType,
-              discountValue: parseInt(formData.discountValue, 10),
-              applicableProducts:
-                formData.hasProductRestriction && formData.applicableProducts
-                  ? [formData.applicableProducts]
-                  : null,
-            }
+                ...r,
+                title: formData.title,
+                description: formData.description,
+                icon: formData.icon,
+                isAvailable: formData.isAvailable,
+                points: formData.points ? parseInt(formData.points, 10) : null,
+                discountType: formData.discountType,
+                discountValue: parseInt(formData.discountValue, 10),
+                applicableProducts:
+                  formData.hasProductRestriction && formData.applicableProducts
+                    ? [formData.applicableProducts]
+                    : null,
+              }
             : r,
         ),
       );
@@ -657,10 +657,10 @@ function RouteComponent() {
                       </span>
                       <span className="text-xs text-gray-400">
                         {reward.applicableProducts &&
-                          reward.applicableProducts.length > 0
+                        reward.applicableProducts.length > 0
                           ? MOCK_PRODUCTS.find(
-                            (p) => p.id === reward.applicableProducts?.[0],
-                          )?.name
+                              (p) => p.id === reward.applicableProducts?.[0],
+                            )?.name
                           : "Todos los productos"}
                       </span>
                     </div>
