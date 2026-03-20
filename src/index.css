@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colores personalizados del HTML */
   --color-primary: #3a4042;
   --color-secondary: #eae6df;
   --color-background-light: #f7f5f0;
@@ -14,6 +13,7 @@
   --color-pink-soft: #e8d5d5;
   --color-pink-powder: #f2e4e4;
   --color-pink-logo: #eedcdc;
+  --color-charcoal: #4a4a4a;
 
   --font-display: "Playfair Display", serif;
   --font-body: "Lato", sans-serif;
@@ -57,4 +57,8 @@
     z-index: 0;
     pointer-events: none;
   }
+}
+
+@utility footer-bg {
+  background-color: #e8d5d5;
 }
