@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { CategoryFilters } from "@/components/layout/category-filters";
-import { MenuHero } from "@/components/layout/menu-hero";
-import { FoodCard } from "@/components/ui/card";
-import { Subheading } from "@/components/ui/typography";
+import { FoodCard } from "@/components/card";
+import { Subheading } from "@/components/typography";
+import { CategoryFilters } from "@/layouts/category-filters";
+import { MenuHero } from "@/layouts/menu-hero";
 
 const MENU_DATA = [
   {
@@ -36,7 +36,7 @@ const MENU_DATA = [
   },
 ];
 
-export const Route = createFileRoute("/menu")({
+export const Route = createFileRoute("/_client/menu")({
   component: RouteComponent,
 });
 

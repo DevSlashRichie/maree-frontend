@@ -9,35 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as MenuRouteImport } from './routes/menu'
-import { Route as LoyaltyRouteImport } from './routes/loyalty'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as CartRouteImport } from './routes/cart'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
 import { Route as AdminReportsRouteImport } from './routes/admin/reports'
+import { Route as ClientMenuRouteImport } from './routes/_client/menu'
+import { Route as ClientLoyaltyRouteImport } from './routes/_client/loyalty'
+import { Route as ClientCartRouteImport } from './routes/_client/cart'
 
-const MenuRoute = MenuRouteImport.update({
-  id: '/menu',
-  path: '/menu',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoyaltyRoute = LoyaltyRouteImport.update({
-  id: '/loyalty',
-  path: '/loyalty',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CartRoute = CartRouteImport.update({
-  id: '/cart',
-  path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -70,15 +55,30 @@ const AdminReportsRoute = AdminReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ClientMenuRoute = ClientMenuRouteImport.update({
+  id: '/_client/menu',
+  path: '/menu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientLoyaltyRoute = ClientLoyaltyRouteImport.update({
+  id: '/_client/loyalty',
+  path: '/loyalty',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientCartRoute = ClientCartRouteImport.update({
+  id: '/_client/cart',
+  path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/cart': typeof CartRoute
   '/login': typeof LoginRoute
-  '/loyalty': typeof LoyaltyRoute
-  '/menu': typeof MenuRoute
+  '/cart': typeof ClientCartRoute
+  '/loyalty': typeof ClientLoyaltyRoute
+  '/menu': typeof ClientMenuRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
@@ -86,10 +86,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/cart': typeof CartRoute
   '/login': typeof LoginRoute
-  '/loyalty': typeof LoyaltyRoute
-  '/menu': typeof MenuRoute
+  '/cart': typeof ClientCartRoute
+  '/loyalty': typeof ClientLoyaltyRoute
+  '/menu': typeof ClientMenuRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin': typeof AdminIndexRoute
@@ -99,10 +99,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/cart': typeof CartRoute
   '/login': typeof LoginRoute
-  '/loyalty': typeof LoyaltyRoute
-  '/menu': typeof MenuRoute
+  '/_client/cart': typeof ClientCartRoute
+  '/_client/loyalty': typeof ClientLoyaltyRoute
+  '/_client/menu': typeof ClientMenuRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
@@ -113,8 +113,8 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/about'
-    | '/cart'
     | '/login'
+    | '/cart'
     | '/loyalty'
     | '/menu'
     | '/admin/reports'
@@ -124,8 +124,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/cart'
     | '/login'
+    | '/cart'
     | '/loyalty'
     | '/menu'
     | '/admin/reports'
@@ -136,10 +136,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/about'
-    | '/cart'
     | '/login'
-    | '/loyalty'
-    | '/menu'
+    | '/_client/cart'
+    | '/_client/loyalty'
+    | '/_client/menu'
     | '/admin/reports'
     | '/admin/rewards'
     | '/admin/'
@@ -149,40 +149,19 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
-  CartRoute: typeof CartRoute
   LoginRoute: typeof LoginRoute
-  LoyaltyRoute: typeof LoyaltyRoute
-  MenuRoute: typeof MenuRoute
+  ClientCartRoute: typeof ClientCartRoute
+  ClientLoyaltyRoute: typeof ClientLoyaltyRoute
+  ClientMenuRoute: typeof ClientMenuRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/menu': {
-      id: '/menu'
-      path: '/menu'
-      fullPath: '/menu'
-      preLoaderRoute: typeof MenuRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/loyalty': {
-      id: '/loyalty'
-      path: '/loyalty'
-      fullPath: '/loyalty'
-      preLoaderRoute: typeof LoyaltyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cart': {
-      id: '/cart'
-      path: '/cart'
-      fullPath: '/cart'
-      preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -227,6 +206,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReportsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/_client/menu': {
+      id: '/_client/menu'
+      path: '/menu'
+      fullPath: '/menu'
+      preLoaderRoute: typeof ClientMenuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_client/loyalty': {
+      id: '/_client/loyalty'
+      path: '/loyalty'
+      fullPath: '/loyalty'
+      preLoaderRoute: typeof ClientLoyaltyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_client/cart': {
+      id: '/_client/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof ClientCartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -250,10 +250,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AboutRoute: AboutRoute,
-  CartRoute: CartRoute,
   LoginRoute: LoginRoute,
-  LoyaltyRoute: LoyaltyRoute,
-  MenuRoute: MenuRoute,
+  ClientCartRoute: ClientCartRoute,
+  ClientLoyaltyRoute: ClientLoyaltyRoute,
+  ClientMenuRoute: ClientMenuRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,4 +1,4 @@
-import { CategoryButton } from "@/components/ui/category-button";
+import { CategoryButton } from "@/features/menu/components/category-button";
 
 interface CategoryFiltersProps {
   categories: string[];

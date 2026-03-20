@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { AdminNavbar } from "@/components/internal/admin/admin-navbar";
+import { AdminNavbar } from "@/features/admin/components/admin-navbar";
 
 export const Route = createFileRoute("/admin")({
   component: RouteComponent,

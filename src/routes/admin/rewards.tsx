@@ -22,7 +22,7 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
-import { Modal } from "@/components/ui/modal";
+import { Modal } from "@/features/loyalty/components/modal";
 
 export const Route = createFileRoute("/admin/rewards")({
   component: RouteComponent,
