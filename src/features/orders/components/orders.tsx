@@ -69,8 +69,6 @@ export function Orders() {
 
   return (
     <>
-      <Header />
-
       <div className="flex flex-col md:flex-row gap-6 p-6">
         <div className="flex-1">
           <OrderColumn
@@ -97,9 +95,13 @@ export function Orders() {
         </div>
       </div>
 
-      <Footer />
-
-      <Modal isOpen={isModalOpen} title="Orden de usuario">
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setModalOpen(false);
+        }}
+        title="Orden de usuario"
+      >
         <OrderDetails
           userName={modalData.userName}
           orderNumber={modalData.orderNumber}

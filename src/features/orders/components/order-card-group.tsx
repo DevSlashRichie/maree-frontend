@@ -19,7 +19,7 @@ export function OrderColumn({
   orderOnClickHandler,
 }: OrderColumnProps) {
   return (
-    <div className="bg-background-light dark:bg-background-dark rounded-3xl border border-pink-soft/40 p-4 flex flex-col gap-3 h-[600px]">
+    <div className="bg-background-light rounded-3xl border border-pink-soft/40 p-4 justify-center flex flex-col gap-3 h-[600px]">
       <h2 className="font-display text-lg text-text-main font-semibold px-1">
         {title}
       </h2>
