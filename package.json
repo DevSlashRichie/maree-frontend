@@ -11,6 +11,8 @@
     "preview": "vite preview",
     "prepare": "husky",
     "orval:generate": "orval",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
     "postinstall": "orval"
   },
   "dependencies": {
@@ -39,6 +41,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tanstack/router-plugin": "^1.161.1",
     "@types/node": "^24.10.1",
     "@types/qs": "^6.15.0",
