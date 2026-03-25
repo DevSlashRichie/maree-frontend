@@ -23,6 +23,11 @@ jobs:
         env:
           ENVIRONMENT: PRODUCTION
 
+      - name: Install dependencies
+        run: bun run orval:generate
+        env:
+          ENVIRONMENT: PRODUCTION
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
