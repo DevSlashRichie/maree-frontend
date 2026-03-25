@@ -1,5 +1,3 @@
-import { Button } from "@/components/button";
-
 interface Product {
     id: string;
     name: string;
@@ -39,10 +37,6 @@ export function ItemDetails({ name, quantity, ingredients }: ItemDetailsProps) {
                     ))}
                 </ul>
             </div>
-
-            <hr className="border-pink-soft/20" />
-
-            <Button variant="action">Aceptar</Button>
         </div>
     );
 }
