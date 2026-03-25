@@ -24,24 +24,17 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
-import { useGetV1Rewards, usePostV1Rewards } from "@/lib/api";
+import {
+  deleteV1RewardsRewardId,
+  useGetV1Rewards,
+  usePostV1Rewards,
+} from "@/lib/api";
 import type { RewardSchema } from "@/lib/schemas/rewardSchema";
+import toast from "react-hot-toast";
 
 export const Route = createFileRoute("/admin/rewards")({
   component: RouteComponent,
 });
-
-type RewardFormValues = {
-  title: string;
-  description: string;
-  icon: string;
-  isAvailable: boolean;
-  points: string;
-  discountType: "percentage" | "fixed";
-  discountValue: string;
-  applicableProducts: string;
-  hasProductRestriction: boolean;
-};
 
 type Reward = {
   id: string;
@@ -137,6 +130,11 @@ function RouteComponent() {
       hasProductRestriction: false,
     },
     onSubmit: async ({ value }) => {
+      if (editingReward) {
+        alert("La edición de recompensas no está implementada todavía");
+        return;
+      }
+
       if (!value.discountValue) {
         alert("Por favor completa el valor del descuento");
         return;
@@ -202,9 +200,28 @@ function RouteComponent() {
     setIsFormOpen(false);
   };
 
-  const handleDelete = (_id: string) => {
-    alert("Funcionalidad de eliminación no disponible aún");
-    setDeleteConfirm(null);
+  const handleDelete = async (id: string) => {
+    const f = async () => {
+      try {
+        const response = await deleteV1RewardsRewardId(id);
+        if (response.status === 204) {
+          await mutate();
+        } else {
+          toast.error("No se pudo eliminar la recompensa");
+        }
+      } catch (error) {
+        console.error("Error deleting reward:", error);
+        alert("Error al intentar eliminar la recompensa");
+      } finally {
+        setDeleteConfirm(null);
+      }
+    };
+
+    await toast.promise(f(), {
+      error: "No se pudo eliminar.",
+      loading: "Eliminando...",
+      success: "Recompensa eliminada.",
+    });
   };
 
   const toggleAvailability = (_id: string) => {
@@ -309,6 +326,7 @@ function RouteComponent() {
                         onChange={(e) => field.handleChange(e.target.value)}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
                         placeholder="Ej: 50"
+                        min={0}
                       />
                     </div>
                   )}
@@ -375,12 +393,12 @@ function RouteComponent() {
                       <span className="block text-sm font-medium text-text-main mb-2">
                         Estado
                       </span>
-                      <div className="flex items-center gap-6">
+                      <div className="flex flex-col items-center gap-1">
                         <button
                           type="button"
                           onClick={() => field.handleChange(true)}
                           className={cn(
-                            "flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all",
+                            "w-full flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all",
                             field.state.value
                               ? "border-green-500 bg-green-50 text-green-700"
                               : "border-gray-200 text-gray-400",
@@ -395,7 +413,7 @@ function RouteComponent() {
                           type="button"
                           onClick={() => field.handleChange(false)}
                           className={cn(
-                            "flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all",
+                            "w-full flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all",
                             !field.state.value
                               ? "border-gray-400 bg-gray-100 text-gray-600"
                               : "border-gray-200 text-gray-400",
@@ -425,7 +443,7 @@ function RouteComponent() {
                             type="button"
                             onClick={() => field.handleChange("percentage")}
                             className={cn(
-                              "flex-1 py-2 rounded-lg border-2 text-sm font-medium transition-all",
+                              "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
                               field.state.value === "percentage"
                                 ? "border-primary bg-primary/10 text-primary"
                                 : "border-gray-200 text-gray-500 hover:border-gray-300",
@@ -437,7 +455,7 @@ function RouteComponent() {
                             type="button"
                             onClick={() => field.handleChange("fixed")}
                             className={cn(
-                              "flex-1 py-2 rounded-lg border-2 text-sm font-medium transition-all",
+                              "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
                               field.state.value === "fixed"
                                 ? "border-primary bg-primary/10 text-primary"
                                 : "border-gray-200 text-gray-500 hover:border-gray-300",
@@ -450,7 +468,9 @@ function RouteComponent() {
                     )}
                   </form.Field>
 
-                  <form.Subscribe selector={(state) => state.values.discountType}>
+                  <form.Subscribe
+                    selector={(state) => state.values.discountType}
+                  >
                     {(discountType) => (
                       <form.Field name="discountValue">
                         {(field) => (
@@ -737,7 +757,7 @@ function RouteComponent() {
               <button
                 type="button"
                 onClick={() => setIsFormOpen(true)}
-                className="mt-4 text-secondary hover:underline"
+                className="mt-4 text-text-main/50 hover:underline"
               >
                 Crear primera recompensa
               </button>
