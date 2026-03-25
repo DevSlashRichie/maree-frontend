@@ -1,13 +1,13 @@
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 
-interface OrderCardProps {
+interface OrderCardCompleteProps {
   userName: string;
   orderNumber: string;
   price: number;
 }
 
-export function OrderCard({ userName, orderNumber, price }: OrderCardProps) {
+export function OrderCardComplete({ userName, orderNumber, price }: OrderCardCompleteProps) {
   return (
     <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-pink-soft/40 px-5 py-6 my-3 flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
