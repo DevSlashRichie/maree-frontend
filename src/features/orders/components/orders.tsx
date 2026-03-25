@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { OrderColumn } from "@/features/orders/components/order-card-group";
-import { Footer } from "../../../layouts/footer";
-import { Header } from "../../../layouts/header";
 import { mockOrders } from "../data/order-details-data";
 import { OrderDetails } from "./order-details";
 
