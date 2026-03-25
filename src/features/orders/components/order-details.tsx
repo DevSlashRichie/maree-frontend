@@ -14,6 +14,7 @@ interface ItemDetailsProp {
 }
 
 interface OrderDetailsProps {
+  id?: string;
   userName: string;
   orderNumber: number;
   price: number;
