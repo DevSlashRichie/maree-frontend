@@ -27,6 +27,7 @@ import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
 import {
   deleteV1RewardsRewardId,
+  patchV1RewardsRewardId,
   useGetV1Rewards,
   usePostV1Rewards,
 } from "@/lib/api";
@@ -116,6 +117,7 @@ function RouteComponent() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<Reward | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -130,11 +132,6 @@ function RouteComponent() {
       hasProductRestriction: false,
     },
     onSubmit: async ({ value }) => {
-      if (editingReward) {
-        alert("La edición de recompensas no está implementada todavía");
-        return;
-      }
-
       if (!value.discountValue) {
         alert("Por favor completa el valor del descuento");
         return;
@@ -147,26 +144,48 @@ function RouteComponent() {
           : "";
 
       try {
-        const result = await createReward({
-          name: value.title,
-          description: value.description,
-          status: value.isAvailable ? "active" : "inactive",
-          cost: String(value.points || 0),
-          discount: {
-            type: value.discountType,
-            value: value.discountValue,
-            appliesTo: productName ? [productName] : [],
-          },
-        });
+        if (editingReward) {
+          setIsUpdating(true);
+          const result = await patchV1RewardsRewardId(editingReward.id, {
+            name: value.title,
+            description: value.description,
+            status: value.isAvailable ? "active" : "inactive",
+            cost: String(value.points || 0),
+          });
 
-        if (result.status === 201) {
-          mutate();
-          setIsFormOpen(false);
-          resetForm();
+          if (result.status === 200) {
+            mutate();
+            setIsFormOpen(false);
+            resetForm();
+            toast.success("Recompensa actualizada");
+          } else {
+            alert("Error al actualizar la recompensa");
+          }
+        } else {
+          const result = await createReward({
+            name: value.title,
+            description: value.description,
+            status: value.isAvailable ? "active" : "inactive",
+            cost: String(value.points || 0),
+            discount: {
+              type: value.discountType,
+              value: value.discountValue,
+              appliesTo: productName ? [productName] : [],
+            },
+          });
+
+          if (result.status === 201) {
+            mutate();
+            setIsFormOpen(false);
+            resetForm();
+            toast.success("Recompensa creada");
+          }
         }
       } catch (error) {
-        console.error("Error creating reward:", error);
-        alert("Error al crear la recompensa");
+        console.error("Error saving reward:", error);
+        alert("Error al guardar la recompensa");
+      } finally {
+        setIsUpdating(false);
       }
     },
   });
@@ -224,8 +243,29 @@ function RouteComponent() {
     });
   };
 
-  const toggleAvailability = (_id: string) => {
-    alert("Funcionalidad de cambio de estado no disponible aún");
+  const toggleAvailability = async (id: string) => {
+    const reward = rewards.find((r) => r.id === id);
+    if (!reward) return;
+
+    const newStatus = reward.isAvailable ? "inactive" : "active";
+
+    try {
+      const result = await patchV1RewardsRewardId(id, {
+        status: newStatus,
+      });
+
+      if (result.status === 200) {
+        mutate();
+        toast.success(
+          newStatus === "active"
+            ? "Recompensa activada"
+            : "Recompensa desactivada",
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling availability:", error);
+      toast.error("Error al cambiar el estado");
+    }
   };
 
   if (isLoadingRewards) {
@@ -630,11 +670,13 @@ function RouteComponent() {
                   {(canSubmit) => (
                     <button
                       type="submit"
-                      disabled={!canSubmit || isCreatingReward}
+                      disabled={!canSubmit || isCreatingReward || isUpdating}
                       className="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50"
                     >
-                      {isCreatingReward
-                        ? "Creando..."
+                      {isCreatingReward || isUpdating
+                        ? editingReward
+                          ? "Guardando..."
+                          : "Creando..."
                         : editingReward
                           ? "Guardar Cambios"
                           : "Crear Recompensa"}
