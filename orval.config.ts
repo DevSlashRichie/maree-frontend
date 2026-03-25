@@ -1,4 +1,5 @@
 import { defineConfig } from "orval";
+import "dotenv/config";
 
 let env = process.env.ENVIRONMENT;
 
