@@ -23,8 +23,16 @@ export function OrderCard({ userName, orderNumber, price }: OrderCardProps) {
         </span>
       </div>
       <div className="flex gap-3">
-        <Button variant="action" className="w-full py-2 bg-accent/20 dark:bg-charcoal text-charcoal dark:text-accent rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-accent hover:text-white dark:hover:bg-accent dark:hover:text-charcoal transition-all">Ver detalles</Button>
-        <Button variant="action" className="w-full py-2 bg-accent/20 dark:bg-charcoal text-charcoal dark:text-accent rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-accent hover:text-white dark:hover:bg-accent dark:hover:text-charcoal transition-all">
+        <Button
+          variant="action"
+          className="w-full py-2 bg-accent/20 dark:bg-charcoal text-charcoal dark:text-accent rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-accent hover:text-white dark:hover:bg-accent dark:hover:text-charcoal transition-all"
+        >
+          Ver detalles
+        </Button>
+        <Button
+          variant="action"
+          className="w-full py-2 bg-accent/20 dark:bg-charcoal text-charcoal dark:text-accent rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-accent hover:text-white dark:hover:bg-accent dark:hover:text-charcoal transition-all"
+        >
           Marcar Listo
         </Button>
       </div>
