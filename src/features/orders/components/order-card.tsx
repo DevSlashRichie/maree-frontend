@@ -1,22 +1,23 @@
 interface OrderCardProps {
   orderNumber: string;
   userName: string;
+  price: number;
 }
 
-export function OrderCard({ orderNumber, userName }: OrderCardProps) {
+export function OrderCard({ userName , orderNumber, price, }: OrderCardProps) {
   return (
-    <div className="group bg-white rounded-t-[50%] rounded-b-3xl shadow-[0_4px_20px_rgba(232,213,213,0.3)] border border-pink-powder p-4 relative mt-12 flex items-center justify-space-between transition-all hover:shadow-[0_8px_30px_rgba(232,213,213,0.5)]">
-      
+    <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-pink-soft/40 px-5 py-6 my-3 flex items-center justify-between gap-3">
       <div>
-        <p className="text-xs text-text-main/60 font-light leading-relaxed mb-8 px-4 h-10">{orderNumber}</p>
-        <p>{userName}</p>
+        <p className="font-display text-base text-text-main font-semibold">
+          {userName}
+        </p>
+        <p className="font-body text-xs text-text-main/50 tracking-wide uppercase">
+          Orden #{orderNumber}
+        </p>
       </div>
-
-      <div>
-        <p>Precio Total:</p>
-        <p>$400</p>
-      </div>
-
+      <span className="font-display text-xl text-text-main font-semibold shrink-0">
+        ${price.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+      </span>
     </div>
   );
 }
