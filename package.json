@@ -10,8 +10,8 @@
     "check:write": "bunx biome check --write",
     "preview": "vite preview",
     "prepare": "husky",
-    "orval:generate": "bunx orval",
-    "postinstall": "bunx orval"
+    "orval:generate": "orval",
+    "postinstall": "orval"
   },
   "dependencies": {
     "@biomejs/biome": "^2.4.2",
@@ -21,10 +21,12 @@
     "@nivo/line": "^0.99.0",
     "@nivo/pie": "^0.99.0",
     "@tailwindcss/vite": "^4.2.0",
+    "@tanstack/react-form": "^1.28.5",
     "@tanstack/react-router": "^1.161.1",
     "@tanstack/react-router-devtools": "^1.161.1",
     "biome": "^0.3.3",
     "classnames": "^2.5.1",
+    "dotenv": "^17.3.1",
     "lucide-react": "^0.577.0",
     "qs": "^6.15.0",
     "react": "^19.2.0",
@@ -48,7 +50,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
-    "orval": "^8.5.2",
+    "orval": "^8.6.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^8.0.0-beta.13"
