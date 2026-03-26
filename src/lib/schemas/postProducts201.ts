@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type ProductListProductsItem = {
+export type PostProducts201 = {
   id: string;
   /** @nullable */
   image: string | null;

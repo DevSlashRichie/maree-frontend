@@ -5,9 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface BackendError {
-  /** @minLength 1 */
-  code: string;
-  /** @minLength 1 */
-  message: string;
-}
+export type GetV1Reports200WeeklyOrdersItem = {
+  day: string;
+  total: number;
+};

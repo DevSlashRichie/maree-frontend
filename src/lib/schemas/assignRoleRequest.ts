@@ -4,10 +4,8 @@
  * Maree Backend API
  * OpenAPI spec version: 1.0.0
  */
-import type { LoginMethod } from "./loginMethod";
 
-export interface Login {
+export interface AssignRoleRequest {
   /** @minLength 1 */
-  identity: string;
-  method: LoginMethod;
+  role: string;
 }

@@ -5,10 +5,17 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface RedemptionHistoryItem {
+export type PostV1Review201 = {
   id: string;
-  rewardId: string;
+  orderId: string;
   userId: string;
   branchId: string;
+  /**
+   * @minimum -2147483648
+   * @maximum 2147483647
+   */
+  satisfactionRate: number;
+  /** @nullable */
+  notes: string | null;
   createdAt: string;
-}
+};

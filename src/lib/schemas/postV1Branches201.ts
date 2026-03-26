@@ -5,12 +5,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type ProductListProductsItem = {
+export type PostV1Branches201 = {
   id: string;
-  /** @nullable */
-  image: string | null;
   name: string;
-  status: string;
-  categoryId: string;
+  state: string;
   createdAt: string;
 };

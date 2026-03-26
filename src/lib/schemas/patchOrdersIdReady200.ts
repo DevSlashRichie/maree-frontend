@@ -5,10 +5,16 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface RedemptionHistoryItem {
+export type PatchOrdersIdReady200 = {
   id: string;
-  rewardId: string;
   userId: string;
   branchId: string;
+  discountId: string;
+  /** @pattern ^d+$ */
+  total: string;
+  status: string;
+  /** @nullable */
+  note: string | null;
+  orderNumber: string;
   createdAt: string;
-}
+};
