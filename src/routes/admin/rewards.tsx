@@ -134,7 +134,7 @@ function RouteComponent() {
     },
     onSubmit: async ({ value }) => {
       if (!value.discountValue) {
-        alert("Por favor completa el valor del descuento");
+        toast.error("Por favor completa el valor del descuento");
         return;
       }
 
@@ -357,7 +357,7 @@ function RouteComponent() {
                         htmlFor={field.name}
                         className="block text-sm font-medium text-text-main mb-2"
                       >
-                        Puntos requeridos (opcional)
+                        Visitas requeridas
                       </label>
                       <Tooltip
                         content="Puntos necesarios para canjear esta recompensa. Deja vacío para recompensas gratuitas."
@@ -491,6 +491,7 @@ function RouteComponent() {
                           >
                             <button
                               type="button"
+                              data-testid="discount-percentage"
                               onClick={() => field.handleChange("percentage")}
                               className={cn(
                                 "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
@@ -508,6 +509,7 @@ function RouteComponent() {
                           >
                             <button
                               type="button"
+                              data-testid="discount-fixed"
                               onClick={() => field.handleChange("fixed")}
                               className={cn(
                                 "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
@@ -574,6 +576,7 @@ function RouteComponent() {
                         </span>
                       </Tooltip>
                       <Switch
+                        data-testid="product-restriction-switch"
                         checked={field.state.value}
                         onChange={(checked) => {
                           field.handleChange(checked);
@@ -618,6 +621,7 @@ function RouteComponent() {
                             >
                               <div className="relative">
                                 <ComboboxInput
+                                  data-testid="product-search-input"
                                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
                                   displayValue={() =>
                                     AVAILABLE_PRODUCTS.find(
@@ -682,7 +686,10 @@ function RouteComponent() {
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setIsFormOpen(false)}
+                  data-testid="cancel-button"
+                  onClick={() => {
+                    setIsFormOpen(false);
+                  }}
                   className="px-6 py-2 text-sm font-medium text-gray-500 hover:text-text-main transition-colors"
                 >
                   Cancelar
@@ -691,6 +698,7 @@ function RouteComponent() {
                   {(canSubmit) => (
                     <button
                       type="submit"
+                      data-testid="submit-button"
                       disabled={!canSubmit || isCreatingReward || isUpdating}
                       className="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50"
                     >
