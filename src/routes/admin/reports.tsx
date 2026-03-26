@@ -11,6 +11,7 @@ export const Route = createFileRoute("/admin/reports")({
 
 function RouteComponent() {
   const { data, isLoading } = useGetV1Reports();
+
   const reportsData =
     data?.status === 200 ? (data.data as GetV1Reports200) : null;
 

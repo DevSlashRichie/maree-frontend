@@ -134,14 +134,14 @@ function RouteComponent() {
     },
     onSubmit: async ({ value }) => {
       if (!value.discountValue) {
-        alert("Por favor completa el valor del descuento");
+        toast.error("Por favor completa el valor del descuento");
         return;
       }
 
       const productName =
         value.hasProductRestriction && value.applicableProducts
           ? AVAILABLE_PRODUCTS.find((p) => p.id === value.applicableProducts)
-              ?.name || ""
+            ?.name || ""
           : "";
 
       try {
@@ -160,7 +160,7 @@ function RouteComponent() {
             resetForm();
             toast.success("Recompensa actualizada");
           } else {
-            alert("Error al actualizar la recompensa");
+            toast.error("Error al actualizar la recompensa");
           }
         } else {
           const result = await createReward({
@@ -184,7 +184,7 @@ function RouteComponent() {
         }
       } catch (error) {
         console.error("Error saving reward:", error);
-        alert("Error al guardar la recompensa");
+        toast.error("Error al guardar la recompensa");
       } finally {
         setIsUpdating(false);
       }
@@ -357,7 +357,7 @@ function RouteComponent() {
                         htmlFor={field.name}
                         className="block text-sm font-medium text-text-main mb-2"
                       >
-                        Puntos requeridos (opcional)
+                        Visitas Requeridas
                       </label>
                       <Tooltip
                         content="Puntos necesarios para canjear esta recompensa. Deja vacío para recompensas gratuitas."
@@ -366,9 +366,15 @@ function RouteComponent() {
                         <input
                           id={field.name}
                           type="number"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           value={field.state.value}
                           onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
+                          onChange={(e) =>
+                            field.handleChange(
+                              e.target.value.replace(/\D/g, ""),
+                            )
+                          }
                           className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
                           placeholder="Ej: 50"
                           min={0}
@@ -540,6 +546,8 @@ function RouteComponent() {
                             <input
                               id={field.name}
                               type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               required
                               min={1}
                               max={
@@ -548,7 +556,9 @@ function RouteComponent() {
                               value={field.state.value}
                               onBlur={field.handleBlur}
                               onChange={(e) =>
-                                field.handleChange(e.target.value)
+                                field.handleChange(
+                                  e.target.value.replace(/\D/g, ""),
+                                )
                               }
                               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
                               placeholder={
@@ -764,10 +774,10 @@ function RouteComponent() {
                       </span>
                       <span className="text-xs text-gray-400">
                         {reward.applicableProducts &&
-                        reward.applicableProducts.length > 0
+                          reward.applicableProducts.length > 0
                           ? AVAILABLE_PRODUCTS.find(
-                              (p) => p.id === reward.applicableProducts?.[0],
-                            )?.name
+                            (p) => p.id === reward.applicableProducts?.[0],
+                          )?.name
                           : "Todos los productos"}
                       </span>
                     </div>
