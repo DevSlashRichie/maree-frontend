@@ -69,7 +69,7 @@ export function Tooltip({
     className?: string;
   }>;
 
-  if (child && child.props) {
+  if (child?.props) {
     return (
       <>
         {React.cloneElement(child, {

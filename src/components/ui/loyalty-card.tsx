@@ -1,10 +1,9 @@
+import cn from "classnames";
 import { Apple, Croissant, QrCode, Wallet } from "lucide-react";
 import { useState } from "react";
-import { Modal } from "./modal";
-import cn from "classnames";
-
 // @ts-expect-error - bad imports for some reason.
 import { QRCode } from "react-qr-code";
+import { Modal } from "./modal";
 
 interface LoyaltyCardProps {
   user: {
