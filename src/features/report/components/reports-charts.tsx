@@ -11,16 +11,7 @@ export function ReportsCharts() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background-light">
-        <div className="p-8">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="font-display text-4xl text-text-main font-bold mb-2 uppercase tracking-wide">
-              Reportes
-            </h1>
-            <p className="font-body text-text-main/60 mb-8">
-              Cargando datos...
-            </p>
-          </div>
-        </div>
+        <p className="font-body text-text-main/60 mb-8">Cargando datos...</p>
       </div>
     );
   }

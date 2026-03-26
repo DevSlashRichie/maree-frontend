@@ -1,0 +1,96 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - img "MARÉE Logo" [ref=e8]
+  - main [ref=e9]:
+    - navigation [ref=e11]:
+      - link "dashboard Dashboard" [ref=e12] [cursor=pointer]:
+        - /url: /admin
+        - generic [ref=e13]: dashboard
+        - generic [ref=e14]: Dashboard
+      - link "card_giftcard Recompensas" [ref=e15] [cursor=pointer]:
+        - /url: /admin/rewards
+        - generic [ref=e16]: card_giftcard
+        - generic [ref=e17]: Recompensas
+      - link "bar_chart Reportes" [ref=e18] [cursor=pointer]:
+        - /url: /admin/reports
+        - generic [ref=e19]: bar_chart
+        - generic [ref=e20]: Reportes
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - heading "Recompensas" [level=1] [ref=e26]
+          - paragraph [ref=e27]: Gestiona las recompensas del programa de lealtad
+        - button "Nueva Recompensa" [ref=e28]:
+          - img [ref=e29]
+          - generic [ref=e30]: Nueva Recompensa
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - img [ref=e35]
+            - button "Disponible" [ref=e40]
+          - heading "Fixed Reward" [level=3] [ref=e41]
+          - paragraph [ref=e42]: Fixed discount
+          - generic [ref=e43]:
+            - generic [ref=e44]:
+              - generic [ref=e45]: Descuento
+              - generic [ref=e46]: $50 de descuento
+              - generic [ref=e47]: Todos los productos
+            - generic [ref=e48]:
+              - button [ref=e49]:
+                - img [ref=e50]
+              - button [ref=e53]:
+                - img [ref=e54]
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - img [ref=e60]
+            - button "No disponible" [ref=e65]
+          - heading "Test Reward" [level=3] [ref=e66]
+          - paragraph [ref=e67]: Test Description
+          - generic [ref=e68]:
+            - generic [ref=e69]:
+              - generic [ref=e70]: Descuento
+              - generic [ref=e71]: 20% de descuento
+              - generic [ref=e72]: Todos los productos
+            - generic [ref=e73]:
+              - button [ref=e74]:
+                - img [ref=e75]
+              - button [ref=e78]:
+                - img [ref=e79]
+  - contentinfo [ref=e82]:
+    - generic [ref=e84]:
+      - paragraph [ref=e85]: © 2026 MARÉE. HECHO CON PASIÓN.
+      - generic [ref=e86]:
+        - link "Instagram" [ref=e87] [cursor=pointer]:
+          - /url: https://instagram.com
+          - generic [ref=e88]: Instagram
+          - img [ref=e89]
+        - link "Facebook" [ref=e91] [cursor=pointer]:
+          - /url: https://facebook.com
+          - generic [ref=e92]: Facebook
+          - img [ref=e93]
+        - link "TikTok" [ref=e95] [cursor=pointer]:
+          - /url: https://tiktok.com
+          - generic [ref=e96]: TikTok
+          - img [ref=e97]
+  - navigation [ref=e99]:
+    - generic [ref=e100]:
+      - link "restaurant_menu Menú" [ref=e101] [cursor=pointer]:
+        - /url: /menu
+        - generic [ref=e102]: restaurant_menu
+        - generic [ref=e103]: Menú
+      - link "shopping_bag Order" [ref=e104] [cursor=pointer]:
+        - /url: /order
+        - generic [ref=e105]: shopping_bag
+        - generic [ref=e106]: Order
+      - link "wallet Loyalty" [ref=e107] [cursor=pointer]:
+        - /url: /loyalty
+        - generic [ref=e108]: wallet
+        - generic [ref=e109]: Loyalty
+      - link "shield_person Admin" [ref=e110] [cursor=pointer]:
+        - /url: /admin
+        - generic [ref=e111]: shield_person
+        - generic [ref=e112]: Admin
+```

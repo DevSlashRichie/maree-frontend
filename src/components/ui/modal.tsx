@@ -6,7 +6,7 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { X } from "lucide-react";
-import { Fragment, type ReactNode } from "react";
+import { Fragment, type ReactNode, useEffect } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -34,6 +34,17 @@ export function Modal({
     xl: "max-w-xl",
     "2xl": "max-w-2xl",
   };
+
+  // NOT BEST PRACTICE BUT HELPS TO MANTAIN SINGLE RESPONSABILITY ON AFTER CLOSE
+  useEffect(() => {
+    if (!isOpen) {
+      if (afterClose) {
+        setTimeout(() => {
+          afterClose();
+        }, 350);
+      }
+    }
+  }, [isOpen, afterClose]);
 
   const handleOnClose = () => {
     onClose?.();
