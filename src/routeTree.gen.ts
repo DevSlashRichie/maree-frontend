@@ -17,9 +17,11 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
 import { Route as AdminReportsRouteImport } from './routes/admin/reports'
 import { Route as AdminOrderRouteImport } from './routes/admin/order'
+import { Route as AdminBranchesRouteImport } from './routes/admin/branches'
 import { Route as ClientMenuRouteImport } from './routes/_client/menu'
 import { Route as ClientLoyaltyRouteImport } from './routes/_client/loyalty'
 import { Route as ClientCartRouteImport } from './routes/_client/cart'
+import { Route as AdminBranchesBranchIdRouteImport } from './routes/admin/branches/$branchId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -61,6 +63,11 @@ const AdminOrderRoute = AdminOrderRouteImport.update({
   path: '/order',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminBranchesRoute = AdminBranchesRouteImport.update({
+  id: '/branches',
+  path: '/branches',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const ClientMenuRoute = ClientMenuRouteImport.update({
   id: '/_client/menu',
   path: '/menu',
@@ -76,6 +83,11 @@ const ClientCartRoute = ClientCartRouteImport.update({
   path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminBranchesBranchIdRoute = AdminBranchesBranchIdRouteImport.update({
+  id: '/$branchId',
+  path: '/$branchId',
+  getParentRoute: () => AdminBranchesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -85,10 +97,12 @@ export interface FileRoutesByFullPath {
   '/cart': typeof ClientCartRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
+  '/admin/branches': typeof AdminBranchesRouteWithChildren
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -97,10 +111,12 @@ export interface FileRoutesByTo {
   '/cart': typeof ClientCartRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
+  '/admin/branches': typeof AdminBranchesRouteWithChildren
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -111,10 +127,12 @@ export interface FileRoutesById {
   '/_client/cart': typeof ClientCartRoute
   '/_client/loyalty': typeof ClientLoyaltyRoute
   '/_client/menu': typeof ClientMenuRoute
+  '/admin/branches': typeof AdminBranchesRouteWithChildren
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -126,10 +144,12 @@ export interface FileRouteTypes {
     | '/cart'
     | '/loyalty'
     | '/menu'
+    | '/admin/branches'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
     | '/admin/'
+    | '/admin/branches/$branchId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -138,10 +158,12 @@ export interface FileRouteTypes {
     | '/cart'
     | '/loyalty'
     | '/menu'
+    | '/admin/branches'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
     | '/admin'
+    | '/admin/branches/$branchId'
   id:
     | '__root__'
     | '/'
@@ -151,10 +173,12 @@ export interface FileRouteTypes {
     | '/_client/cart'
     | '/_client/loyalty'
     | '/_client/menu'
+    | '/admin/branches'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
     | '/admin/'
+    | '/admin/branches/$branchId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -225,6 +249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrderRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/branches': {
+      id: '/admin/branches'
+      path: '/branches'
+      fullPath: '/admin/branches'
+      preLoaderRoute: typeof AdminBranchesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/_client/menu': {
       id: '/_client/menu'
       path: '/menu'
@@ -246,10 +277,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientCartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/branches/$branchId': {
+      id: '/admin/branches/$branchId'
+      path: '/$branchId'
+      fullPath: '/admin/branches/$branchId'
+      preLoaderRoute: typeof AdminBranchesBranchIdRouteImport
+      parentRoute: typeof AdminBranchesRoute
+    }
   }
 }
 
+interface AdminBranchesRouteChildren {
+  AdminBranchesBranchIdRoute: typeof AdminBranchesBranchIdRoute
+}
+
+const AdminBranchesRouteChildren: AdminBranchesRouteChildren = {
+  AdminBranchesBranchIdRoute: AdminBranchesBranchIdRoute,
+}
+
+const AdminBranchesRouteWithChildren = AdminBranchesRoute._addFileChildren(
+  AdminBranchesRouteChildren,
+)
+
 interface AdminRouteRouteChildren {
+  AdminBranchesRoute: typeof AdminBranchesRouteWithChildren
   AdminOrderRoute: typeof AdminOrderRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
@@ -257,6 +308,7 @@ interface AdminRouteRouteChildren {
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminBranchesRoute: AdminBranchesRouteWithChildren,
   AdminOrderRoute: AdminOrderRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminRewardsRoute: AdminRewardsRoute,
