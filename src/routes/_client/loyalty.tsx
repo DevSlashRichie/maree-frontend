@@ -10,11 +10,11 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
+import { Button } from "@/components/button";
 import { HistoryItem } from "@/components/ui/history-item";
 import { LoyaltyCard } from "@/components/ui/loyalty-card";
 import { Modal } from "@/components/ui/modal";
 import { RewardCard } from "@/components/ui/reward-card";
-import { Button } from "@/components/button";
 
 export const Route = createFileRoute("/_client/loyalty")({
   component: RouteComponent,
@@ -290,10 +290,11 @@ function RouteComponent() {
                   key={filter}
                   type="button"
                   onClick={() => setHistoryFilter(filter)}
-                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${historyFilter === filter
+                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${
+                    historyFilter === filter
                       ? "bg-accent text-white border-accent"
                       : "bg-white dark:bg-charcoal text-gray-500 border-gray-200 dark:border-gray-700 hover:border-accent/50"
-                    }`}
+                  }`}
                 >
                   {filter === "all"
                     ? "Todos"
