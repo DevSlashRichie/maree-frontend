@@ -70,9 +70,7 @@ export function Modal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <DialogPanel
-                className={`w-full ${maxWidthClasses[maxWidth]} transform overflow-hidden rounded-2xl bg-white dark:bg-charcoal p-8 text-left align-middle shadow-2xl transition-all`}
-              >
+              <DialogPanel className="w-full max-w-[min(90vw,520px)] transform overflow-hidden rounded-2xl bg-white dark:bg-charcoal p-6 text-left align-middle shadow-2xl transition-all">
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     {title && (

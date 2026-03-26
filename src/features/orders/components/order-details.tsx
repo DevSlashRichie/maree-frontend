@@ -41,13 +41,14 @@ export function OrderDetails({
 
       <hr className="border-pink-soft/20" />
 
-      <div className="grid grid-cols-3 gap-3 items-stretch">
+      <div className="flex flex-wrap gap-3 items-stretch">
         {items.map((item) => (
           <ItemDetails
             key={item.id}
             name={item.name}
             quantity={item.quantity}
             ingredients={item.ingredients}
+            className="w-40 flex-shrink-0" // fixed card width, wraps naturally
           />
         ))}
       </div>
