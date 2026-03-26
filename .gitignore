@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Orval generated files
+src/lib/api.ts
+src/lib/schemas/
+src/lib/zods.ts
