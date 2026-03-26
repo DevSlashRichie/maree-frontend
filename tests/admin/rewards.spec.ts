@@ -146,4 +146,62 @@ test.describe("Admin Rewards Page", () => {
       await expect(page.getByText("Crear primera recompensa")).toBeVisible();
     }
   });
+
+  test.describe("Tooltips", () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto("/admin/rewards");
+      await page.waitForSelector("h1", { state: "visible" });
+      await page.click("button:has-text('Nueva Recompensa')");
+    });
+
+    test("tooltip is not visible initially", async ({ page }) => {
+      await expect(page.locator(".bg-gray-900.rounded-lg")).not.toBeVisible();
+    });
+
+    test("shows tooltip on points input hover", async ({ page }) => {
+      const pointsInput = page.locator('input[id="points"]');
+      await pointsInput.hover();
+      await page.waitForTimeout(300);
+
+      await expect(page.locator(".bg-gray-900.rounded-lg")).toBeVisible();
+      await expect(page.locator(".bg-gray-900.rounded-lg")).toContainText(
+        "Puntos necesarios para canjear esta recompensa",
+      );
+    });
+
+    test("shows tooltip on percentage button hover", async ({ page }) => {
+      const percentButton = page.locator("button:has-text('%')");
+      await percentButton.hover();
+      await page.waitForTimeout(300);
+
+      await expect(page.locator(".bg-gray-900.rounded-lg")).toBeVisible();
+      await expect(page.locator(".bg-gray-900.rounded-lg")).toContainText(
+        "Aplica un porcentaje de descuento sobre el precio total",
+      );
+    });
+
+    test("shows tooltip on fixed button hover", async ({ page }) => {
+      const fixedButton = page.locator("button:has-text('$')");
+      await fixedButton.hover();
+      await page.waitForTimeout(300);
+
+      await expect(page.locator(".bg-gray-900.rounded-lg")).toBeVisible();
+      await expect(page.locator(".bg-gray-900.rounded-lg")).toContainText(
+        "Aplica un monto fijo a descontar del precio total",
+      );
+    });
+
+    test("shows tooltip on product restriction label hover", async ({
+      page,
+    }) => {
+      const productLabel = page.getByText("Aplicar a producto específico");
+      await productLabel.hover();
+      await page.waitForTimeout(300);
+
+      await expect(page.locator(".bg-gray-900.rounded-lg")).toBeVisible();
+      await expect(page.locator(".bg-gray-900.rounded-lg")).toContainText(
+        "Limita el descuento solo al producto seleccionado",
+      );
+    });
+  });
 });

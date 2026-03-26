@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { HistoryItem } from "@/components/ui/history-item";
 import { LoyaltyCard } from "@/components/ui/loyalty-card";
 import { Modal } from "@/components/ui/modal";
-import { ProgressBar } from "@/components/ui/progress-bar";
 import { RewardCard } from "@/components/ui/reward-card";
 
 export const Route = createFileRoute("/loyalty")({
@@ -178,11 +177,10 @@ function RouteComponent() {
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div className="md:col-span-5 space-y-6">
-              <LoyaltyCard memberName="Ana López" memberId="4427536211" />
-              <ProgressBar
-                current={8}
-                total={10}
-                label="¡Solo 2 visitas más para tu recompensa!"
+              <LoyaltyCard
+                user={{ firstName: "Ana López", loyaltyId: "4427536211" }}
+                stamps={{ total: 6, collected: 3 }}
+                rewardsAvailable={1}
               />
             </div>
 

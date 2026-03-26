@@ -25,6 +25,7 @@ import {
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
+import { Tooltip } from "@/components/ui/tooltip";
 import {
   deleteV1RewardsRewardId,
   patchV1RewardsRewardId,
@@ -358,16 +359,21 @@ function RouteComponent() {
                       >
                         Puntos requeridos (opcional)
                       </label>
-                      <input
-                        id={field.name}
-                        type="number"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
-                        placeholder="Ej: 50"
-                        min={0}
-                      />
+                      <Tooltip
+                        content="Puntos necesarios para canjear esta recompensa. Deja vacío para recompensas gratuitas."
+                        placement="right"
+                      >
+                        <input
+                          id={field.name}
+                          type="number"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
+                          placeholder="Ej: 50"
+                          min={0}
+                        />
+                      </Tooltip>
                     </div>
                   )}
                 </form.Field>
@@ -479,30 +485,40 @@ function RouteComponent() {
                           Tipo de descuento
                         </p>
                         <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => field.handleChange("percentage")}
-                            className={cn(
-                              "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
-                              field.state.value === "percentage"
-                                ? "border-primary bg-primary/10 text-primary"
-                                : "border-gray-200 text-gray-500 hover:border-gray-300",
-                            )}
+                          <Tooltip
+                            content="Aplica un porcentaje de descuento sobre el precio total"
+                            placement="top"
                           >
-                            %
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => field.handleChange("fixed")}
-                            className={cn(
-                              "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
-                              field.state.value === "fixed"
-                                ? "border-primary bg-primary/10 text-primary"
-                                : "border-gray-200 text-gray-500 hover:border-gray-300",
-                            )}
+                            <button
+                              type="button"
+                              onClick={() => field.handleChange("percentage")}
+                              className={cn(
+                                "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
+                                field.state.value === "percentage"
+                                  ? "border-primary bg-primary/10 text-primary"
+                                  : "border-gray-200 text-gray-500 hover:border-gray-300",
+                              )}
+                            >
+                              %
+                            </button>
+                          </Tooltip>
+                          <Tooltip
+                            content="Aplica un monto fijo a descontar del precio total"
+                            placement="top"
                           >
-                            $
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => field.handleChange("fixed")}
+                              className={cn(
+                                "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
+                                field.state.value === "fixed"
+                                  ? "border-primary bg-primary/10 text-primary"
+                                  : "border-gray-200 text-gray-500 hover:border-gray-300",
+                              )}
+                            >
+                              $
+                            </button>
+                          </Tooltip>
                         </div>
                       </div>
                     )}
@@ -549,9 +565,14 @@ function RouteComponent() {
                 <form.Field name="hasProductRestriction">
                   {(field) => (
                     <div className="flex items-center justify-between mt-6">
-                      <span className="text-sm font-medium text-text-main">
-                        Aplicar a producto específico
-                      </span>
+                      <Tooltip
+                        content="Limita el descuento solo al producto seleccionado"
+                        placement="top"
+                      >
+                        <span className="text-sm font-medium text-text-main cursor-help">
+                          Aplicar a producto específico
+                        </span>
+                      </Tooltip>
                       <Switch
                         checked={field.state.value}
                         onChange={(checked) => {

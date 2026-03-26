@@ -1,56 +1,103 @@
-import { Apple, Wallet } from "lucide-react";
+import { Apple, Croissant, QrCode, Wallet } from "lucide-react";
 import { useState } from "react";
+import { Modal } from "./modal";
+import cn from "classnames";
+
 // @ts-expect-error - bad imports for some reason.
 import { QRCode } from "react-qr-code";
-import { Modal } from "./modal";
 
 interface LoyaltyCardProps {
-  memberName: string;
-  memberId: string;
+  user: {
+    firstName: string;
+    loyaltyId: string;
+  };
+  stamps: {
+    total: number;
+    collected: number;
+  };
+  rewardsAvailable: number;
+  isLoading?: boolean;
 }
 
-export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
+export function LoyaltyCard({
+  user,
+  stamps,
+  rewardsAvailable,
+  isLoading = false,
+}: LoyaltyCardProps) {
   const [isQRExpanded, setIsQRExpanded] = useState(false);
+  const stamps_ = Array.from({ length: stamps.total }, (_, i) => ({ id: i }));
+  const isComplete = stamps.collected >= stamps.total;
+
+  if (isLoading) {
+    return (
+      <div className="w-full aspect-[1.58/1] rounded-2xl overflow-hidden shadow-2xl bg-primary animate-pulse" />
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="relative w-full aspect-[1.58/1] rounded-2xl overflow-hidden shadow-2xl transform transition hover:scale-[1.01] duration-500 group">
-        <div className="absolute inset-0 bg-charcoal dark:bg-black pattern-grid-lg text-gray-800" />
-        <div className="absolute top-0 right-0 w-32 h-32 bg-secondary opacity-10 rounded-full blur-2xl -mr-10 -mt-10" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary opacity-20 rounded-full blur-xl -ml-5 -mb-5" />
+      <div className="flex flex-col rounded-2xl overflow-hidden shadow-2xl bg-charcoal">
+        <div className="relative p-6 pb-4 pattern-grid-lg">
+          <div className="absolute top-4 right-4 w-32 h-32 bg-secondary opacity-10 rounded-full blur-2xl" />
+          <div className="absolute bottom-0 left-4 w-24 h-24 bg-accent opacity-20 rounded-full blur-xl" />
 
-        <div className="absolute inset-0 p-6 flex flex-col justify-between z-10">
-          <div className="flex justify-between items-start">
+          <div className="relative flex justify-between items-start">
             <div>
               <h2 className="font-display text-3xl text-white tracking-widest">
                 MARÉE
               </h2>
             </div>
-            <span className="bg-accent/20 backdrop-blur-sm text-gray-200 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider border border-accent/30 text-right">
-              Premium Member
+            <span className="bg-white/10 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[10px] uppercase tracking-wider border border-white/20">
+              {isComplete
+                ? `Premio Disponible (${rewardsAvailable})`
+                : "Premium Member"}
             </span>
           </div>
+        </div>
 
-          <div className="flex justify-between items-end">
-            <div className="flex flex-col gap-1">
-              <p className="text-gray-400 text-xs uppercase tracking-wider">
-                Titular
-              </p>
-              <p className="text-white font-display text-lg tracking-wide">
-                {memberName}
-              </p>
-              <p className="text-gray-500 text-xs font-mono">
-                Teléfono: {memberId}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsQRExpanded(true)}
-              className="bg-white p-1 rounded cursor-pointer hover:scale-105 transition-transform"
-            >
-              <QRCode size={60} value={memberId} />
-            </button>
+        <div className="px-6 py-4">
+          <div className="grid grid-cols-3 gap-3 justify-center items-center">
+            {stamps_.map((stamp, index) => (
+              <div
+                key={stamp.id}
+                className="w-full flex justify-center items-center"
+              >
+                <div
+                  className={cn(
+                    "flex items-center justify-center border rounded-full w-[60px] h-[60px]",
+                    {
+                      "text-white/20": index + 1 > stamps.collected,
+                      "text-white": index + 1 <= stamps.collected,
+                    },
+                  )}
+                >
+                  <Croissant />
+                </div>
+              </div>
+            ))}
           </div>
+        </div>
+
+        <div className="flex justify-between items-end p-6 border-t border-white/10">
+          <div className="flex flex-col gap-1">
+            <p className="text-white/50 text-xs uppercase tracking-wider">
+              Titular
+            </p>
+            <p className="text-white font-display text-lg tracking-wide">
+              {user.firstName}
+            </p>
+            <p className="text-white/50 text-xs font-mono">
+              Teléfono: {user.loyaltyId}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsQRExpanded(true)}
+            className="bg-white p-2 rounded-lg cursor-pointer hover:scale-105 transition-transform"
+          >
+            <QrCode className="w-8 h-8 text-primary" />
+          </button>
         </div>
       </div>
 
@@ -84,13 +131,11 @@ export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
       >
         <div className="flex flex-col items-center">
           <div className="bg-white p-4 rounded-xl border border-gray-200 dark:border-gray-600 mb-4">
-            <QRCode size={220} value={memberId} />
+            <QRCode size={180} value={user.loyaltyId} />
           </div>
-          <p className="font-display text-lg text-charcoal dark:text-white">
-            {memberName}
-          </p>
+          <p className="font-display text-lg text-primary">{user.firstName}</p>
           <p className="text-sm text-gray-500 font-mono">
-            Teléfono: {memberId}
+            Teléfono: {user.loyaltyId}
           </p>
         </div>
       </Modal>
