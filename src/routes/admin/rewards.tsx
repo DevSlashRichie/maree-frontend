@@ -141,7 +141,7 @@ function RouteComponent() {
       const productName =
         value.hasProductRestriction && value.applicableProducts
           ? AVAILABLE_PRODUCTS.find((p) => p.id === value.applicableProducts)
-            ?.name || ""
+              ?.name || ""
           : "";
 
       try {
@@ -774,10 +774,10 @@ function RouteComponent() {
                       </span>
                       <span className="text-xs text-gray-400">
                         {reward.applicableProducts &&
-                          reward.applicableProducts.length > 0
+                        reward.applicableProducts.length > 0
                           ? AVAILABLE_PRODUCTS.find(
-                            (p) => p.id === reward.applicableProducts?.[0],
-                          )?.name
+                              (p) => p.id === reward.applicableProducts?.[0],
+                            )?.name
                           : "Todos los productos"}
                       </span>
                     </div>
