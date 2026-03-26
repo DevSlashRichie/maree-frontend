@@ -6,7 +6,7 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { X } from "lucide-react";
-import { Fragment, useEffect, type ReactNode } from "react";
+import { Fragment, type ReactNode, useEffect } from "react";
 
 interface ModalProps {
   isOpen: boolean;

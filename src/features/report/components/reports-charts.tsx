@@ -21,36 +21,36 @@ export function ReportsCharts() {
 
   const weeklySalesData = reportsData
     ? [
-      {
-        id: "Ventas",
-        color: "#5e6c75",
-        data: reportsData.weeklyOrders.map(
-          (item: { day: string; total: number }) => ({
-            x: item.day,
-            y: item.total,
-          }),
-        ),
-      },
-    ]
+        {
+          id: "Ventas",
+          color: "#5e6c75",
+          data: reportsData.weeklyOrders.map(
+            (item: { day: string; total: number }) => ({
+              x: item.day,
+              y: item.total,
+            }),
+          ),
+        },
+      ]
     : [];
 
   const topProductsData = reportsData
     ? reportsData.topProducts.map(
-      (item: { productName: string; quantity: number }) => ({
-        producto: item.productName,
-        ventas: item.quantity,
-      }),
-    )
+        (item: { productName: string; quantity: number }) => ({
+          producto: item.productName,
+          ventas: item.quantity,
+        }),
+      )
     : [];
 
   const categoryData = reportsData
     ? reportsData.categoryConsumption.map(
-      (item: { category: string; total: number }, index: number) => ({
-        id: item.category,
-        value: item.total,
-        color: ["#5e6c75", "#e8d5d5", "#3a4042", "#f2e4e4"][index % 4],
-      }),
-    )
+        (item: { category: string; total: number }, index: number) => ({
+          id: item.category,
+          value: item.total,
+          color: ["#5e6c75", "#e8d5d5", "#3a4042", "#f2e4e4"][index % 4],
+        }),
+      )
     : [];
 
   return (
