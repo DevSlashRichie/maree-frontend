@@ -31,12 +31,12 @@
           - generic [ref=e33]:
             - img [ref=e35]
             - button "Disponible" [ref=e40]
-          - heading "Test Reward" [level=3] [ref=e41]
-          - paragraph [ref=e42]: Test Description
+          - heading "Fixed Reward" [level=3] [ref=e41]
+          - paragraph [ref=e42]: Fixed discount
           - generic [ref=e43]:
             - generic [ref=e44]:
               - generic [ref=e45]: Descuento
-              - generic [ref=e46]: 20% de descuento
+              - generic [ref=e46]: $50 de descuento
               - generic [ref=e47]: Todos los productos
             - generic [ref=e48]:
               - button [ref=e49]:
@@ -46,83 +46,51 @@
         - generic [ref=e57]:
           - generic [ref=e58]:
             - img [ref=e60]
-            - button "Disponible" [ref=e65]
-          - heading "Fixed Reward" [level=3] [ref=e66]
-          - paragraph [ref=e67]: Fixed discount
+            - button "No disponible" [ref=e65]
+          - heading "Test Reward" [level=3] [ref=e66]
+          - paragraph [ref=e67]: Test Description
           - generic [ref=e68]:
             - generic [ref=e69]:
               - generic [ref=e70]: Descuento
-              - generic [ref=e71]: $50 de descuento
+              - generic [ref=e71]: 20% de descuento
               - generic [ref=e72]: Todos los productos
             - generic [ref=e73]:
               - button [ref=e74]:
                 - img [ref=e75]
               - button [ref=e78]:
                 - img [ref=e79]
-        - generic [ref=e82]:
-          - generic [ref=e83]:
-            - img [ref=e85]
-            - button "No disponible" [ref=e90]
-          - heading "Test Reward" [level=3] [ref=e91]
-          - paragraph [ref=e92]: Test Description
-          - generic [ref=e93]:
-            - generic [ref=e94]:
-              - generic [ref=e95]: Descuento
-              - generic [ref=e96]: 20% de descuento
-              - generic [ref=e97]: Todos los productos
-            - generic [ref=e98]:
-              - button [ref=e99]:
-                - img [ref=e100]
-              - button [ref=e103]:
-                - img [ref=e104]
-        - generic [ref=e107]:
-          - generic [ref=e108]:
-            - img [ref=e110]
-            - button "Disponible" [ref=e115]
-          - heading "Fixed Reward" [level=3] [ref=e116]
-          - paragraph [ref=e117]: Fixed discount
-          - generic [ref=e118]:
-            - generic [ref=e119]:
-              - generic [ref=e120]: Descuento
-              - generic [ref=e121]: $50 de descuento
-              - generic [ref=e122]: Todos los productos
-            - generic [ref=e123]:
-              - button [ref=e124]:
-                - img [ref=e125]
-              - button [ref=e128]:
-                - img [ref=e129]
-  - contentinfo [ref=e132]:
-    - generic [ref=e134]:
-      - paragraph [ref=e135]: © 2026 MARÉE. HECHO CON PASIÓN.
-      - generic [ref=e136]:
-        - link "Instagram" [ref=e137] [cursor=pointer]:
+  - contentinfo [ref=e82]:
+    - generic [ref=e84]:
+      - paragraph [ref=e85]: © 2026 MARÉE. HECHO CON PASIÓN.
+      - generic [ref=e86]:
+        - link "Instagram" [ref=e87] [cursor=pointer]:
           - /url: https://instagram.com
-          - generic [ref=e138]: Instagram
-          - img [ref=e139]
-        - link "Facebook" [ref=e141] [cursor=pointer]:
+          - generic [ref=e88]: Instagram
+          - img [ref=e89]
+        - link "Facebook" [ref=e91] [cursor=pointer]:
           - /url: https://facebook.com
-          - generic [ref=e142]: Facebook
-          - img [ref=e143]
-        - link "TikTok" [ref=e145] [cursor=pointer]:
+          - generic [ref=e92]: Facebook
+          - img [ref=e93]
+        - link "TikTok" [ref=e95] [cursor=pointer]:
           - /url: https://tiktok.com
-          - generic [ref=e146]: TikTok
-          - img [ref=e147]
-  - navigation [ref=e149]:
-    - generic [ref=e150]:
-      - link "restaurant_menu Menú" [ref=e151] [cursor=pointer]:
+          - generic [ref=e96]: TikTok
+          - img [ref=e97]
+  - navigation [ref=e99]:
+    - generic [ref=e100]:
+      - link "restaurant_menu Menú" [ref=e101] [cursor=pointer]:
         - /url: /menu
-        - generic [ref=e152]: restaurant_menu
-        - generic [ref=e153]: Menú
-      - link "shopping_bag Order" [ref=e154] [cursor=pointer]:
+        - generic [ref=e102]: restaurant_menu
+        - generic [ref=e103]: Menú
+      - link "shopping_bag Order" [ref=e104] [cursor=pointer]:
         - /url: /order
-        - generic [ref=e155]: shopping_bag
-        - generic [ref=e156]: Order
-      - link "wallet Loyalty" [ref=e157] [cursor=pointer]:
+        - generic [ref=e105]: shopping_bag
+        - generic [ref=e106]: Order
+      - link "wallet Loyalty" [ref=e107] [cursor=pointer]:
         - /url: /loyalty
-        - generic [ref=e158]: wallet
-        - generic [ref=e159]: Loyalty
-      - link "shield_person Admin" [ref=e160] [cursor=pointer]:
+        - generic [ref=e108]: wallet
+        - generic [ref=e109]: Loyalty
+      - link "shield_person Admin" [ref=e110] [cursor=pointer]:
         - /url: /admin
-        - generic [ref=e161]: shield_person
-        - generic [ref=e162]: Admin
+        - generic [ref=e111]: shield_person
+        - generic [ref=e112]: Admin
 ```
