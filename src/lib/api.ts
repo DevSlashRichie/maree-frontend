@@ -2263,7 +2263,7 @@ export const usePostV1RewardsRedeem = <
 };
 
 export type deleteV1RewardsRewardIdResponse204 = {
-  data: void;
+  data: undefined;
   status: 204;
 };
 

@@ -12,7 +12,7 @@ function RouteComponent() {
   const reportsData =
     data?.status === 200 ? (data.data as GetV1Reports200) : null;
 
-  const weeklySalesData = reportsData
+  const _weeklySalesData = reportsData
     ? [
         {
           id: "Ventas",
@@ -27,7 +27,7 @@ function RouteComponent() {
       ]
     : [];
 
-  const topProductsData = reportsData
+  const _topProductsData = reportsData
     ? reportsData.topProducts.map(
         (item: { productName: string; quantity: number }) => ({
           producto: item.productName,
@@ -36,7 +36,7 @@ function RouteComponent() {
       )
     : [];
 
-  const categoryData = reportsData
+  const _categoryData = reportsData
     ? reportsData.categoryConsumption.map(
         (item: { category: string; total: number }, index: number) => ({
           id: item.category,
