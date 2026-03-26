@@ -1,0 +1,60 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - img "MARÉE Logo" [ref=e8]
+  - main [ref=e9]:
+    - generic [ref=e11]:
+      - navigation [ref=e12]:
+        - link "dashboard Dashboard" [ref=e13] [cursor=pointer]:
+          - /url: /admin
+          - generic [ref=e14]: dashboard
+          - generic [ref=e15]: Dashboard
+        - link "card_giftcard Recompensas" [ref=e16] [cursor=pointer]:
+          - /url: /admin/rewards
+          - generic [ref=e17]: card_giftcard
+          - generic [ref=e18]: Recompensas
+        - link "bar_chart Reportes" [ref=e19] [cursor=pointer]:
+          - /url: /admin/reports
+          - generic [ref=e20]: bar_chart
+          - generic [ref=e21]: Reportes
+      - button "Selecciona Sucursal" [active] [ref=e24] [cursor=pointer]:
+        - img [ref=e25]
+        - generic [ref=e28]: Selecciona Sucursal
+        - img [ref=e29]
+  - contentinfo [ref=e33]:
+    - generic [ref=e35]:
+      - paragraph [ref=e36]: © 2026 MARÉE. HECHO CON PASIÓN.
+      - generic [ref=e37]:
+        - link "Instagram" [ref=e38] [cursor=pointer]:
+          - /url: https://instagram.com
+          - generic [ref=e39]: Instagram
+          - img [ref=e40]
+        - link "Facebook" [ref=e42] [cursor=pointer]:
+          - /url: https://facebook.com
+          - generic [ref=e43]: Facebook
+          - img [ref=e44]
+        - link "TikTok" [ref=e46] [cursor=pointer]:
+          - /url: https://tiktok.com
+          - generic [ref=e47]: TikTok
+          - img [ref=e48]
+  - navigation [ref=e50]:
+    - generic [ref=e51]:
+      - link "restaurant_menu Menú" [ref=e52] [cursor=pointer]:
+        - /url: /menu
+        - generic [ref=e53]: restaurant_menu
+        - generic [ref=e54]: Menú
+      - link "shopping_bag Order" [ref=e55] [cursor=pointer]:
+        - /url: /order
+        - generic [ref=e56]: shopping_bag
+        - generic [ref=e57]: Order
+      - link "wallet Loyalty" [ref=e58] [cursor=pointer]:
+        - /url: /loyalty
+        - generic [ref=e59]: wallet
+        - generic [ref=e60]: Loyalty
+      - link "shield_person Admin" [ref=e61] [cursor=pointer]:
+        - /url: /admin
+        - generic [ref=e62]: shield_person
+        - generic [ref=e63]: Admin
+```

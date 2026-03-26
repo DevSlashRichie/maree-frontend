@@ -1,0 +1,67 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - img "MARÉE Logo" [ref=e8]
+  - main [ref=e9]:
+    - generic [ref=e11]:
+      - navigation [ref=e12]:
+        - link "dashboard Dashboard" [ref=e13] [cursor=pointer]:
+          - /url: /admin
+          - generic [ref=e14]: dashboard
+          - generic [ref=e15]: Dashboard
+        - link "card_giftcard Recompensas" [ref=e16] [cursor=pointer]:
+          - /url: /admin/rewards
+          - generic [ref=e17]: card_giftcard
+          - generic [ref=e18]: Recompensas
+        - link "bar_chart Reportes" [ref=e19] [cursor=pointer]:
+          - /url: /admin/reports
+          - generic [ref=e20]: bar_chart
+          - generic [ref=e21]: Reportes
+      - generic [ref=e23]:
+        - button "Selecciona Sucursal" [expanded] [active] [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+          - generic [ref=e28]: Selecciona Sucursal
+          - img [ref=e29]
+        - generic [ref=e32]:
+          - paragraph [ref=e34]: Selecciona Sucursal
+          - paragraph [ref=e37]: No hay sucursales
+          - button "Configuración" [ref=e39] [cursor=pointer]:
+            - img [ref=e41]
+            - paragraph [ref=e44]: Configuración
+  - contentinfo [ref=e47]:
+    - generic [ref=e49]:
+      - paragraph [ref=e50]: © 2026 MARÉE. HECHO CON PASIÓN.
+      - generic [ref=e51]:
+        - link "Instagram" [ref=e52] [cursor=pointer]:
+          - /url: https://instagram.com
+          - generic [ref=e53]: Instagram
+          - img [ref=e54]
+        - link "Facebook" [ref=e56] [cursor=pointer]:
+          - /url: https://facebook.com
+          - generic [ref=e57]: Facebook
+          - img [ref=e58]
+        - link "TikTok" [ref=e60] [cursor=pointer]:
+          - /url: https://tiktok.com
+          - generic [ref=e61]: TikTok
+          - img [ref=e62]
+  - navigation [ref=e64]:
+    - generic [ref=e65]:
+      - link "restaurant_menu Menú" [ref=e66] [cursor=pointer]:
+        - /url: /menu
+        - generic [ref=e67]: restaurant_menu
+        - generic [ref=e68]: Menú
+      - link "shopping_bag Order" [ref=e69] [cursor=pointer]:
+        - /url: /order
+        - generic [ref=e70]: shopping_bag
+        - generic [ref=e71]: Order
+      - link "wallet Loyalty" [ref=e72] [cursor=pointer]:
+        - /url: /loyalty
+        - generic [ref=e73]: wallet
+        - generic [ref=e74]: Loyalty
+      - link "shield_person Admin" [ref=e75] [cursor=pointer]:
+        - /url: /admin
+        - generic [ref=e76]: shield_person
+        - generic [ref=e77]: Admin
+```
