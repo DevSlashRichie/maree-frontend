@@ -6,6 +6,7 @@ import {
   ComboboxOptions,
   Switch,
 } from "@headlessui/react";
+import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
 import cn from "classnames";
 import {
@@ -22,14 +23,23 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
-import { Modal } from "@/features/loyalty/components/modal";
+import toast from "react-hot-toast";
+import { Modal } from "@/components/ui/modal";
+import { Tooltip } from "@/components/ui/tooltip";
+import {
+  deleteV1RewardsRewardId,
+  patchV1RewardsRewardId,
+  useGetV1Rewards,
+  usePostV1Rewards,
+} from "@/lib/api";
+import type { RewardSchema } from "@/lib/schemas/rewardSchema";
 
 export const Route = createFileRoute("/admin/rewards")({
   component: RouteComponent,
 });
 
 type Reward = {
-  id: number;
+  id: string;
   title: string;
   description: string;
   icon: string;
@@ -38,9 +48,14 @@ type Reward = {
   discountType: "percentage" | "fixed";
   discountValue: number;
   applicableProducts: string[] | null;
+  status: string;
+  cost: string;
+  discountId: string;
+  image: string | null;
+  createdAt: string;
 };
 
-const MOCK_PRODUCTS = [
+const AVAILABLE_PRODUCTS = [
   { id: "1", name: "Cappuccino" },
   { id: "2", name: "Latte" },
   { id: "3", name: "Espresso" },
@@ -65,186 +80,210 @@ const AVAILABLE_ICONS = [
   { value: "utensils", label: "Utensils", icon: Utensils },
 ];
 
-const INITIAL_REWARDS: Reward[] = [
-  {
-    id: 1,
-    title: "Crepa Dulce Gratis",
-    description:
-      "Elige cualquier crepa dulce de nuestro menú clásico para celebrar.",
-    icon: "utensils-crossed",
-    isAvailable: true,
-    points: null,
-    discountType: "percentage",
-    discountValue: 100,
-    applicableProducts: null,
-  },
-  {
-    id: 2,
-    title: "Café de Especialidad",
-    description: "Un café latte o cappuccino mediano preparado por baristas.",
-    icon: "coffee",
-    isAvailable: false,
-    points: 50,
-    discountType: "percentage",
-    discountValue: 50,
-    applicableProducts: ["1"],
-  },
-  {
-    id: 3,
-    title: "Bebida de Temporada",
-    description: "Prueba nuestra bebida especial del mes totalmente gratis.",
-    icon: "ice-cream",
-    isAvailable: true,
-    points: null,
-    discountType: "percentage",
-    discountValue: 100,
-    applicableProducts: null,
-  },
-  {
-    id: 4,
-    title: "Postre Especial",
-    description: "Un postre artesanal hecho en casa para endulzar tu día.",
-    icon: "cake",
-    isAvailable: false,
-    points: 75,
-    discountType: "percentage",
-    discountValue: 75,
-    applicableProducts: ["10"],
-  },
-  {
-    id: 5,
-    title: "Combo Pareja",
-    description: "Descuento especial en nuestro combo para dos personas.",
-    icon: "utensils",
-    isAvailable: false,
-    points: 150,
-    discountType: "percentage",
-    discountValue: 30,
-    applicableProducts: null,
-  },
-];
-
 function getIconComponent(iconName: string) {
   const found = AVAILABLE_ICONS.find((i) => i.value === iconName);
   return found ? found.icon : UtensilsCrossed;
 }
 
 function RouteComponent() {
-  const [rewards, setRewards] = useState<Reward[]>(INITIAL_REWARDS);
+  const {
+    data: rewardsData,
+    isLoading: isLoadingRewards,
+    error: rewardsError,
+    mutate,
+  } = useGetV1Rewards();
+
+  const { trigger: createReward, isMutating: isCreatingReward } =
+    usePostV1Rewards();
+
+  const rewards: Reward[] =
+    rewardsData?.data?.map((r: RewardSchema) => ({
+      id: r.id,
+      title: r.name.replace("REWARD-", ""),
+      description: r.description,
+      icon: "utensils-crossed",
+      isAvailable: r.status === "active",
+      points: parseInt(r.cost, 10) || null,
+      discountType: r.discount.type as "percentage" | "fixed",
+      discountValue: parseInt(r.discount.value, 10),
+      applicableProducts:
+        r.discount.appliesTo.length > 0 ? r.discount.appliesTo : null,
+      status: r.status,
+      cost: r.cost,
+      discountId: r.discountId,
+      image: r.image,
+      createdAt: r.createdAt,
+    })) ?? [];
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<Reward | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    icon: "utensils-crossed",
-    isAvailable: true,
-    points: "",
-    discountType: "percentage" as "percentage" | "fixed",
-    discountValue: "",
-    applicableProducts: "" as string,
-    hasProductRestriction: false,
-  });
-
-  const resetForm = () => {
-    setFormData({
+  const form = useForm({
+    defaultValues: {
       title: "",
       description: "",
       icon: "utensils-crossed",
       isAvailable: true,
       points: "",
-      discountType: "percentage",
+      discountType: "percentage" as "percentage" | "fixed",
       discountValue: "",
       applicableProducts: "",
       hasProductRestriction: false,
-    });
-    setEditingReward(null);
-    setIsFormOpen(false);
-  };
+    },
+    onSubmit: async ({ value }) => {
+      if (!value.discountValue) {
+        alert("Por favor completa el valor del descuento");
+        return;
+      }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+      const productName =
+        value.hasProductRestriction && value.applicableProducts
+          ? AVAILABLE_PRODUCTS.find((p) => p.id === value.applicableProducts)
+              ?.name || ""
+          : "";
 
-    if (!formData.discountValue) {
-      alert("Por favor completa el valor del descuento");
-      return;
-    }
+      try {
+        if (editingReward) {
+          setIsUpdating(true);
+          const result = await patchV1RewardsRewardId(editingReward.id, {
+            name: value.title,
+            description: value.description,
+            status: value.isAvailable ? "active" : "inactive",
+            cost: String(value.points || 0),
+          });
 
-    if (editingReward) {
-      setRewards(
-        rewards.map((r) =>
-          r.id === editingReward.id
-            ? {
-                ...r,
-                title: formData.title,
-                description: formData.description,
-                icon: formData.icon,
-                isAvailable: formData.isAvailable,
-                points: formData.points ? parseInt(formData.points, 10) : null,
-                discountType: formData.discountType,
-                discountValue: parseInt(formData.discountValue, 10),
-                applicableProducts:
-                  formData.hasProductRestriction && formData.applicableProducts
-                    ? [formData.applicableProducts]
-                    : null,
-              }
-            : r,
-        ),
-      );
-    } else {
-      const newReward: Reward = {
-        id: Date.now(),
-        title: formData.title,
-        description: formData.description,
-        icon: formData.icon,
-        isAvailable: formData.isAvailable,
-        points: formData.points ? parseInt(formData.points, 10) : null,
-        discountType: formData.discountType,
-        discountValue: parseInt(formData.discountValue, 10),
-        applicableProducts:
-          formData.hasProductRestriction && formData.applicableProducts
-            ? [formData.applicableProducts]
-            : null,
-      };
-      setRewards([...rewards, newReward]);
-    }
-    setIsFormOpen(false);
-  };
+          if (result.status === 200) {
+            mutate();
+            setIsFormOpen(false);
+            resetForm();
+            toast.success("Recompensa actualizada");
+          } else {
+            alert("Error al actualizar la recompensa");
+          }
+        } else {
+          const result = await createReward({
+            name: value.title,
+            description: value.description,
+            status: value.isAvailable ? "active" : "inactive",
+            cost: String(value.points || 0),
+            discount: {
+              type: value.discountType,
+              value: value.discountValue,
+              appliesTo: productName ? [productName] : [],
+            },
+          });
+
+          if (result.status === 201) {
+            mutate();
+            setIsFormOpen(false);
+            resetForm();
+            toast.success("Recompensa creada");
+          }
+        }
+      } catch (error) {
+        console.error("Error saving reward:", error);
+        alert("Error al guardar la recompensa");
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+  });
 
   const handleEdit = (reward: Reward) => {
     setEditingReward(reward);
     const hasRestriction =
       reward.applicableProducts !== null &&
       reward.applicableProducts.length > 0;
-    setFormData({
-      title: reward.title,
-      description: reward.description,
-      icon: reward.icon,
-      isAvailable: reward.isAvailable,
-      points: reward.points?.toString() || "",
-      discountType: reward.discountType,
-      discountValue: reward.discountValue?.toString() || "",
-      applicableProducts: hasRestriction
-        ? reward.applicableProducts?.[0] || ""
-        : "",
-      hasProductRestriction: hasRestriction,
-    });
+    form.setFieldValue("title", reward.title);
+    form.setFieldValue("description", reward.description);
+    form.setFieldValue("icon", reward.icon);
+    form.setFieldValue("isAvailable", reward.isAvailable);
+    form.setFieldValue("points", reward.points?.toString() || "");
+    form.setFieldValue(
+      "discountType",
+      reward.discountType as "percentage" | "fixed",
+    );
+    form.setFieldValue("discountValue", reward.discountValue?.toString() || "");
+    form.setFieldValue(
+      "applicableProducts",
+      hasRestriction ? reward.applicableProducts?.[0] || "" : "",
+    );
+    form.setFieldValue("hasProductRestriction", hasRestriction);
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setRewards(rewards.filter((r) => r.id !== id));
-    setDeleteConfirm(null);
+  const resetForm = () => {
+    form.reset();
+    setEditingReward(null);
+    setIsFormOpen(false);
   };
 
-  const toggleAvailability = (id: number) => {
-    setRewards(
-      rewards.map((r) =>
-        r.id === id ? { ...r, isAvailable: !r.isAvailable } : r,
-      ),
-    );
+  const handleDelete = async (id: string) => {
+    const f = async () => {
+      try {
+        const response = await deleteV1RewardsRewardId(id);
+        if (response.status === 204) {
+          await mutate();
+        } else {
+          toast.error("No se pudo eliminar la recompensa");
+        }
+      } catch (error) {
+        console.error("Error deleting reward:", error);
+        alert("Error al intentar eliminar la recompensa");
+      } finally {
+        setDeleteConfirm(null);
+      }
+    };
+
+    await toast.promise(f(), {
+      error: "No se pudo eliminar.",
+      loading: "Eliminando...",
+      success: "Recompensa eliminada.",
+    });
   };
+
+  const toggleAvailability = async (id: string) => {
+    const reward = rewards.find((r) => r.id === id);
+    if (!reward) return;
+
+    const newStatus = reward.isAvailable ? "inactive" : "active";
+
+    try {
+      const result = await patchV1RewardsRewardId(id, {
+        status: newStatus,
+      });
+
+      if (result.status === 200) {
+        mutate();
+        toast.success(
+          newStatus === "active"
+            ? "Recompensa activada"
+            : "Recompensa desactivada",
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling availability:", error);
+      toast.error("Error al cambiar el estado");
+    }
+  };
+
+  if (isLoadingRewards) {
+    return (
+      <div className="min-h-screen bg-background-light flex items-center justify-center">
+        <div className="text-text-main">Cargando recompensas...</div>
+      </div>
+    );
+  }
+
+  if (rewardsError) {
+    return (
+      <div className="min-h-screen bg-background-light flex items-center justify-center">
+        <div className="text-red-500">Error al cargar recompensas</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background-light">
@@ -279,308 +318,365 @@ function RouteComponent() {
             description="Completa los detalles de la recompensa"
             maxWidth="xl"
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                form.handleSubmit();
+              }}
+              className="space-y-6"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label
-                    htmlFor="title"
-                    className="block text-sm font-medium text-text-main mb-2"
-                  >
-                    Título
-                  </label>
-                  <input
-                    id="title"
-                    type="text"
-                    required
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
-                    placeholder="Ej: Café Gratis"
-                  />
-                </div>
+                <form.Field name="title">
+                  {(field) => (
+                    <div>
+                      <label
+                        htmlFor={field.name}
+                        className="block text-sm font-medium text-text-main mb-2"
+                      >
+                        Título
+                      </label>
+                      <input
+                        id={field.name}
+                        type="text"
+                        required
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
+                        placeholder="Ej: Café Gratis"
+                      />
+                    </div>
+                  )}
+                </form.Field>
 
-                <div>
-                  <label
-                    htmlFor="points"
-                    className="block text-sm font-medium text-text-main mb-2"
-                  >
-                    Puntos requeridos (opcional)
-                  </label>
-                  <input
-                    id="points"
-                    type="number"
-                    value={formData.points}
-                    onChange={(e) =>
-                      setFormData({ ...formData, points: e.target.value })
-                    }
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
-                    placeholder="Ej: 50"
-                  />
-                </div>
+                <form.Field name="points">
+                  {(field) => (
+                    <div>
+                      <label
+                        htmlFor={field.name}
+                        className="block text-sm font-medium text-text-main mb-2"
+                      >
+                        Puntos requeridos (opcional)
+                      </label>
+                      <Tooltip
+                        content="Puntos necesarios para canjear esta recompensa. Deja vacío para recompensas gratuitas."
+                        placement="right"
+                      >
+                        <input
+                          id={field.name}
+                          type="number"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
+                          placeholder="Ej: 50"
+                          min={0}
+                        />
+                      </Tooltip>
+                    </div>
+                  )}
+                </form.Field>
               </div>
 
-              <div>
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-text-main mb-2"
-                >
-                  Descripción
-                </label>
-                <textarea
-                  id="description"
-                  required
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  rows={3}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all resize-none"
-                  placeholder="Describe la recompensa..."
-                />
-              </div>
+              <form.Field name="description">
+                {(field) => (
+                  <div>
+                    <label
+                      htmlFor={field.name}
+                      className="block text-sm font-medium text-text-main mb-2"
+                    >
+                      Descripción
+                    </label>
+                    <textarea
+                      id={field.name}
+                      required
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      rows={3}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all resize-none"
+                      placeholder="Describe la recompensa..."
+                    />
+                  </div>
+                )}
+              </form.Field>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <span className="block text-sm font-medium text-text-main mb-2">
-                    Icono
-                  </span>
-                  <div className="flex gap-2 flex-wrap">
-                    {AVAILABLE_ICONS.map((icon) => {
-                      const IconComponent = icon.icon;
-                      return (
+                <form.Field name="icon">
+                  {(field) => (
+                    <div>
+                      <span className="block text-sm font-medium text-text-main mb-2">
+                        Icono
+                      </span>
+                      <div className="flex gap-2 flex-wrap">
+                        {AVAILABLE_ICONS.map((icon) => {
+                          const IconComponent = icon.icon;
+                          return (
+                            <button
+                              key={icon.value}
+                              type="button"
+                              onClick={() => field.handleChange(icon.value)}
+                              className={cn(
+                                "p-3 rounded-xl border-2 transition-all",
+                                field.state.value === icon.value
+                                  ? "border-green-500 bg-secondary/10"
+                                  : "border-gray-200 hover:border-gray-300",
+                              )}
+                            >
+                              <IconComponent className="w-6 h-6 text-text-main" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
+
+                <form.Field name="isAvailable">
+                  {(field) => (
+                    <div>
+                      <span className="block text-sm font-medium text-text-main mb-2">
+                        Estado
+                      </span>
+                      <div className="flex flex-col items-center gap-1">
                         <button
-                          key={icon.value}
                           type="button"
-                          onClick={() =>
-                            setFormData({ ...formData, icon: icon.value })
-                          }
+                          onClick={() => field.handleChange(true)}
                           className={cn(
-                            "p-3 rounded-xl border-2 transition-all",
-                            formData.icon === icon.value
-                              ? "border-secondary bg-secondary/10"
-                              : "border-gray-200 hover:border-gray-300",
+                            "w-full flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all",
+                            field.state.value
+                              ? "border-green-500 bg-green-50 text-green-700"
+                              : "border-gray-200 text-gray-400",
                           )}
                         >
-                          <IconComponent className="w-6 h-6 text-text-main" />
+                          <Check className="w-5 h-5" />
+                          <span className="text-sm font-medium">
+                            Disponible
+                          </span>
                         </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <span className="block text-sm font-medium text-text-main mb-2">
-                    Estado
-                  </span>
-                  <div className="flex items-center gap-6">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, isAvailable: true })
-                      }
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all",
-                        formData.isAvailable
-                          ? "border-green-500 bg-green-50 text-green-700"
-                          : "border-gray-200 text-gray-400",
-                      )}
-                    >
-                      <Check className="w-5 h-5" />
-                      <span className="text-sm font-medium">Disponible</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, isAvailable: false })
-                      }
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all",
-                        !formData.isAvailable
-                          ? "border-gray-400 bg-gray-100 text-gray-600"
-                          : "border-gray-200 text-gray-400",
-                      )}
-                    >
-                      <X className="w-5 h-5" />
-                      <span className="text-sm font-medium">No disponible</span>
-                    </button>
-                  </div>
-                </div>
+                        <button
+                          type="button"
+                          onClick={() => field.handleChange(false)}
+                          className={cn(
+                            "w-full flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all",
+                            !field.state.value
+                              ? "border-gray-400 bg-gray-100 text-gray-600"
+                              : "border-gray-200 text-gray-400",
+                          )}
+                        >
+                          <X className="w-5 h-5" />
+                          <span className="text-sm font-medium">
+                            No disponible
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
               </div>
 
               <div className="border-t border-gray-200 pt-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="block text-sm font-medium text-text-main mb-2">
-                      Tipo de descuento
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setFormData({
-                            ...formData,
-                            discountType: "percentage",
-                          })
-                        }
-                        className={cn(
-                          "flex-1 py-2 rounded-lg border-2 text-sm font-medium transition-all",
-                          formData.discountType === "percentage"
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-gray-200 text-gray-500 hover:border-gray-300",
-                        )}
-                      >
-                        %
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setFormData({ ...formData, discountType: "fixed" })
-                        }
-                        className={cn(
-                          "flex-1 py-2 rounded-lg border-2 text-sm font-medium transition-all",
-                          formData.discountType === "fixed"
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-gray-200 text-gray-500 hover:border-gray-300",
-                        )}
-                      >
-                        $
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="discountValue"
-                      className="block text-sm font-medium text-text-main mb-2"
-                    >
-                      Valor
-                    </label>
-                    <input
-                      id="discountValue"
-                      type="number"
-                      required
-                      min={1}
-                      max={
-                        formData.discountType === "percentage" ? 100 : undefined
-                      }
-                      value={formData.discountValue}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          discountValue: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
-                      placeholder={
-                        formData.discountType === "percentage" ? "20" : "50"
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mt-6">
-                  <span className="text-sm font-medium text-text-main">
-                    Aplicar a producto específico
-                  </span>
-                  <Switch
-                    checked={formData.hasProductRestriction}
-                    onChange={(checked) =>
-                      setFormData({
-                        ...formData,
-                        hasProductRestriction: checked,
-                        applicableProducts: checked
-                          ? formData.applicableProducts
-                          : "",
-                      })
-                    }
-                    className={cn(
-                      formData.hasProductRestriction
-                        ? "bg-primary"
-                        : "bg-gray-200",
-                      "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        formData.hasProductRestriction
-                          ? "translate-x-6"
-                          : "translate-x-1",
-                        "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
-                      )}
-                    />
-                  </Switch>
-                </div>
-
-                {formData.hasProductRestriction && (
-                  <div className="mt-4">
-                    <p className="block text-sm font-medium text-text-main mb-2">
-                      Producto
-                    </p>
-                    <Combobox
-                      value={formData.applicableProducts}
-                      onChange={(value) =>
-                        setFormData({
-                          ...formData,
-                          applicableProducts: value || "",
-                        })
-                      }
-                    >
-                      <div className="relative">
-                        <ComboboxInput
-                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
-                          displayValue={() =>
-                            MOCK_PRODUCTS.find(
-                              (p) => p.id === formData.applicableProducts,
-                            )?.name || ""
-                          }
-                          placeholder="Buscar producto..."
-                        />
-                        <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-4">
-                          <ChevronDown className="w-5 h-5 text-gray-400" />
-                        </ComboboxButton>
-                      </div>
-                      <ComboboxOptions
-                        className={cn(
-                          "mt-1 bg-white border border-gray-200 rounded-xl shadow-lg focus:outline-none empty:invisible",
-                          "w-(--input-width) [--anchor-gap:--spacing(1)] empty:invisible",
-                          "transition duration-100 ease-in data-leave:data-closed:opacity-0",
-                        )}
-                        transition
-                        anchor="bottom"
-                      >
-                        {MOCK_PRODUCTS.map((product) => (
-                          <ComboboxOption
-                            key={product.id}
-                            value={product.id}
-                            className={({ focus, selected }) =>
-                              cn(
-                                "px-4 py-3 cursor-pointer select-none",
-                                focus ? "bg-gray-100" : "",
-                                selected
-                                  ? "bg-primary/10 text-primary"
-                                  : "text-text-main",
-                              )
-                            }
+                  <form.Field name="discountType">
+                    {(field) => (
+                      <div>
+                        <p className="block text-sm font-medium text-text-main mb-2">
+                          Tipo de descuento
+                        </p>
+                        <div className="flex gap-2">
+                          <Tooltip
+                            content="Aplica un porcentaje de descuento sobre el precio total"
+                            placement="top"
                           >
-                            {({ selected }) => (
-                              <div className="flex justify-between items-center">
-                                <span
-                                  className={cn(selected ? "font-medium" : "")}
-                                >
-                                  {product.name}
-                                </span>
-                                {selected && (
-                                  <Check className="w-4 h-4 text-primary" />
-                                )}
+                            <button
+                              type="button"
+                              onClick={() => field.handleChange("percentage")}
+                              className={cn(
+                                "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
+                                field.state.value === "percentage"
+                                  ? "border-primary bg-primary/10 text-primary"
+                                  : "border-gray-200 text-gray-500 hover:border-gray-300",
+                              )}
+                            >
+                              %
+                            </button>
+                          </Tooltip>
+                          <Tooltip
+                            content="Aplica un monto fijo a descontar del precio total"
+                            placement="top"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => field.handleChange("fixed")}
+                              className={cn(
+                                "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
+                                field.state.value === "fixed"
+                                  ? "border-primary bg-primary/10 text-primary"
+                                  : "border-gray-200 text-gray-500 hover:border-gray-300",
+                              )}
+                            >
+                              $
+                            </button>
+                          </Tooltip>
+                        </div>
+                      </div>
+                    )}
+                  </form.Field>
+
+                  <form.Subscribe
+                    selector={(state) => state.values.discountType}
+                  >
+                    {(discountType) => (
+                      <form.Field name="discountValue">
+                        {(field) => (
+                          <div>
+                            <label
+                              htmlFor={field.name}
+                              className="block text-sm font-medium text-text-main mb-2"
+                            >
+                              Valor
+                            </label>
+                            <input
+                              id={field.name}
+                              type="number"
+                              required
+                              min={1}
+                              max={
+                                discountType === "percentage" ? 100 : undefined
+                              }
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) =>
+                                field.handleChange(e.target.value)
+                              }
+                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
+                              placeholder={
+                                discountType === "percentage" ? "20" : "50"
+                              }
+                            />
+                          </div>
+                        )}
+                      </form.Field>
+                    )}
+                  </form.Subscribe>
+                </div>
+
+                <form.Field name="hasProductRestriction">
+                  {(field) => (
+                    <div className="flex items-center justify-between mt-6">
+                      <Tooltip
+                        content="Limita el descuento solo al producto seleccionado"
+                        placement="top"
+                      >
+                        <span className="text-sm font-medium text-text-main cursor-help">
+                          Aplicar a producto específico
+                        </span>
+                      </Tooltip>
+                      <Switch
+                        checked={field.state.value}
+                        onChange={(checked) => {
+                          field.handleChange(checked);
+                          if (!checked) {
+                            form.setFieldValue("applicableProducts", "");
+                          }
+                        }}
+                        className={cn(
+                          field.state.value ? "bg-primary" : "bg-gray-200",
+                          "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            field.state.value
+                              ? "translate-x-6"
+                              : "translate-x-1",
+                            "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                          )}
+                        />
+                      </Switch>
+                    </div>
+                  )}
+                </form.Field>
+
+                <form.Subscribe
+                  selector={(state) => state.values.hasProductRestriction}
+                >
+                  {(hasProductRestriction) =>
+                    hasProductRestriction ? (
+                      <form.Field name="applicableProducts">
+                        {(field) => (
+                          <div className="mt-4">
+                            <p className="block text-sm font-medium text-text-main mb-2">
+                              Producto
+                            </p>
+                            <Combobox
+                              value={field.state.value}
+                              onChange={(value) =>
+                                field.handleChange(value || "")
+                              }
+                            >
+                              <div className="relative">
+                                <ComboboxInput
+                                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
+                                  displayValue={() =>
+                                    AVAILABLE_PRODUCTS.find(
+                                      (p) => p.id === field.state.value,
+                                    )?.name || ""
+                                  }
+                                  placeholder="Buscar producto..."
+                                />
+                                <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-4">
+                                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                                </ComboboxButton>
                               </div>
-                            )}
-                          </ComboboxOption>
-                        ))}
-                      </ComboboxOptions>
-                    </Combobox>
-                  </div>
-                )}
+                              <ComboboxOptions
+                                className={cn(
+                                  "mt-1 bg-white border border-gray-200 rounded-xl shadow-lg focus:outline-none empty:invisible",
+                                  "w-(--input-width) [--anchor-gap:--spacing(1)] empty:invisible",
+                                  "transition duration-100 ease-in data-leave:data-closed:opacity-0",
+                                )}
+                                transition
+                                anchor="bottom"
+                              >
+                                {AVAILABLE_PRODUCTS.map((product) => (
+                                  <ComboboxOption
+                                    key={product.id}
+                                    value={product.id}
+                                    className={({ focus, selected }) =>
+                                      cn(
+                                        "px-4 py-3 cursor-pointer select-none",
+                                        focus ? "bg-gray-100" : "",
+                                        selected
+                                          ? "bg-primary/10 text-primary"
+                                          : "text-text-main",
+                                      )
+                                    }
+                                  >
+                                    {({ selected }) => (
+                                      <div className="flex justify-between items-center">
+                                        <span
+                                          className={cn(
+                                            selected ? "font-medium" : "",
+                                          )}
+                                        >
+                                          {product.name}
+                                        </span>
+                                        {selected && (
+                                          <Check className="w-4 h-4 text-primary" />
+                                        )}
+                                      </div>
+                                    )}
+                                  </ComboboxOption>
+                                ))}
+                              </ComboboxOptions>
+                            </Combobox>
+                          </div>
+                        )}
+                      </form.Field>
+                    ) : null
+                  }
+                </form.Subscribe>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
@@ -591,12 +687,23 @@ function RouteComponent() {
                 >
                   Cancelar
                 </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors text-sm font-medium"
-                >
-                  {editingReward ? "Guardar Cambios" : "Crear Recompensa"}
-                </button>
+                <form.Subscribe selector={(state) => state.canSubmit}>
+                  {(canSubmit) => (
+                    <button
+                      type="submit"
+                      disabled={!canSubmit || isCreatingReward || isUpdating}
+                      className="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50"
+                    >
+                      {isCreatingReward || isUpdating
+                        ? editingReward
+                          ? "Guardando..."
+                          : "Creando..."
+                        : editingReward
+                          ? "Guardar Cambios"
+                          : "Crear Recompensa"}
+                    </button>
+                  )}
+                </form.Subscribe>
               </div>
             </form>
           </Modal>
@@ -658,7 +765,7 @@ function RouteComponent() {
                       <span className="text-xs text-gray-400">
                         {reward.applicableProducts &&
                         reward.applicableProducts.length > 0
-                          ? MOCK_PRODUCTS.find(
+                          ? AVAILABLE_PRODUCTS.find(
                               (p) => p.id === reward.applicableProducts?.[0],
                             )?.name
                           : "Todos los productos"}
@@ -713,7 +820,7 @@ function RouteComponent() {
               <button
                 type="button"
                 onClick={() => setIsFormOpen(true)}
-                className="mt-4 text-secondary hover:underline"
+                className="mt-4 text-text-main/50 hover:underline"
               >
                 Crear primera recompensa
               </button>
