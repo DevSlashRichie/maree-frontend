@@ -1,13 +1,33 @@
+import { Button } from "@/components/button";
+import { Input } from "@/components/input";
+import { Heading, Paragraph } from "@/components/typography";
+import { postAuthLogin } from "@/lib/api";
 import { createFileRoute } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Heading, Paragraph } from "@/components/ui/typography";
+import { useState } from "react";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
 function LoginPage() {
+  const [phone, setPhone] = useState("");
+
+  const handleLogin = () => {
+    postAuthLogin(
+      {
+        identity: phone,
+        method: {
+          type: "test",
+        },
+      },
+      {
+        credentials: "include",
+      },
+    ).then((e) => {
+      console.log(e);
+    });
+  };
+
   return (
     <div className="min-h-screen texture-bg flex justify-center px-4 py-12 mt-8">
       <div className="w-full max-w-md">
@@ -29,9 +49,19 @@ function LoginPage() {
               placeholder="+52 442 753 62 11"
               name="phone"
               required
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+              }}
             />
 
-            <Button type="submit" className="w-full mt-2">
+            <Button
+              type="submit"
+              className="w-full mt-2"
+              onClick={() => {
+                handleLogin();
+              }}
+            >
               Continuar
             </Button>
           </form>
