@@ -1,15 +1,9 @@
+import type { GetV1Orders200Item } from "@/lib/schemas";
 import { OrderCard } from "./order-card";
-
-interface Order {
-  orderId: string;
-  userName: string;
-  orderNumber: number;
-  price: number;
-}
 
 interface OrderColumnProps {
   title: string;
-  orders: Order[];
+  orders: GetV1Orders200Item[];
   orderOnClickHandler: (orderId: string) => void;
 }
 
@@ -27,13 +21,10 @@ export function OrderColumn({
       <div className="flex flex-col overflow-y-auto scrollbar-hide flex-1">
         {orders.map((order) => (
           <OrderCard
-            key={order.orderId}
-            orderId={order.orderId}
-            userName={order.userName}
-            orderNumber={order.orderNumber}
-            price={order.price}
+            key={order.order.id}
+            order={order}
             orderOnClickHandler={() => {
-              orderOnClickHandler(order.orderId);
+              orderOnClickHandler(order.order.id);
             }}
           />
         ))}
