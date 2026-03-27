@@ -29,3 +29,6 @@ src/lib/schemas/
 src/lib/zods.ts
 
 test-results/
+
+playwright-report/
+

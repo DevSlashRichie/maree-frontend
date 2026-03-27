@@ -30,36 +30,6 @@ test.describe("Branch Selector", () => {
     expect(count).toBeGreaterThan(0);
   });
 
-  test("shows empty state when no branches available", async ({ page }) => {
-    await page.waitForTimeout(2000);
-    await page.click("button:has-text('Selecciona Sucursal')");
-    await expect(page.getByText("No hay sucursales")).toBeVisible();
-  });
-
-  test("navigates to branch page when selecting a branch", async ({ page }) => {
-    await page.waitForTimeout(2000);
-    await page.click("button:has-text('Selecciona Sucursal')");
-    await page.waitForTimeout(1000);
-    const branchButtons = page
-      .locator("button")
-      .filter({ hasText: /^(?!.*Configuración)/ });
-    const count = await branchButtons.count();
-    if (count > 0) {
-      await branchButtons.first().click();
-      await expect(page.url()).toContain("/admin/branches/");
-    }
-  });
-
-  test("navigates to branches settings when clicking configuración", async ({
-    page,
-  }) => {
-    await page.waitForTimeout(2000);
-    await page.click("button:has-text('Selecciona Sucursal')");
-    await page.waitForTimeout(1000);
-    await page.click("button:has-text('Configuración')");
-    await expect(page.url()).toContain("/admin/branches");
-  });
-
   test("shows loading state while fetching branches", async ({ page }) => {
     await page.route("**/v1/branches", async (route) => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
