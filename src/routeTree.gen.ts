@@ -21,7 +21,7 @@ import { Route as AdminBranchesRouteImport } from './routes/admin/branches'
 import { Route as ClientMenuRouteImport } from './routes/_client/menu'
 import { Route as ClientLoyaltyRouteImport } from './routes/_client/loyalty'
 import { Route as ClientCartRouteImport } from './routes/_client/cart'
-import { Route as AdminBranchesBranchIdRouteImport } from './routes/admin/branches/$branchId'
+import { Route as AdminBranchesBranchIdRouteImport } from './routes./routes/admin/branches/$branchId
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
