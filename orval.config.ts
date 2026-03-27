@@ -38,6 +38,11 @@ export default defineConfig({
         getBaseUrlFromSpecification: true,
         index: choosenIndex,
       },
+      override: {
+        requestOptions: {
+          credentials: "include",
+        },
+      },
     },
   },
   mareeZod: {
