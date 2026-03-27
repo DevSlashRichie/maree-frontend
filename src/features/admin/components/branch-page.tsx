@@ -1,8 +1,8 @@
+// 1. Importa Link de tanstack router
+import { Link } from "@tanstack/react-router";
 import { MapPin } from "lucide-react";
 import { useGetV1Branches } from "@/lib/api";
 import { BranchCard } from "../components/branch-card";
-// 1. Importa Link de tanstack router
-import { Link } from "@tanstack/react-router";
 
 export function BranchesPage() {
   const { data, isLoading } = useGetV1Branches();

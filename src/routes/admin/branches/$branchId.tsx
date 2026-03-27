@@ -7,9 +7,5 @@ export const Route = createFileRoute("/admin/branches/$branchId")({
 
 function RouteComponent() {
   const { branchId } = Route.useParams();
-  return (
-    <div className="px-4 py-8 max-w-sm mx-auto">
-      dajkshfkjs
-    </div>
-  );
+  return <div className="px-4 py-8 max-w-sm mx-auto">dajkshfkjs</div>;
 }
