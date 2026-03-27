@@ -3,8 +3,8 @@ import { Apple, QrCode, Wallet } from "lucide-react";
 import { useState } from "react";
 // @ts-expect-error - bad imports for some reason.
 import { QRCode } from "react-qr-code";
-import { Modal } from "./modal";
 import { useGetV1Loyalty } from "@/lib/api";
+import { Modal } from "./modal";
 
 interface LoyaltyCardProps {
   user: {
@@ -19,13 +19,10 @@ interface LoyaltyCardProps {
   isLoading?: boolean;
 }
 
-
-
-
 export function LoyaltyCard() {
   const [isQRExpanded, setIsQRExpanded] = useState(false);
 
-  const {data, isLoading} = useGetV1Loyalty()
+  const { data, isLoading } = useGetV1Loyalty();
   const TOTAL_STAMPS = 6;
 
   if (isLoading) {
@@ -34,15 +31,15 @@ export function LoyaltyCard() {
     );
   }
 
-    if (!data || data.status !== 200) {
+  if (!data || data.status !== 200) {
     return <div>{data?.data.message}</div>;
-   }
+  }
 
-     const current = data.data.currentBalance ?? 0;
+  const current = data.data.currentBalance ?? 0;
 
   const stamps_ = Array.from({ length: TOTAL_STAMPS }, (_, i) => ({
-  id: i,
-  filled: i < current,
+    id: i,
+    filled: i < current,
   }));
 
   return (
@@ -146,7 +143,9 @@ export function LoyaltyCard() {
           <div className="bg-white p-4 rounded-xl border border-gray-200 dark:border-gray-600 mb-4">
             <QRCode size={180} value={data.data.phone} />
           </div>
-          <p className="font-display text-lg text-primary">{data.data.firstName}</p>
+          <p className="font-display text-lg text-primary">
+            {data.data.firstName}
+          </p>
           <p className="text-sm text-gray-500 font-mono">
             Teléfono: {data.data.phone}
           </p>

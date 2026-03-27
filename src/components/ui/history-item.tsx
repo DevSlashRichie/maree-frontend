@@ -4,7 +4,7 @@ interface HistoryItemProps {
   title: string;
   location: string;
   date: string;
-  status: "redeemed" | "gift";
+  status: string;
 }
 
 export function HistoryItem({
@@ -13,7 +13,9 @@ export function HistoryItem({
   date,
   status,
 }: HistoryItemProps) {
-  const isRedeemed = status === "redeemed";
+  const isRedeemed =
+    status.toLowerCase() === "completado" ||
+    status.toLowerCase() === "canjeado";
 
   return (
     <li className="p-4 hover:bg-background-light dark:hover:bg-background-dark/50 transition-colors flex items-center justify-between">
@@ -40,14 +42,15 @@ export function HistoryItem({
       </div>
       <div className="text-right">
         <p className="text-xs font-mono text-gray-600 dark:text-gray-400">
-          {date}
+          {/* Opcional: formatear la fecha aquí si viene como ISOString */}
+          {new Date(date).toLocaleDateString()}
         </p>
         <p
           className={`text-[10px] uppercase tracking-wide font-bold ${
             isRedeemed ? "text-green-600 dark:text-green-400" : "text-secondary"
           }`}
         >
-          {isRedeemed ? "Canjeado" : "Regalo"}
+          {status}
         </p>
       </div>
     </li>

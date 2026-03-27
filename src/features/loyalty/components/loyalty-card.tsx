@@ -2,18 +2,14 @@ import { Apple, Wallet } from "lucide-react";
 import { useState } from "react";
 // @ts-expect-error - bad imports for some reason.
 import { QRCode } from "react-qr-code";
-import { Modal } from "./modal";
 import { useGetV1Loyalty } from "@/lib/api";
-
-
-
-
+import { Modal } from "./modal";
 
 export function LoyaltyCard() {
   const [isQRExpanded, setIsQRExpanded] = useState(false);
-  
-  const {data, isLoading} = useGetV1Loyalty();
-  
+
+  const { data, isLoading } = useGetV1Loyalty();
+
   if (isLoading) {
     return <div>Cargando</div>;
   }

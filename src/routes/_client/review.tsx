@@ -7,7 +7,13 @@ export const Route = createFileRoute("/_client/review")({
 });
 
 function RouteComponent() {
-  const handleSubmit = async ({ rating, text }: { rating: number; text: string }) => {
+  const handleSubmit = async ({
+    rating,
+    text,
+  }: {
+    rating: number;
+    text: string;
+  }) => {
     console.log({ rating, text });
   };
 

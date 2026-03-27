@@ -52,14 +52,21 @@ export default function ReviewForm({ onSubmit }) {
       }}
     >
       {/* Rating */}
-      <div style={{ marginBottom: "14px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <label
-      style={{
-      fontSize: "12px",
-      color: "#5e6c75",
-      letterSpacing: "0.06em",
-      marginBottom: "6px",
-    }}
+      <div
+        style={{
+          marginBottom: "14px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <label
+          style={{
+            fontSize: "12px",
+            color: "#5e6c75",
+            letterSpacing: "0.06em",
+            marginBottom: "6px",
+          }}
         >
           Tu calificación
         </label>
