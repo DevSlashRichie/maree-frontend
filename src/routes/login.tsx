@@ -1,10 +1,10 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
+import z from "zod";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Heading, Paragraph } from "@/components/typography";
 import { postAuthLogin } from "@/lib/api";
-import z from "zod";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
