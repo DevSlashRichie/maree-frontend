@@ -1,48 +1,50 @@
 import { Button } from "@/components/button.tsx";
 import { ItemDetails } from "@/features/orders/components/item-details.tsx";
 
-interface Product {
-  id: string;
-  name: string;
-}
-
-interface ItemDetailsProp {
-  id: string;
-  name: string;
-  quantity: number;
-  ingredients: Product[];
-}
-
 interface OrderDetailsProps {
-  id?: string;
-  userName: string;
-  orderNumber: number;
-  price: number;
-  items: ItemDetailsProp[];
+  id: string;
 }
 
-export function OrderDetails({
-  userName,
-  orderNumber,
-  price,
-  items,
-}: OrderDetailsProps) {
+export function OrderDetails({ id }: OrderDetailsProps) {
+  // make a fetch to get the order details with the id
+  const mockItems = [
+    {
+      id: "1",
+      name: "Crepe",
+      quantity: 2,
+      ingredients: [
+        { id: "1", name: "Queso" },
+        { id: "2", name: "Chocolate" },
+        { id: "3", name: "Sal" },
+      ],
+    },
+    {
+      id: "2",
+      name: "Tarta de Chocolate",
+      quantity: 1,
+      ingredients: [
+        { id: "1", name: "Queso" },
+        { id: "2", name: "Chocolate" },
+        { id: "3", name: "Sal" },
+      ],
+    },
+  ];
   return (
     <div className="bg-card-light rounded-2xl border border-pink-soft/40 px-5 py-6 flex flex-col gap-5">
       <div className="flex items-baseline gap-3">
-        <p className="font-display text-lg text-text-main">{userName}</p>
+        <p className="font-display text-lg text-text-main">{`something`}</p>
         <p className="font-mono text-[11px] uppercase tracking-widest text-text-main/40">
-          Orden #{orderNumber}
+          Orden #{`something`}
         </p>
         <p className="font-display text-lg text-text-main ml-auto">
-          ${price.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+          ${`something`}
         </p>
       </div>
 
       <hr className="border-pink-soft/20" />
 
       <div className="flex flex-wrap gap-3 items-stretch">
-        {items.map((item) => (
+        {mockItems.map((item) => (
           <ItemDetails
             key={item.id}
             name={item.name}
