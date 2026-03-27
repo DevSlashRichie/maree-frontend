@@ -3,14 +3,24 @@ import { useState } from "react";
 // @ts-expect-error - bad imports for some reason.
 import { QRCode } from "react-qr-code";
 import { Modal } from "./modal";
+import { useGetV1Loyalty } from "@/lib/api";
 
-interface LoyaltyCardProps {
-  memberName: string;
-  memberId: string;
-}
 
-export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
+
+
+
+export function LoyaltyCard() {
   const [isQRExpanded, setIsQRExpanded] = useState(false);
+  
+  const {data, isLoading} = useGetV1Loyalty();
+  
+  if (isLoading) {
+    return <div>Cargando</div>;
+  }
+
+  if (!data || data.status !== 200) {
+    return <div>{data?.data.message}</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -37,10 +47,10 @@ export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
                 Titular
               </p>
               <p className="text-white font-display text-lg tracking-wide">
-                {memberName}
+                {`${data.data.firstName} ${data.data.lastName}`}
               </p>
               <p className="text-gray-500 text-xs font-mono">
-                Teléfono: {memberId}
+                Teléfono: {data.data.phone}
               </p>
             </div>
             <button
@@ -48,7 +58,7 @@ export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
               onClick={() => setIsQRExpanded(true)}
               className="bg-white p-1 rounded cursor-pointer hover:scale-105 transition-transform"
             >
-              <QRCode size={60} value={memberId} />
+              <QRCode size={60} value={data.data.phone} />
             </button>
           </div>
         </div>
@@ -84,13 +94,13 @@ export function LoyaltyCard({ memberName, memberId }: LoyaltyCardProps) {
       >
         <div className="flex flex-col items-center">
           <div className="bg-white p-4 rounded-xl border border-gray-200 dark:border-gray-600 mb-4">
-            <QRCode size={220} value={memberId} />
+            <QRCode size={220} value={data.data.phone} />
           </div>
           <p className="font-display text-lg text-charcoal dark:text-white">
-            {memberName}
+            {`${data.data.firstName} ${data.data.lastName}`}
           </p>
           <p className="text-sm text-gray-500 font-mono">
-            Teléfono: {memberId}
+            Teléfono: {data.data.phone}
           </p>
         </div>
       </Modal>

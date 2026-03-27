@@ -4,6 +4,7 @@ import { useState } from "react";
 // @ts-expect-error - bad imports for some reason.
 import { QRCode } from "react-qr-code";
 import { Modal } from "./modal";
+import { useGetV1Loyalty } from "@/lib/api";
 
 interface LoyaltyCardProps {
   user: {
@@ -18,21 +19,31 @@ interface LoyaltyCardProps {
   isLoading?: boolean;
 }
 
-export function LoyaltyCard({
-  user,
-  stamps,
-  rewardsAvailable,
-  isLoading = false,
-}: LoyaltyCardProps) {
+
+
+
+export function LoyaltyCard() {
   const [isQRExpanded, setIsQRExpanded] = useState(false);
-  const stamps_ = Array.from({ length: stamps.total }, (_, i) => ({ id: i }));
-  const isComplete = stamps.collected >= stamps.total;
+
+  const {data, isLoading} = useGetV1Loyalty()
+  const TOTAL_STAMPS = 6;
 
   if (isLoading) {
     return (
       <div className="w-full aspect-[1.58/1] rounded-2xl overflow-hidden shadow-2xl bg-primary animate-pulse" />
     );
   }
+
+    if (!data || data.status !== 200) {
+    return <div>{data?.data.message}</div>;
+   }
+
+     const current = data.data.currentBalance ?? 0;
+
+  const stamps_ = Array.from({ length: TOTAL_STAMPS }, (_, i) => ({
+  id: i,
+  filled: i < current,
+  }));
 
   return (
     <div className="space-y-6">
@@ -47,11 +58,6 @@ export function LoyaltyCard({
                 MARÉE
               </h2>
             </div>
-            <span className="bg-white/10 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[10px] uppercase tracking-wider border border-white/20">
-              {isComplete
-                ? `Premio Disponible (${rewardsAvailable})`
-                : "Premium Member"}
-            </span>
           </div>
         </div>
 
@@ -66,8 +72,8 @@ export function LoyaltyCard({
                   className={cn(
                     "flex items-center justify-center border rounded-full w-[60px] h-[60px]",
                     {
-                      "text-white/20": index + 1 > stamps.collected,
-                      "text-white": index + 1 <= stamps.collected,
+                      "text-white/20": !stamp.filled,
+                      "text-white": stamp.filled,
                     },
                   )}
                 >
@@ -92,10 +98,10 @@ export function LoyaltyCard({
               Titular
             </p>
             <p className="text-white font-display text-lg tracking-wide">
-              {user.firstName}
+              {data.data.firstName}
             </p>
             <p className="text-white/50 text-xs font-mono">
-              Teléfono: {user.loyaltyId}
+              Teléfono: {data.data.phone}
             </p>
           </div>
           <button
@@ -138,11 +144,11 @@ export function LoyaltyCard({
       >
         <div className="flex flex-col items-center">
           <div className="bg-white p-4 rounded-xl border border-gray-200 dark:border-gray-600 mb-4">
-            <QRCode size={180} value={user.loyaltyId} />
+            <QRCode size={180} value={data.data.phone} />
           </div>
-          <p className="font-display text-lg text-primary">{user.firstName}</p>
+          <p className="font-display text-lg text-primary">{data.data.firstName}</p>
           <p className="text-sm text-gray-500 font-mono">
-            Teléfono: {user.loyaltyId}
+            Teléfono: {data.data.phone}
           </p>
         </div>
       </Modal>

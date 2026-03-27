@@ -15,6 +15,7 @@ import { HistoryItem } from "@/components/ui/history-item";
 import { LoyaltyCard } from "@/components/ui/loyalty-card";
 import { Modal } from "@/components/ui/modal";
 import { RewardCard } from "@/components/ui/reward-card";
+import { useGetV1Loyalty } from "@/lib/api";
 
 export const Route = createFileRoute("/_client/loyalty")({
   component: RouteComponent,
@@ -113,6 +114,8 @@ const HISTORY_DATA = [
   },
 ];
 
+
+
 function RouteComponent() {
   const [selectedReward, setSelectedReward] = useState<
     (typeof REWARDS_DATA)[0] | null
@@ -177,11 +180,7 @@ function RouteComponent() {
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div className="md:col-span-5 space-y-6">
-              <LoyaltyCard
-                user={{ firstName: "Ana López", loyaltyId: "4427536211" }}
-                stamps={{ total: 6, collected: 3 }}
-                rewardsAvailable={1}
-              />
+              <LoyaltyCard />
             </div>
 
             <div className="md:col-span-7 space-y-2 overflow-x-auto">

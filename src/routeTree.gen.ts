@@ -18,6 +18,7 @@ import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
 import { Route as AdminReportsRouteImport } from './routes/admin/reports'
 import { Route as AdminOrderRouteImport } from './routes/admin/order'
 import { Route as AdminBranchesRouteImport } from './routes/admin/branches'
+import { Route as ClientReviewRouteImport } from './routes/_client/review'
 import { Route as ClientMenuRouteImport } from './routes/_client/menu'
 import { Route as ClientLoyaltyRouteImport } from './routes/_client/loyalty'
 import { Route as ClientCartRouteImport } from './routes/_client/cart'
@@ -68,6 +69,11 @@ const AdminBranchesRoute = AdminBranchesRouteImport.update({
   path: '/branches',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ClientReviewRoute = ClientReviewRouteImport.update({
+  id: '/_client/review',
+  path: '/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClientMenuRoute = ClientMenuRouteImport.update({
   id: '/_client/menu',
   path: '/menu',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof ClientCartRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
+  '/review': typeof ClientReviewRoute
   '/admin/branches': typeof AdminBranchesRouteWithChildren
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/cart': typeof ClientCartRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
+  '/review': typeof ClientReviewRoute
   '/admin/branches': typeof AdminBranchesRouteWithChildren
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/_client/cart': typeof ClientCartRoute
   '/_client/loyalty': typeof ClientLoyaltyRoute
   '/_client/menu': typeof ClientMenuRoute
+  '/_client/review': typeof ClientReviewRoute
   '/admin/branches': typeof AdminBranchesRouteWithChildren
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/loyalty'
     | '/menu'
+    | '/review'
     | '/admin/branches'
     | '/admin/order'
     | '/admin/reports'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/loyalty'
     | '/menu'
+    | '/review'
     | '/admin/branches'
     | '/admin/order'
     | '/admin/reports'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/_client/cart'
     | '/_client/loyalty'
     | '/_client/menu'
+    | '/_client/review'
     | '/admin/branches'
     | '/admin/order'
     | '/admin/reports'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   ClientCartRoute: typeof ClientCartRoute
   ClientLoyaltyRoute: typeof ClientLoyaltyRoute
   ClientMenuRoute: typeof ClientMenuRoute
+  ClientReviewRoute: typeof ClientReviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -255,6 +268,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/branches'
       preLoaderRoute: typeof AdminBranchesRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/_client/review': {
+      id: '/_client/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ClientReviewRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_client/menu': {
       id: '/_client/menu'
@@ -327,6 +347,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClientCartRoute: ClientCartRoute,
   ClientLoyaltyRoute: ClientLoyaltyRoute,
   ClientMenuRoute: ClientMenuRoute,
+  ClientReviewRoute: ClientReviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
