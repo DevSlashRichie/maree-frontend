@@ -1,9 +1,9 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Heading, Paragraph } from "@/components/typography";
 import { postAuthLogin } from "@/lib/api";
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
