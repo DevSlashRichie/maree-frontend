@@ -5,7 +5,7 @@ interface OrderDetailsProps {
   id: string;
 }
 
-export function OrderDetails({ id }: OrderDetailsProps) {
+export function OrderDetails(_p: OrderDetailsProps) {
   // make a fetch to get the order details with the id
   const mockItems = [
     {
