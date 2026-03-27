@@ -1,13 +1,26 @@
-import { useState } from "react";
+import { DragDropProvider } from "@dnd-kit/react";
+import { useEffect, useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { OrderColumn } from "@/features/orders/components/order-card-group";
-import { useGetV1Orders } from "@/lib/api.ts";
+import {
+  patchV1OrdersIdPending,
+  patchV1OrdersIdReady,
+  useGetV1Orders,
+} from "@/lib/api.ts";
+import type { GetV1Orders200Item } from "@/lib/schemas";
 import { OrderDetails } from "./order-details";
 
 export function Orders() {
   const { data, isLoading } = useGetV1Orders();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeOrderInModalId, setActiveOrderIdInModal] = useState("s");
+  const [localData, setLocalData] = useState<GetV1Orders200Item[]>([]);
+
+  useEffect(() => {
+    if (data?.status === 200) {
+      setLocalData(data.data);
+    }
+  }, [data]);
 
   if (isLoading) {
     return <div>Cargando...</div>;
@@ -27,21 +40,61 @@ export function Orders() {
   //   },
   //   user: item.user,
   // }));
-  const cleanedData = data.data;
+  // const cleanedData = data.data;
 
   const orderOnClickHandler = (orderId: string) => {
     setActiveOrderIdInModal(orderId);
     setIsModalOpen(true);
   };
 
+  const handleDragEnd = async (event: any) => {
+    console.log("fired");
+    if (event.canceled) return;
+    console.log("not canceled");
+    const { source, target } = event.operation;
+    if (!target) return;
+    console.log("target", target);
+
+    setLocalData((prevData) =>
+      prevData.map((item) =>
+        item.order.id === source.id
+          ? { ...item, order: { ...item.order, status: target.id } }
+          : item,
+      ),
+    );
+    console.log("localdata set");
+
+    try {
+      if (target.id === "ready") {
+        await patchV1OrdersIdReady(source.id);
+        console.log("set ready");
+      } else if (target.id === "pending") {
+        await patchV1OrdersIdPending(source.id);
+        console.log("set pending");
+      } else if (target.id === "processing") {
+        await patchV1OrdersIdPending(source.id);
+        console.log("set processing");
+      }
+    } catch (error) {
+      console.error("error");
+      setLocalData((prevData) =>
+        prevData.map((item) =>
+          item.order.id === source.id
+            ? { ...item, order: { ...item.order, status: source.id } }
+            : item,
+        ),
+      );
+    }
+  };
   return (
-    <>
+    <DragDropProvider onDragEnd={handleDragEnd}>
       <div className="flex flex-col md:flex-row gap-6 p-6">
         <div className="flex-1">
           <OrderColumn
             title="Incoming"
-            orders={cleanedData.filter(
-              (order) => order.order.status === "pending",
+            displayId="pending"
+            orders={localData.filter(
+              (order: any) => order.order.status === "pending",
             )}
             orderOnClickHandler={orderOnClickHandler}
           />
@@ -50,8 +103,9 @@ export function Orders() {
         <div className="flex-1">
           <OrderColumn
             title="Preparation"
-            orders={cleanedData.filter(
-              (order) => order.order.status === "processing",
+            displayId="processing"
+            orders={localData.filter(
+              (order: any) => order.order.status === "processing",
             )}
             orderOnClickHandler={orderOnClickHandler}
           />
@@ -60,8 +114,9 @@ export function Orders() {
         <div className="flex-1">
           <OrderColumn
             title="Ready"
-            orders={cleanedData.filter(
-              (order) => order.order.status === "ready",
+            displayId="ready"
+            orders={localData.filter(
+              (order: any) => order.order.status === "ready",
             )}
             orderOnClickHandler={orderOnClickHandler}
           />
@@ -77,6 +132,6 @@ export function Orders() {
       >
         <OrderDetails id={activeOrderInModalId}></OrderDetails>
       </Modal>
-    </>
+    </DragDropProvider>
   );
 }
