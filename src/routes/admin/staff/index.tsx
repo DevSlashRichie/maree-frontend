@@ -16,20 +16,11 @@ import {
 import { useMemo, useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { useGetV1UsersStaff } from "@/lib/api";
+import type { Actor } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/staff/")({
   component: RouteComponent,
 });
-
-type Staff = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  email: string | null;
-  createdAt: string;
-  role: string | null;
-};
 
 const ROLES = [
   { value: "administrator", label: "Administrador" },
@@ -52,7 +43,7 @@ const roleLabels: Record<string, string> = {
   cashier: "Cajero",
 };
 
-const columnHelper = createColumnHelper<Staff>();
+const columnHelper = createColumnHelper<Actor>();
 
 const columns = [
   columnHelper.accessor("firstName", {
