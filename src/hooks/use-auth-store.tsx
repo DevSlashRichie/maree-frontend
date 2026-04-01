@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { postAuthLogout } from "@/lib/api";
 import type { Actor } from "@/lib/schemas";
 
 // only enable when required.
@@ -20,15 +21,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
   setAuth: (actor) => set({ actor, isAuthenticated: true }),
   clearAuth: () => set({ actor: null, isAuthenticated: false }),
   login: () => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL;
-    window.location.href = `${baseUrl}/auth/v1/login`;
+    window.location.href = "/login";
   },
   logout: async () => {
     // Clear local state
     set({ actor: null, isAuthenticated: false });
+    await postAuthLogout();
 
-    const baseUrl = import.meta.env.VITE_API_BASE_URL;
-    window.location.href = `${baseUrl}/auth/v1/logout`;
+    window.location.href = "/";
   },
   isInDev: IS_DEV,
 }));

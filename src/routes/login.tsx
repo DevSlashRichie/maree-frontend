@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
+import z from "zod";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Heading, Paragraph } from "@/components/typography";
@@ -7,10 +8,15 @@ import { postAuthLogin } from "@/lib/api";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
+  validateSearch: z.object({
+    next: z.string().optional(),
+  }),
 });
 
 function LoginPage() {
   const [phone, setPhone] = useState("");
+  const router = useRouter();
+  const { next: redirectTo } = Route.useSearch();
 
   const handleLogin = () => {
     postAuthLogin(
@@ -23,8 +29,11 @@ function LoginPage() {
       {
         credentials: "include",
       },
-    ).then((e) => {
-      console.log(e);
+    ).then(() => {
+      if (redirectTo)
+        router.navigate({
+          href: redirectTo,
+        });
     });
   };
 
