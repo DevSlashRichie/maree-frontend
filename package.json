@@ -27,6 +27,7 @@
     "@tanstack/react-form": "^1.28.5",
     "@tanstack/react-router": "^1.161.1",
     "@tanstack/react-router-devtools": "^1.161.1",
+    "@tanstack/react-table": "^8.21.3",
     "biome": "^0.3.3",
     "classnames": "^2.5.1",
     "dotenv": "^17.3.1",
