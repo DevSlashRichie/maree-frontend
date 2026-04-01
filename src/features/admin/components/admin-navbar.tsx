@@ -12,6 +12,8 @@ import { BranchSelector } from "../components/selector-branch";
 
 const adminNavItems = [
   { to: "/admin", label: "Dashboard", icon: "dashboard" },
+  { to: "/admin/users", label: "Usuarios", icon: "person" },
+  { to: "/admin/staff", label: "Staff", icon: "group" },
   { to: "/admin/rewards", label: "Recompensas", icon: "card_giftcard" },
   { to: "/admin/reports", label: "Reportes", icon: "bar_chart" },
 ];
