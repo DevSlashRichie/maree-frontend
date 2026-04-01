@@ -85,8 +85,9 @@ const columns = [
       const role = info.getValue();
       return (
         <span
-          className={`px-3 py-1 rounded-full text-xs font-medium ${roleColors[role || ""] || "bg-gray-100 text-gray-700"
-            }`}
+          className={`px-3 py-1 rounded-full text-xs font-medium ${
+            roleColors[role || ""] || "bg-gray-100 text-gray-700"
+          }`}
         >
           {roleLabels[role || ""] || role}
         </span>
@@ -430,9 +431,9 @@ function RouteComponent() {
                               {header.isPlaceholder
                                 ? null
                                 : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext(),
-                                )}
+                                    header.column.columnDef.header,
+                                    header.getContext(),
+                                  )}
                             </th>
                           ))}
                         </tr>

@@ -288,6 +288,7 @@ function RouteComponent() {
               <main className="flex-1">
                 <div className="bg-white rounded-2xl border border-gray-200 divide-y divide-gray-100">
                   {[...Array(4)].map((_, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: index required for skeleton
                     <div key={i} className="p-6">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-5 h-5 bg-gray-200 rounded animate-pulse" />
