@@ -1,5 +1,5 @@
+import fs from "node:fs";
 import { test as setup } from "@playwright/test";
-import fs from "fs";
 
 const adminAuthFile = ".auth/admin.json";
 
