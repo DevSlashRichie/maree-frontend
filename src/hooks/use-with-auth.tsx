@@ -2,11 +2,12 @@ import { Navigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { getV1UsersMe } from "@/lib/api";
-import { sessionEvents } from "@/lib/sessionEvents";
+import { sessionEvents } from "@/lib/session-event";
 import { useAuthStore } from "./use-auth-store";
 
 export function withAuth<P extends object>(
   Component: React.ComponentType<P>,
+  navigateTo: string = "/",
 ): React.FC<P> {
   return function WithAuthComponent(props: P) {
     const { isAuthenticated, setAuth, clearAuth, isInDev } = useAuthStore();
@@ -28,6 +29,7 @@ export function withAuth<P extends object>(
           if (user && status === 200) {
             setAuth(user);
             setWasAuthenticated(true);
+            console.info("Session validated");
           } else {
             // No valid session
             clearAuth();
@@ -68,7 +70,8 @@ export function withAuth<P extends object>(
 
     // If not authenticated and never was authenticated, redirect to home
     if (!isAuthenticated && !wasAuthenticated) {
-      return <Navigate to="/" replace />;
+      const next = `${navigateTo}?next=${encodeURIComponent(location.toString())}`;
+      return <Navigate to={next} replace />;
     }
 
     // If not authenticated but was authenticated before, show component
