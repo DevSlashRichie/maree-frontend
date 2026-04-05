@@ -18,23 +18,30 @@ function LoginPage() {
   const router = useRouter();
   const { next: redirectTo } = Route.useSearch();
 
-  const handleLogin = () => {
-    postAuthLogin(
-      {
-        identity: phone,
-        method: {
-          type: "test",
+  const handleLogin = async () => {
+    try {
+      await postAuthLogin(
+        {
+          identity: phone,
+          method: {
+            type: "test",
+          },
         },
-      },
-      {
-        credentials: "include",
-      },
-    ).then(() => {
-      if (redirectTo)
-        router.navigate({
-          href: redirectTo,
-        });
-    });
+        {
+          credentials: "include",
+        },
+      );
+
+      // Tell TanStack Router to re-evaluate route guards after successful login
+      await router.invalidate();
+
+      // Navigate to the next route or fallback to home
+      router.navigate({
+        to: redirectTo || "/",
+      });
+    } catch (error) {
+      console.error("Login failed", error);
+    }
   };
 
   return (
