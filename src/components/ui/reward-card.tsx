@@ -1,3 +1,4 @@
+import cn from "classnames";
 import type { LucideIcon } from "lucide-react";
 
 interface RewardCardProps {
@@ -19,17 +20,17 @@ export function RewardCard({
 }: RewardCardProps) {
   return (
     <div
-      className={`bg-card-light p-5 rounded-xl border border-accent/30 hover:shadow-md transition-shadow group cursor-pointer ${
-        !isAvailable ? "opacity-75" : ""
-      }`}
+      className={cn(
+        "bg-card-light p-5 rounded-xl border border-accent/30 hover:shadow-md transition-shadow group cursor-pointer",
+        { "opacity-75": !isAvailable },
+      )}
     >
       <div className="flex justify-between items-start mb-4">
         <div
-          className={`p-3 rounded-full ${
-            isAvailable
-              ? "bg-secondary/20 text-charcoal"
-              : "bg-primary/20 text-primary"
-          }`}
+          className={cn("p-3 rounded-full", {
+            "bg-secondary/20 text-charcoal": isAvailable,
+            "bg-primary/20 text-primary": !isAvailable,
+          })}
         >
           <Icon className="w-5 h-5" />
         </div>

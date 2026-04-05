@@ -82,20 +82,20 @@ export function Modal({
               leaveTo="opacity-0 scale-95"
             >
               <DialogPanel
-                className={`w-full ${maxWidthClasses[maxWidth]} transform overflow-hidden rounded-2xl bg-white dark:bg-charcoal p-8 text-left align-middle shadow-2xl transition-all`}
+                className={`w-full ${maxWidthClasses[maxWidth]} transform overflow-hidden rounded-2xl bg-white p-8 text-left align-middle shadow-2xl transition-all`}
               >
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     {title && (
                       <DialogTitle
                         as="h3"
-                        className="font-display text-xl text-charcoal dark:text-white"
+                        className="font-display text-xl text-charcoal"
                       >
                         {title}
                       </DialogTitle>
                     )}
                     {description && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-gray-500">
                         {description}
                       </p>
                     )}
@@ -103,7 +103,7 @@ export function Modal({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors p-1"
+                    className="rounded-full hover:bg-gray-100 transition-colors p-1"
                   >
                     <X className="w-5 h-5 text-gray-500" />
                   </button>
