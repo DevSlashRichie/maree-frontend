@@ -95,9 +95,7 @@ export function Modal({
                       </DialogTitle>
                     )}
                     {description && (
-                      <p className="text-xs text-gray-500">
-                        {description}
-                      </p>
+                      <p className="text-xs text-gray-500">{description}</p>
                     )}
                   </div>
                   <button
