@@ -27,29 +27,6 @@ export function AdminNavbar() {
     <div className="bg-white border-b border-secondary/20">
       <div className="grid grid-cols-[1fr_auto_1fr] items-center px-4 py-3">
         <div className="flex justify-start">
-          <BranchSelector />
-        </div>
-
-        <nav className="flex items-center gap-2">
-          {adminNavItems.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
-                isActive(item.to)
-                  ? "bg-secondary text-white"
-                  : "text-text-main/60 hover:bg-secondary/10 hover:text-text-main"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[18px]">
-                {item.icon}
-              </span>
-              <span className="text-sm font-medium">{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex justify-end">
           <Popover className="relative">
             {({ open }) => (
               <>
@@ -83,7 +60,7 @@ export function AdminNavbar() {
                   leaveFrom="opacity-100 translate-y-0 scale-100"
                   leaveTo="opacity-0 translate-y-1 scale-95"
                 >
-                  <PopoverPanel className="absolute right-0 mt-2 w-48 z-50 origin-top-right">
+                  <PopoverPanel className="absolute left-0 mt-2 w-48 z-50 origin-top-left">
                     <div className="rounded-2xl shadow-xl border border-secondary/20 bg-white overflow-hidden">
                       <button
                         type="button"
@@ -104,6 +81,29 @@ export function AdminNavbar() {
               </>
             )}
           </Popover>
+        </div>
+
+        <nav className="flex items-center gap-2">
+          {adminNavItems.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
+                isActive(item.to)
+                  ? "bg-secondary text-white"
+                  : "text-text-main/60 hover:bg-secondary/10 hover:text-text-main"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                {item.icon}
+              </span>
+              <span className="text-sm font-medium">{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex justify-end">
+          <BranchSelector />
         </div>
       </div>
     </div>
