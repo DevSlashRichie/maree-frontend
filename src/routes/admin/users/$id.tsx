@@ -18,6 +18,8 @@ import { RewardCard } from "@/components/ui/reward-card";
 import {
   useGetV1Branches,
   useGetV1Rewards,
+  useGetV1RewardsHistory,
+  useGetV1RewardsUserUserIdHistory,
   useGetV1UsersUserId,
   usePostV1RewardsRedeem,
   usePostV1RewardsVisit,
@@ -44,11 +46,17 @@ function RouteComponent() {
   });
 
   const { data: rewardsData, isLoading: isLoadingRewards } = useGetV1Rewards();
+
+  const { data: historyData, isLoading: isLoadingHistory } =
+    useGetV1RewardsUserUserIdHistory(params.id);
+
   const { data: branchesData } = useGetV1Branches();
 
   const user = data && data.status === 200 ? data.data : null;
   const rewards =
     rewardsData && rewardsData.status === 200 ? rewardsData.data : [];
+  const history =
+    historyData && historyData.status === 200 ? historyData.data : [];
   const branches =
     branchesData && branchesData.status === 200 ? branchesData.data : [];
 
@@ -65,7 +73,7 @@ function RouteComponent() {
     );
   }
 
-  if ((isLoading || isLoadingRewards) && !user) {
+  if ((isLoading || isLoadingRewards || isLoadingHistory) && !user) {
     return (
       <div className="min-h-screen bg-background-light">
         <div className="p-8">
@@ -218,20 +226,27 @@ function RouteComponent() {
                   Recompensas Disponibles
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {rewards.map((reward) => (
-                    <RewardCard
-                      key={reward.id}
-                      title={reward.name}
-                      description={reward.description}
-                      icon={Utensils}
-                      isAvailable={
-                        reward.status === "active" &&
-                        user.totalVisits >= Number(reward.cost)
-                      }
-                      points={Number(reward.cost)}
-                      onRedeem={() => setSelectedReward(reward)}
-                    />
-                  ))}
+                  {rewards.map((reward) => {
+                    const isRedeemed = history.some(
+                      (h) => h.rewardId === reward.id && h.userId === user.id,
+                    );
+                    const hasPoints = user.totalVisits >= Number(reward.cost);
+
+                    return (
+                      <RewardCard
+                        key={reward.id}
+                        title={reward.name}
+                        description={reward.description}
+                        icon={Utensils}
+                        isRedeemed={isRedeemed}
+                        isAvailable={
+                          reward.status === "active" && hasPoints && !isRedeemed
+                        }
+                        points={Number(reward.cost)}
+                        onRedeem={() => setSelectedReward(reward)}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </main>
