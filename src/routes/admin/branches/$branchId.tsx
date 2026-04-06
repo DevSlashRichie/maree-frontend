@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, MapPin, Clock, Calendar, Globe } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Globe, MapPin } from "lucide-react";
 import { useGetV1BranchesId } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/branches/$branchId")({
@@ -98,8 +98,10 @@ function RouteComponent() {
           <h2 className="font-display text-base font-bold text-text-main uppercase tracking-wide">
             Horarios
           </h2>
-          <span className="font-body text-[10px] font-bold uppercase tracking-widest
-            border border-pink-powder text-accent px-3 py-1 rounded-full">
+          <span
+            className="font-body text-[10px] font-bold uppercase tracking-widest
+            border border-pink-powder text-accent px-3 py-1 rounded-full"
+          >
             {schedules.length} horario{schedules.length !== 1 ? "s" : ""}
           </span>
         </div>

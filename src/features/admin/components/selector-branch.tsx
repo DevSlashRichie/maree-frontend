@@ -67,7 +67,6 @@ export function BranchSelector() {
           >
             <PopoverPanel className="absolute right-0 mt-2 w-56 z-50 origin-top-right">
               <div className="rounded-2xl shadow-xl border border-secondary/20 bg-white overflow-hidden">
-
                 <div className="border-b border-secondary/10">
                   <button
                     type="button"
@@ -139,7 +138,6 @@ export function BranchSelector() {
                     );
                   })}
                 </div>
-
               </div>
             </PopoverPanel>
           </Transition>

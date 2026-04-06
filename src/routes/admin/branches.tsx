@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MapPin } from "lucide-react";
-import { BranchCard } from "../../features/admin/components/branch-card";
 import { useGetV1Branches } from "@/lib/api";
+import { BranchCard } from "../../features/admin/components/branch-card";
 
 export const Route = createFileRoute("/admin/branches")({
   component: RouteComponent,
