@@ -1,99 +1,70 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Cake,
   ChevronLeft,
   ChevronRight,
-  Coffee,
-  IceCream,
+  Gift,
   Search,
-  Utensils,
-  UtensilsCrossed,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { HistoryItem } from "@/components/ui/history-item";
 import { LoyaltyCard } from "@/components/ui/loyalty-card";
 import { Modal } from "@/components/ui/modal";
 import { RewardCard } from "@/components/ui/reward-card";
-import { useGetV1Loyalty } from "@/lib/api";
+import { useGetV1Loyalty, useGetV1Rewards } from "@/lib/api";
 
 export const Route = createFileRoute("/_client/loyalty")({
   component: RouteComponent,
 });
 
-const REWARDS_DATA = [
-  {
-    id: 1,
-    title: "Crepa Dulce Gratis",
-    description:
-      "Elige cualquier crepa dulce de nuestro menú clásico para celebrar.",
-    icon: UtensilsCrossed,
-    isAvailable: true,
-  },
-  {
-    id: 2,
-    title: "Café de Especialidad",
-    description: "Un café latte o cappuccino mediano preparado por baristas.",
-    icon: Coffee,
-    isAvailable: false,
-    points: 50,
-  },
-  {
-    id: 3,
-    title: "Bebida de Temporada",
-    description: "Prueba nuestra bebida especial del mes totalmente gratis.",
-    icon: IceCream,
-    isAvailable: true,
-  },
-  {
-    id: 4,
-    title: "Postre Especial",
-    description: "Un postre artesanal hecho en casa para endulzar tu día.",
-    icon: Cake,
-    isAvailable: false,
-    points: 75,
-  },
-  {
-    id: 5,
-    title: "Combo Pareja",
-    description: "Descuento especial en nuestro combo para dos personas.",
-    icon: Utensils,
-    isAvailable: false,
-    points: 150,
-  },
-];
+type RewardItem = {
+  id: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  isAvailable: boolean;
+  points: number;
+};
 
 function RouteComponent() {
-  // 1. Hooks de API y Estado siempre al principio
   const { data, isLoading } = useGetV1Loyalty();
+  const { data: rewardsData, isLoading: rewardsLoading } = useGetV1Rewards();
 
-  const [selectedReward, setSelectedReward] = useState<
-    (typeof REWARDS_DATA)[0] | null
-  >(null);
+  const [selectedReward, setSelectedReward] = useState<RewardItem | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [historySearch, setHistorySearch] = useState("");
-  const [historyFilter, setHistoryFilter] = useState<
-    "all" | "redeemed" | "gift"
-  >("all");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // 2. Extraer y filtrar la data de la API
-  const apiHistory = useMemo(() => data?.data?.lastRedemptions || [], [data]);
+  const apiHistory = useMemo(() => {
+    if (data?.status !== 200) return [];
+    return data.data.lastRedemptions || [];
+  }, [data]);
+
+  const rewards = useMemo<RewardItem[]>(() => {
+    const balance = data?.status === 200 ? data.data.currentBalance : 0;
+    return (rewardsData?.data ?? []).map((r) => ({
+      id: r.id,
+      title: r.name,
+      description: r.description,
+      icon: Gift,
+      isAvailable: balance >= r.cost,
+      points: r.cost,
+    }));
+  }, [rewardsData, data]);
 
   const filteredHistory = useMemo(() => {
-    return apiHistory.filter((item: any) => {
-      const matchesSearch =
+    return apiHistory.filter((item) => {
+      return (
         item.name.toLowerCase().includes(historySearch.toLowerCase()) ||
-        item.branch.toLowerCase().includes(historySearch.toLowerCase());
-
-      // Si no hay status en la API para filtrar, solo usamos la búsqueda
-      return matchesSearch;
+        item.branch.toLowerCase().includes(historySearch.toLowerCase())
+      );
     });
   }, [apiHistory, historySearch]);
 
   const groupedHistory = useMemo(() => {
-    const groups: Record<string, any[]> = {};
+    const groups: Record<string, typeof apiHistory> = {};
     for (const item of filteredHistory) {
       const dateObj = new Date(item.date);
       const monthLabel = dateObj.toLocaleString("es-MX", {
@@ -106,8 +77,7 @@ function RouteComponent() {
     return groups;
   }, [filteredHistory]);
 
-  // 3. Manejadores de eventos
-  const handleRedeemClick = (reward: (typeof REWARDS_DATA)[0]) => {
+  const handleRedeemClick = (reward: RewardItem) => {
     setSelectedReward(reward);
     setIsConfirmModalOpen(true);
   };
@@ -129,8 +99,7 @@ function RouteComponent() {
     }
   };
 
-  // 4. Retornos de estado (después de definir todos los hooks)
-  if (isLoading) {
+  if (isLoading || rewardsLoading) {
     return (
       <div className="h-screen flex items-center justify-center font-display text-accent">
         Cargando...
@@ -180,7 +149,7 @@ function RouteComponent() {
                   ref={scrollContainerRef}
                   className="flex overflow-x-auto gap-4 pb-6 snap-x scrollbar-hide"
                 >
-                  {REWARDS_DATA.map((reward) => (
+                  {rewards.map((reward) => (
                     <div key={reward.id} className="min-w-[280px] snap-start">
                       <RewardCard
                         {...reward}
@@ -197,9 +166,9 @@ function RouteComponent() {
                 </h3>
                 <div className="bg-card-light dark:bg-card-dark rounded-xl border border-accent/20 overflow-hidden">
                   <ul className="divide-y divide-accent/20">
-                    {apiHistory.slice(0, 3).map((item: any, idx: number) => (
+                    {apiHistory.slice(0, 3).map((item, idx) => (
                       <HistoryItem
-                        key={item.id || idx}
+                        key={idx}
                         title={item.name}
                         location={item.branch}
                         date={item.date}
@@ -222,7 +191,6 @@ function RouteComponent() {
         </main>
       </div>
 
-      {/* Modal Historial */}
       <Modal
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
@@ -247,9 +215,9 @@ function RouteComponent() {
                   {month}
                 </h4>
                 <div className="bg-white dark:bg-charcoal/30 rounded-xl border divide-y">
-                  {items.map((item: any, idx: number) => (
+                  {items.map((item, idx) => (
                     <HistoryItem
-                      key={item.id || idx}
+                      key={idx}
                       title={item.name}
                       location={item.branch}
                       date={item.date}
@@ -263,7 +231,6 @@ function RouteComponent() {
         </div>
       </Modal>
 
-      {/* Modal Confirmación */}
       <Modal
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
