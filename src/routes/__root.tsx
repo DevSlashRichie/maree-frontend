@@ -1,9 +1,9 @@
 import { createRootRoute, Outlet, useRouter } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/hooks/use-auth-store";
 import { Footer } from "@/layouts/footer";
 import { Header } from "@/layouts/header";
 import { Nav } from "@/layouts/nav";
-import { useEffect, useState } from "react";
-import { useAuthStore } from "@/hooks/use-auth-store";
 import { getV1UsersMe } from "@/lib/api";
 
 export const Route = createRootRoute({

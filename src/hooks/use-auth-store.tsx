@@ -1,6 +1,6 @@
+import toast from "react-hot-toast";
 import { create } from "zustand";
 import type { Actor } from "@/lib/schemas";
-import toast from "react-hot-toast";
 
 // only enable when required.
 const IS_DEV = import.meta.env.VITE_DISABLE_AUTH === "true";

@@ -18,7 +18,6 @@ import { RewardCard } from "@/components/ui/reward-card";
 import {
   useGetV1Branches,
   useGetV1Rewards,
-  useGetV1RewardsHistory,
   useGetV1RewardsUserUserIdHistory,
   useGetV1UsersUserId,
   usePostV1RewardsRedeem,

@@ -1,11 +1,11 @@
-import { createFileRoute, useRouter, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import z from "zod";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Heading, Paragraph } from "@/components/typography";
-import { postAuthLogin, getV1UsersMe } from "@/lib/api";
 import { useAuthStore } from "@/hooks/use-auth-store";
+import { getV1UsersMe, postAuthLogin } from "@/lib/api";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: ({ search }) => {

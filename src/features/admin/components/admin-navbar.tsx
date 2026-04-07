@@ -8,8 +8,8 @@ import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { ChevronDown, LogOut } from "lucide-react";
 import { Fragment } from "react";
 import { useAuthStore } from "@/hooks/use-auth-store";
-import { BranchSelector } from "../components/selector-branch";
 import { postAuthLogout } from "@/lib/api";
+import { BranchSelector } from "../components/selector-branch";
 
 const adminNavItems = [
   { to: "/admin", label: "Dashboard", icon: "dashboard" },
