@@ -24,7 +24,7 @@ import {
   usePostV1RewardsRedeem,
   usePostV1RewardsVisit,
 } from "@/lib/api";
-import type { RewardSchema } from "@/lib/schemas";
+import type { ReedemRewardDto, RewardSchema } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/users/$id")({
   component: RouteComponent,
@@ -287,7 +287,7 @@ function RouteComponent() {
           reward={selectedReward}
           user={user}
           branchId={branches[0]?.id}
-          onSave={(newBalance) => {
+          onSave={(data) => {
             mutate((prev) => {
               if (!prev) return prev;
 
@@ -296,7 +296,7 @@ function RouteComponent() {
                   ...prev,
                   data: {
                     ...prev.data,
-                    totalVisits: newBalance,
+                    totalVisits: Number(data.newBalance),
                   },
                 };
               }
@@ -304,7 +304,18 @@ function RouteComponent() {
               return prev;
             });
 
-            mutateHistory();
+            mutateHistory((prev) => {
+              if (!prev) return prev;
+
+              if (prev.status === 200) {
+                return {
+                  ...prev,
+                  data: [...prev.data, data.redemption],
+                };
+              }
+
+              return prev;
+            });
           }}
         />
       )}
@@ -436,7 +447,7 @@ function RedeemRewardModal({
   reward: RewardSchema;
   user: { id: string; firstName: string; lastName: string };
   branchId?: string;
-  onSave?: (newBalance: number) => void;
+  onSave?: (data: ReedemRewardDto) => void;
 }) {
   const { trigger, isMutating } = usePostV1RewardsRedeem();
 
@@ -454,7 +465,7 @@ function RedeemRewardModal({
 
     if (result.status === 200) {
       toast.success("Recompensa canjeada con éxito");
-      onSave?.(Number(result.data.newBalance));
+      onSave?.(result.data);
       onClose();
     } else {
       toast.error(result.data.message || "Error al canjear recompensa");
