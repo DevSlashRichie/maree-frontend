@@ -1,15 +1,31 @@
 import { useState } from "react";
 
-const StarPicker = ({ value, onChange }) => {
+const StarPicker = ({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+}) => {
   const [hovered, setHovered] = useState(0);
   return (
-    <div style={{ display: "flex", gap: "6px" }}>
+    <div
+      role="group"
+      aria-label="Seleccionar calificación"
+      style={{ display: "flex", gap: "6px" }}
+    >
       {[1, 2, 3, 4, 5].map((v) => (
         <div
           key={v}
+          role="button"
+          tabIndex={0}
+          aria-label={`${v} estrella${v > 1 ? "s" : ""}`}
           onMouseEnter={() => setHovered(v)}
           onMouseLeave={() => setHovered(0)}
           onClick={() => onChange(v)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") onChange(v);
+          }}
           style={{
             width: "64px",
             height: "64px",
@@ -26,10 +42,13 @@ const StarPicker = ({ value, onChange }) => {
   );
 };
 
-export default function ReviewForm({ onSubmit }) {
+export default function ReviewForm({
+  onSubmit,
+}: {
+  onSubmit?: (data: { rating: number; text: string }) => void;
+}) {
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
-
   const requiresComment = rating > 0 && rating < 5;
   const isDisabled = !rating || (requiresComment && !text.trim());
 
@@ -60,7 +79,7 @@ export default function ReviewForm({ onSubmit }) {
           alignItems: "center",
         }}
       >
-        <label
+        <span
           style={{
             fontSize: "12px",
             color: "#5e6c75",
@@ -69,7 +88,7 @@ export default function ReviewForm({ onSubmit }) {
           }}
         >
           Tu calificación
-        </label>
+        </span>
         <StarPicker value={rating} onChange={setRating} />
       </div>
 
@@ -77,6 +96,7 @@ export default function ReviewForm({ onSubmit }) {
       {requiresComment && (
         <div style={{ marginBottom: "14px" }}>
           <label
+            htmlFor="review-comment"
             style={{
               display: "block",
               fontSize: "12px",
@@ -88,6 +108,7 @@ export default function ReviewForm({ onSubmit }) {
             ¿Qué podríamos mejorar?
           </label>
           <textarea
+            id="review-comment"
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Cuéntanos qué salió mal o qué podríamos hacer mejor..."
@@ -111,6 +132,7 @@ export default function ReviewForm({ onSubmit }) {
       {/* Submit */}
       {rating > 0 && (
         <button
+          type="button"
           onClick={handleSubmit}
           disabled={isDisabled}
           style={{

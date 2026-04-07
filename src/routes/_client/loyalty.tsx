@@ -1,17 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Gift,
-  Search,
-} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Gift, Search } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { HistoryItem } from "@/components/ui/history-item";
-import { LoyaltyCard } from "@/components/ui/loyalty-card";
 import { Modal } from "@/components/ui/modal";
-import { RewardCard } from "@/components/ui/reward-card";
+import { LoyaltyCard } from "@/features/loyalty/components/loyalty-card";
+import { RewardCard } from "@/features/loyalty/components/reward-card";
 import { useGetV1Loyalty, useGetV1Rewards } from "@/lib/api";
 
 export const Route = createFileRoute("/_client/loyalty")({
@@ -43,14 +38,14 @@ function RouteComponent() {
   }, [data]);
 
   const rewards = useMemo<RewardItem[]>(() => {
-    const balance = data?.status === 200 ? data.data.currentBalance : 0;
+    const balance = data?.status === 200 ? Number(data.data.currentBalance) : 0;
     return (rewardsData?.data ?? []).map((r) => ({
       id: r.id,
       title: r.name,
       description: r.description,
       icon: Gift,
-      isAvailable: balance >= r.cost,
-      points: r.cost,
+      isAvailable: balance >= Number(r.cost),
+      points: Number(r.cost),
     }));
   }, [rewardsData, data]);
 
@@ -132,12 +127,14 @@ function RouteComponent() {
                   </h3>
                   <div className="hidden md:flex gap-2">
                     <button
+                      type="button"
                       onClick={() => scroll("left")}
                       className="p-1 rounded-full border border-accent/20 text-accent cursor-pointer"
                     >
                       <ChevronLeft />
                     </button>
                     <button
+                      type="button"
                       onClick={() => scroll("right")}
                       className="p-1 rounded-full border border-accent/20 text-accent cursor-pointer"
                     >
@@ -166,9 +163,9 @@ function RouteComponent() {
                 </h3>
                 <div className="bg-card-light dark:bg-card-dark rounded-xl border border-accent/20 overflow-hidden">
                   <ul className="divide-y divide-accent/20">
-                    {apiHistory.slice(0, 3).map((item, idx) => (
+                    {apiHistory.slice(0, 3).map((item) => (
                       <HistoryItem
-                        key={idx}
+                        key={`${item.name}-${item.branch}-${item.date}`}
                         title={item.name}
                         location={item.branch}
                         date={item.date}
@@ -178,6 +175,7 @@ function RouteComponent() {
                   </ul>
                   <div className="p-3 bg-gray-50 dark:bg-charcoal/30 text-center border-t border-accent/20">
                     <button
+                      type="button"
                       onClick={() => setIsHistoryModalOpen(true)}
                       className="text-xs font-bold uppercase text-gray-500 cursor-pointer"
                     >
@@ -215,9 +213,9 @@ function RouteComponent() {
                   {month}
                 </h4>
                 <div className="bg-white dark:bg-charcoal/30 rounded-xl border divide-y">
-                  {items.map((item, idx) => (
+                  {items.map((item) => (
                     <HistoryItem
-                      key={idx}
+                      key={`${item.name}-${item.branch}-${item.date}`}
                       title={item.name}
                       location={item.branch}
                       date={item.date}
