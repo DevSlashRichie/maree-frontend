@@ -47,8 +47,11 @@ function RouteComponent() {
 
   const { data: rewardsData, isLoading: isLoadingRewards } = useGetV1Rewards();
 
-  const { data: historyData, isLoading: isLoadingHistory } =
-    useGetV1RewardsUserUserIdHistory(params.id);
+  const {
+    data: historyData,
+    isLoading: isLoadingHistory,
+    mutate: mutateHistory,
+  } = useGetV1RewardsUserUserIdHistory(params.id);
 
   const { data: branchesData } = useGetV1Branches();
 
@@ -300,6 +303,8 @@ function RouteComponent() {
 
               return prev;
             });
+
+            mutateHistory();
           }}
         />
       )}
