@@ -5,6 +5,7 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
 import biomePlugin from "vite-plugin-biome";
+import svgr from "vite-plugin-svgr";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    svgr(),
     biomePlugin({
       mode: "check",
       files: ".",
