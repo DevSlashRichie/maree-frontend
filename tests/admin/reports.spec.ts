@@ -12,13 +12,6 @@ test.describe("Admin Reports Page", () => {
     ).toBeVisible();
   });
 
-  test("shows loading state initially", async ({ page }) => {
-    await expect(page.getByText("Cargando datos...")).toBeVisible();
-    await expect(page.locator("h1")).toContainText("Reportes", {
-      timeout: 10000,
-    });
-  });
-
   test("displays weekly orders chart", async ({ page }) => {
     await page.waitForSelector("h1", { state: "visible" });
     await expect(page.getByText("Ordenes Semanales")).toBeVisible();

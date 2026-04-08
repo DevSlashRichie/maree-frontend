@@ -13,6 +13,24 @@ export default defineConfig({
   },
   projects: [
     {
+      name: "setup",
+      testMatch: /admin-setup\.spec\.ts/,
+    },
+    {
+      name: "admin",
+      testDir: "./tests/admin",
+      testMatch: /^(?!.*admin-setup).*\.spec\.ts$/,
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: ".auth/admin.json",
+      },
+    },
+    {
+      name: "client",
+      testDir: "./tests/client",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },

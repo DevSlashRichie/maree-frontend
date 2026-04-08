@@ -27,3 +27,8 @@ dist-ssr
 src/lib/api.ts
 src/lib/schemas/
 src/lib/zods.ts
+
+test-results/
+
+playwright-report/
+

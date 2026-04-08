@@ -34,10 +34,12 @@ import {
 } from "@/lib/api";
 import type { RewardSchema } from "@/lib/schemas/rewardSchema";
 
+// Route definition for admin rewards page
 export const Route = createFileRoute("/admin/rewards")({
   component: RouteComponent,
 });
 
+// Reward data structure used throughout the component
 type Reward = {
   id: string;
   title: string;
@@ -55,6 +57,7 @@ type Reward = {
   createdAt: string;
 };
 
+// Products that rewards can be applied to
 const AVAILABLE_PRODUCTS = [
   { id: "1", name: "Cappuccino" },
   { id: "2", name: "Latte" },
@@ -68,6 +71,7 @@ const AVAILABLE_PRODUCTS = [
   { id: "10", name: "Brownie" },
 ];
 
+// Icon options for reward cards
 const AVAILABLE_ICONS = [
   {
     value: "utensils-crossed",
@@ -80,22 +84,31 @@ const AVAILABLE_ICONS = [
   { value: "utensils", label: "Utensils", icon: Utensils },
 ];
 
+// Returns the icon component for a given icon name, defaults to UtensilsCrossed
 function getIconComponent(iconName: string) {
   const found = AVAILABLE_ICONS.find((i) => i.value === iconName);
   return found ? found.icon : UtensilsCrossed;
 }
 
+// Main component for managing loyalty program rewards
 function RouteComponent() {
+  // Fetch rewards data from API
   const {
     data: rewardsData,
     isLoading: isLoadingRewards,
     error: rewardsError,
     mutate,
-  } = useGetV1Rewards();
+  } = useGetV1Rewards({
+    fetch: {
+      credentials: "include",
+    },
+  });
 
+  // Mutation hook for creating new rewards
   const { trigger: createReward, isMutating: isCreatingReward } =
     usePostV1Rewards();
 
+  // Transform API reward data to local Reward type
   const rewards: Reward[] =
     rewardsData?.data?.map((r: RewardSchema) => ({
       id: r.id,
@@ -115,11 +128,13 @@ function RouteComponent() {
       createdAt: r.createdAt,
     })) ?? [];
 
+  // UI state management
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<Reward | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Form configuration with default values and submit handler
   const form = useForm({
     defaultValues: {
       title: "",
@@ -134,7 +149,7 @@ function RouteComponent() {
     },
     onSubmit: async ({ value }) => {
       if (!value.discountValue) {
-        alert("Por favor completa el valor del descuento");
+        toast.error("Por favor completa el valor del descuento");
         return;
       }
 
@@ -191,6 +206,7 @@ function RouteComponent() {
     },
   });
 
+  // Populates form fields with reward data for editing
   const handleEdit = (reward: Reward) => {
     setEditingReward(reward);
     const hasRestriction =
@@ -214,12 +230,14 @@ function RouteComponent() {
     setIsFormOpen(true);
   };
 
+  // Resets form state and closes modal
   const resetForm = () => {
     form.reset();
     setEditingReward(null);
     setIsFormOpen(false);
   };
 
+  // Deletes a reward after confirmation with toast notifications
   const handleDelete = async (id: string) => {
     const f = async () => {
       try {
@@ -244,6 +262,7 @@ function RouteComponent() {
     });
   };
 
+  // Toggles reward availability status between active/inactive
   const toggleAvailability = async (id: string) => {
     const reward = rewards.find((r) => r.id === id);
     if (!reward) return;
@@ -269,6 +288,7 @@ function RouteComponent() {
     }
   };
 
+  // Loading state
   if (isLoadingRewards) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
@@ -277,6 +297,7 @@ function RouteComponent() {
     );
   }
 
+  // Error state
   if (rewardsError) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
@@ -310,6 +331,7 @@ function RouteComponent() {
             )}
           </div>
 
+          {/* Create/Edit Reward Modal */}
           <Modal
             isOpen={isFormOpen}
             onClose={() => setIsFormOpen(false)}
@@ -357,7 +379,7 @@ function RouteComponent() {
                         htmlFor={field.name}
                         className="block text-sm font-medium text-text-main mb-2"
                       >
-                        Puntos requeridos (opcional)
+                        Visitas requeridas
                       </label>
                       <Tooltip
                         content="Puntos necesarios para canjear esta recompensa. Deja vacío para recompensas gratuitas."
@@ -412,6 +434,7 @@ function RouteComponent() {
                       <div className="flex gap-2 flex-wrap">
                         {AVAILABLE_ICONS.map((icon) => {
                           const IconComponent = icon.icon;
+                          // Main rewards management UI
                           return (
                             <button
                               key={icon.value}
@@ -491,6 +514,7 @@ function RouteComponent() {
                           >
                             <button
                               type="button"
+                              data-testid="discount-percentage"
                               onClick={() => field.handleChange("percentage")}
                               className={cn(
                                 "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
@@ -508,6 +532,7 @@ function RouteComponent() {
                           >
                             <button
                               type="button"
+                              data-testid="discount-fixed"
                               onClick={() => field.handleChange("fixed")}
                               className={cn(
                                 "flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all",
@@ -574,6 +599,7 @@ function RouteComponent() {
                         </span>
                       </Tooltip>
                       <Switch
+                        data-testid="product-restriction-switch"
                         checked={field.state.value}
                         onChange={(checked) => {
                           field.handleChange(checked);
@@ -618,6 +644,7 @@ function RouteComponent() {
                             >
                               <div className="relative">
                                 <ComboboxInput
+                                  data-testid="product-search-input"
                                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
                                   displayValue={() =>
                                     AVAILABLE_PRODUCTS.find(
@@ -682,7 +709,10 @@ function RouteComponent() {
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setIsFormOpen(false)}
+                  data-testid="cancel-button"
+                  onClick={() => {
+                    setIsFormOpen(false);
+                  }}
                   className="px-6 py-2 text-sm font-medium text-gray-500 hover:text-text-main transition-colors"
                 >
                   Cancelar
@@ -691,6 +721,7 @@ function RouteComponent() {
                   {(canSubmit) => (
                     <button
                       type="submit"
+                      data-testid="submit-button"
                       disabled={!canSubmit || isCreatingReward || isUpdating}
                       className="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50"
                     >
@@ -708,6 +739,7 @@ function RouteComponent() {
             </form>
           </Modal>
 
+          {/* Rewards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {rewards.map((reward) => {
               const IconComponent = getIconComponent(reward.icon);
@@ -812,6 +844,7 @@ function RouteComponent() {
             })}
           </div>
 
+          {/* Empty state when no rewards exist */}
           {rewards.length === 0 && (
             <div className="text-center py-12">
               <p className="text-text-main/60">
