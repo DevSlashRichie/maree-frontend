@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePostV1Review } from "@/lib/api";
 
 const StarPicker = ({
   value,
@@ -46,18 +47,29 @@ const StarPicker = ({
 };
 
 export default function ReviewForm({
-  onSubmit,
+  orderId,
+  userId,
+  branchId,
 }: {
-  onSubmit?: (data: { rating: number; text: string }) => void;
+  orderId: string;
+  userId: string;
+  branchId: string;
 }) {
+  const { trigger, isMutating } = usePostV1Review();
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
   const requiresComment = rating > 0 && rating < 5;
-  const isDisabled = !rating || (requiresComment && !text.trim());
+  const isDisabled = !rating || (requiresComment && !text.trim()) || isMutating;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (isDisabled) return;
-    onSubmit?.({ rating, text });
+    await trigger({
+      orderId,
+      userId,
+      branchId,
+      satisfactionRate: rating,
+      notes: text || null,
+    });
     setRating(0);
     setText("");
   };
@@ -73,7 +85,6 @@ export default function ReviewForm({
         maxWidth: "480px",
       }}
     >
-      {/* Rating */}
       <div
         style={{
           marginBottom: "14px",
@@ -95,7 +106,6 @@ export default function ReviewForm({
         <StarPicker value={rating} onChange={setRating} />
       </div>
 
-      {/* Textarea — solo si rating < 5 */}
       {requiresComment && (
         <div style={{ marginBottom: "14px" }}>
           <label
@@ -133,7 +143,6 @@ export default function ReviewForm({
         </div>
       )}
 
-      {/* Submit */}
       {rating > 0 && (
         <button
           type="button"
@@ -141,7 +150,7 @@ export default function ReviewForm({
           disabled={isDisabled}
           style={{
             width: "100%",
-            padding: "24px 20px",
+            padding: "12px",
             background: isDisabled ? "#a0a8ab" : "#3a4042",
             color: "#f2efe9",
             border: "none",
@@ -153,7 +162,7 @@ export default function ReviewForm({
             transition: "background 0.15s",
           }}
         >
-          Publicar reseña
+          {isMutating ? "Enviando..." : "Publicar reseña"}
         </button>
       )}
     </div>
