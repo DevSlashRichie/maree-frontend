@@ -57,8 +57,9 @@ function RouteComponent() {
       <button
         type="button"
         onClick={() => navigate({ to: "/admin/branches" })}
-        className="flex items-center gap-2 text-sm font-body text-text-main/50
-          hover:text-text-main transition-colors duration-150 mb-10"
+        className="flex items-center gap-2 px-5 py-2 rounded-full 
+            bg-[#2F3437] text-white
+            text-xs font-bold uppercase mb-15"   
       >
         <ArrowLeft className="w-4 h-4" />
         Volver a sucursales

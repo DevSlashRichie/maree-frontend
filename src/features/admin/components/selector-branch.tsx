@@ -93,7 +93,7 @@ export function BranchSelector() {
                   </p>
                 </div>
 
-                <div className="py-1">
+                <div className="py-1 max-h-80 overflow-y-scroll">
                   {data.data.length === 0 ? (
                     <div className="px-4 py-3 border-b border-secondary/10">
                       <p className="text-[10px] uppercase tracking-[0.15em] text-text-main/40 font-semibold">
