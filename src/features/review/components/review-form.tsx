@@ -9,36 +9,39 @@ const StarPicker = ({
 }) => {
   const [hovered, setHovered] = useState(0);
   return (
-    <div
-      role="group"
+    <fieldset
       aria-label="Seleccionar calificación"
-      style={{ display: "flex", gap: "6px" }}
+      style={{
+        display: "flex",
+        gap: "6px",
+        border: "none",
+        padding: 0,
+        margin: 0,
+      }}
     >
       {[1, 2, 3, 4, 5].map((v) => (
-        <div
+        <button
           key={v}
-          role="button"
-          tabIndex={0}
+          type="button"
           aria-label={`${v} estrella${v > 1 ? "s" : ""}`}
           onMouseEnter={() => setHovered(v)}
           onMouseLeave={() => setHovered(0)}
           onClick={() => onChange(v)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") onChange(v);
-          }}
           style={{
-            width: "64px",
-            height: "64px",
+            width: "44px",
+            height: "44px",
             cursor: "pointer",
             clipPath:
               "polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)",
             background: v <= (hovered || value) ? "#b08080" : "#eae6df",
             transform: v <= (hovered || value) ? "scale(1.15)" : "scale(1)",
             transition: "background 0.12s, transform 0.1s",
+            border: "none",
+            padding: 0,
           }}
         />
       ))}
-    </div>
+    </fieldset>
   );
 };
 
@@ -124,6 +127,7 @@ export default function ReviewForm({
               color: "#2d2a26",
               background: "#f7f5f0",
               outline: "none",
+              boxSizing: "border-box",
             }}
           />
         </div>
@@ -137,7 +141,7 @@ export default function ReviewForm({
           disabled={isDisabled}
           style={{
             width: "100%",
-            padding: "11px",
+            padding: "24px 20px",
             background: isDisabled ? "#a0a8ab" : "#3a4042",
             color: "#f2efe9",
             border: "none",
