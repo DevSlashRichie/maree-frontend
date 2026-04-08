@@ -74,12 +74,12 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
   const updateSchedule = <K extends EditableFields>(
     id: string,
     field: K,
-    value: Schedule[K]
+    value: Schedule[K],
   ): void => {
     setForm({
       ...form,
       schedules: form.schedules.map((s) =>
-        s.id === id ? { ...s, [field]: value } : s
+        s.id === id ? { ...s, [field]: value } : s,
       ),
     });
   };
@@ -93,7 +93,6 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-
       <div className="flex flex-col gap-1">
         <label
           htmlFor="name"
@@ -104,9 +103,7 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
         <input
           id="name"
           value={form.name}
-          onChange={(e) =>
-            setForm({ ...form, name: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
           className="px-4 py-2.5 rounded-xl border border-secondary/20 text-sm font-semibold text-text-main outline-none focus:border-secondary"
           placeholder="Sucursal Centro"
         />
@@ -122,9 +119,7 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
         <input
           id="state"
           value={form.state}
-          onChange={(e) =>
-            setForm({ ...form, state: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, state: e.target.value })}
           className="px-4 py-2.5 rounded-xl border border-secondary/20 text-sm font-semibold text-text-main outline-none focus:border-secondary"
           placeholder="Open/Close"
         />
@@ -146,9 +141,7 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
         </div>
 
         {form.schedules.length === 0 && (
-          <p className="text-xs text-text-main/40">
-            Sin horarios
-          </p>
+          <p className="text-xs text-text-main/40">Sin horarios</p>
         )}
 
         {form.schedules.map((s) => (
@@ -173,18 +166,14 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
             <input
               type="time"
               value={s.fromTime}
-              onChange={(e) =>
-                updateSchedule(s.id, "fromTime", e.target.value)
-              }
+              onChange={(e) => updateSchedule(s.id, "fromTime", e.target.value)}
               className="text-sm border rounded-lg px-2 py-1"
             />
 
             <input
               type="time"
               value={s.toTime}
-              onChange={(e) =>
-                updateSchedule(s.id, "toTime", e.target.value)
-              }
+              onChange={(e) => updateSchedule(s.id, "toTime", e.target.value)}
               className="text-sm border rounded-lg px-2 py-1"
             />
 
@@ -199,11 +188,7 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
         ))}
       </div>
 
-      {error && (
-        <p className="text-xs text-red-500 font-semibold">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-xs text-red-500 font-semibold">{error}</p>}
 
       <div className="flex justify-end gap-3 mt-4">
         <button

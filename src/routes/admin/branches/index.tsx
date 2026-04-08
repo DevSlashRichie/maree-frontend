@@ -1,17 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MapPin, Plus } from "lucide-react";
 import { useState } from "react";
-import { BranchCard } from "../../../features/admin/components/branch-card";
-import { Modal } from "../../../components/modal";
-import { useGetV1Branches } from "@/lib/api";
 import { CreateBranchForm } from "@/features/admin/components/new-branch-form";
+import { useGetV1Branches } from "@/lib/api";
+import { Modal } from "../../../components/modal";
+import { BranchCard } from "../../../features/admin/components/branch-card";
 
 export const Route = createFileRoute("/admin/branches/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { data, isLoading, mutate} = useGetV1Branches();
+  const { data, isLoading, mutate } = useGetV1Branches();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (isLoading) {
@@ -46,7 +46,7 @@ function RouteComponent() {
             registrada{branches.length !== 1 ? "s" : ""}
           </p>
         </div>
-       <button
+        <button
           type="button"
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-2 px-5 py-2 rounded-full 
@@ -84,7 +84,7 @@ function RouteComponent() {
         <CreateBranchForm
           onClose={() => setIsModalOpen(false)}
           onSuccess={() => {
-              mutate();
+            mutate();
           }}
         />
       </Modal>
