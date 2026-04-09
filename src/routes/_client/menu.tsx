@@ -58,7 +58,7 @@ function RouteComponent() {
     });
 
     return () => observer.disconnect();
-  }, [categories]);
+  }, [categoriesData]);
 
   if (isLoadingCategories || isLoadingProducts) {
     return (
@@ -148,7 +148,7 @@ function RouteComponent() {
                   <div className="flex flex-col gap-3 border-l-4 border-charcoal pl-8 transition-all duration-700">
                     <div className="flex items-center gap-3">
                       <span className="h-px w-8 bg-charcoal" />
-                      <span className="text-[10px] font-bold tracking-[0.4em] text-pink uppercase">
+                      <span className="text-[10px] font-bold tracking-[0.4em] text-charcoal uppercase">
                         Nuestra Selección de
                       </span>
                     </div>
