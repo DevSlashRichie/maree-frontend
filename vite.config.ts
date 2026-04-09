@@ -18,7 +18,6 @@ export default defineConfig({
     },
   },
   plugins: [
-    svgr(),
     biomePlugin({
       mode: "check",
       files: ".",
