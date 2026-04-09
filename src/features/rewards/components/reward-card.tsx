@@ -5,6 +5,7 @@ interface RewardCardProps {
   description: string;
   icon: LucideIcon;
   isAvailable: boolean;
+  isRedeemed?: boolean;
   points?: number;
   onRedeem?: () => void;
 }
@@ -14,13 +15,14 @@ export function RewardCard({
   description,
   icon: Icon,
   isAvailable,
+  isRedeemed,
   points,
   onRedeem,
 }: RewardCardProps) {
   return (
     <div
       className={`bg-card-light p-5 rounded-xl border border-accent/30 hover:shadow-md transition-shadow group cursor-pointer ${
-        !isAvailable ? "opacity-75" : ""
+        !isAvailable || isRedeemed ? "opacity-75" : ""
       }`}
     >
       <div className="flex justify-between items-start mb-4">
@@ -33,7 +35,11 @@ export function RewardCard({
         >
           <Icon className="w-5 h-5" />
         </div>
-        {isAvailable ? (
+        {isRedeemed ? (
+          <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-bold uppercase tracking-wider">
+            Canjeado
+          </span>
+        ) : isAvailable ? (
           <span className="text-[10px] bg-green-100 text-green-800 px-2 py-1 rounded-full font-bold uppercase tracking-wider">
             Disponible
           </span>
@@ -43,9 +49,19 @@ export function RewardCard({
           </span>
         )}
       </div>
-      <h4 className="font-display text-lg text-charcoal mb-1">{title}</h4>
+      <h4 className="font-display text-lg text-charcoal mb-1">
+        {title}
+      </h4>
       <p className="text-xs text-gray-500 mb-4 line-clamp-2">{description}</p>
-      {isAvailable ? (
+      {isRedeemed ? (
+        <button
+          type="button"
+          disabled
+          className="w-full py-2 bg-gray-100 text-gray-400 rounded-lg text-xs font-bold uppercase tracking-widest cursor-not-allowed"
+        >
+          Canjeado
+        </button>
+      ) : isAvailable ? (
         <button
           type="button"
           onClick={onRedeem}
