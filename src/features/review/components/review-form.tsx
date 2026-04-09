@@ -68,7 +68,7 @@ export default function ReviewForm({
       userId,
       branchId,
       satisfactionRate: rating,
-      notes: text || null,
+      notes: text || undefined,
     });
     setRating(0);
     setText("");
