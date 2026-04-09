@@ -67,13 +67,33 @@ export function BranchSelector() {
           >
             <PopoverPanel className="absolute right-0 mt-2 w-56 z-50 origin-top-right">
               <div className="rounded-2xl shadow-xl border border-secondary/20 bg-white overflow-hidden">
+                <div className="border-b border-secondary/10">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelected(null);
+                      navigate({ to: "/admin/branches" });
+                      close();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer
+                      hover:bg-secondary/5 transition-colors duration-150 group"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-secondary/10 group-hover:bg-secondary/20 flex items-center justify-center shrink-0">
+                      <Settings className="w-3.5 h-3.5 text-text-main/50" />
+                    </div>
+                    <p className="text-sm font-semibold text-text-main/80">
+                      Configuración
+                    </p>
+                  </button>
+                </div>
+
                 <div className="px-4 py-3 border-b border-secondary/10">
                   <p className="text-[10px] uppercase tracking-[0.15em] text-text-main/40 font-semibold">
                     Selecciona Sucursal
                   </p>
                 </div>
 
-                <div className="py-1">
+                <div className="py-1 max-h-80 overflow-y-scroll">
                   {data.data.length === 0 ? (
                     <div className="px-4 py-3 border-b border-secondary/10">
                       <p className="text-[10px] uppercase tracking-[0.15em] text-text-main/40 font-semibold">
@@ -117,25 +137,6 @@ export function BranchSelector() {
                       </button>
                     );
                   })}
-                </div>
-
-                <div className="border-t border-secondary/10">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigate({ to: "/admin/branches" });
-                      close();
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer
-                      hover:bg-secondary/5 transition-colors duration-150 group"
-                  >
-                    <div className="w-7 h-7 rounded-full bg-secondary/10 group-hover:bg-secondary/20 flex items-center justify-center shrink-0">
-                      <Settings className="w-3.5 h-3.5 text-text-main/50" />
-                    </div>
-                    <p className="text-sm font-semibold text-text-main/80">
-                      Configuración
-                    </p>
-                  </button>
                 </div>
               </div>
             </PopoverPanel>
