@@ -1,4 +1,4 @@
-import { Minus, Plus, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import type { Category } from "@/features/products/components/category-picker";
 import {
@@ -174,10 +174,11 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
                       <button
                         type="button"
                         onClick={() => toggleComponent(component)}
-                        className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all cursor-pointer active:scale-95 ${isRemoved
+                        className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                          isRemoved
                             ? "border-pink-soft/30 bg-background-light text-text-main/30 hover:border-pink-soft/60"
                             : "border-pink-soft/40 bg-background-light text-text-main/50 hover:border-red-300 hover:text-red-400"
-                          }`}
+                        }`}
                       >
                         {isRemoved ? (
                           <Plus className="w-3 h-3" />
@@ -212,10 +213,11 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
                     <button
                       type="button"
                       onClick={() => addExtra(ingredient)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm transition-all cursor-pointer active:scale-95 ${added
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm transition-all cursor-pointer active:scale-95 ${
+                        added
                           ? "bg-secondary/10 border-secondary/30 text-secondary"
                           : "bg-card-light border-pink-soft/40 text-text-main/70 hover:border-pink-soft hover:bg-pink-soft/10 hover:text-text-main"
-                        }`}
+                      }`}
                     >
                       {added && (
                         <span className="font-mono text-xs font-bold">

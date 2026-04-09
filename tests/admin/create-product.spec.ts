@@ -77,7 +77,9 @@ test.describe("Admin Create Product Page", () => {
     await page.goto("/admin/create-product");
   });
 
-  test("creates product variant after interacting with multiple categories", async ({ page }) => {
+  test("creates product variant after interacting with multiple categories", async ({
+    page,
+  }) => {
     let capturedPayload: Record<string, unknown> | null = null;
 
     await page.route("**/v1/products/image", async (route) => {
@@ -91,7 +93,10 @@ test.describe("Admin Create Product Page", () => {
     });
 
     await page.route("**/v1/products/product-variant", async (route) => {
-      capturedPayload = route.request().postDataJSON() as Record<string, unknown>;
+      capturedPayload = route.request().postDataJSON() as Record<
+        string,
+        unknown
+      >;
 
       await route.fulfill({
         status: 201,
@@ -100,7 +105,9 @@ test.describe("Admin Create Product Page", () => {
       });
     });
 
-    await expect(page.getByRole("heading", { name: "Nuevo Producto" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Nuevo Producto" }),
+    ).toBeVisible();
 
     await page.getByLabel("Nombre").fill("Crepa de Prueba");
 
@@ -143,7 +150,9 @@ test.describe("Admin Create Product Page", () => {
     });
   });
 
-  test("updates ingredient options when switching category branch", async ({ page }) => {
+  test("updates ingredient options when switching category branch", async ({
+    page,
+  }) => {
     await page.getByRole("button", { name: "Dulce", exact: true }).click();
     await page.getByRole("button", { name: "Crepas", exact: true }).click();
 
@@ -160,10 +169,14 @@ test.describe("Admin Create Product Page", () => {
     await expect(page.getByText("Nutella")).toBeHidden();
 
     await page.locator("#ingredient-search").fill("Queso");
-    await expect(page.getByRole("button", { name: /Queso Manchego/ })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Queso Manchego/ }),
+    ).toBeVisible();
   });
 
-  test("shows validation error when category is not selected", async ({ page }) => {
+  test("shows validation error when category is not selected", async ({
+    page,
+  }) => {
     await page.getByLabel("Nombre").fill("Producto sin categoria");
     await page.locator("#variant-price").fill("100");
     await page.locator("#variant-image").setInputFiles({
@@ -231,7 +244,9 @@ test.describe("Admin Create Product Page", () => {
     expect(variantCalled).toBeFalsy();
   });
 
-  test("shows error when product variant creation returns 409", async ({ page }) => {
+  test("shows error when product variant creation returns 409", async ({
+    page,
+  }) => {
     await page.route("**/v1/products/image", async (route) => {
       await route.fulfill({
         status: 201,
@@ -268,4 +283,3 @@ test.describe("Admin Create Product Page", () => {
     await expect(page.getByText("Producto creado")).toBeHidden();
   });
 });
-
