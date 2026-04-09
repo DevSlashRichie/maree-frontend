@@ -17,12 +17,13 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
 import { Route as AdminReportsRouteImport } from './routes/admin/reports'
 import { Route as AdminOrderRouteImport } from './routes/admin/order'
-import { Route as AdminBranchesRouteImport } from './routes/admin/branches'
+import { Route as ClientReviewRouteImport } from './routes/_client/review'
 import { Route as ClientMenuRouteImport } from './routes/_client/menu'
 import { Route as ClientLoyaltyRouteImport } from './routes/_client/loyalty'
 import { Route as ClientCartRouteImport } from './routes/_client/cart'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminStaffIndexRouteImport } from './routes/admin/staff/index'
+import { Route as AdminBranchesIndexRouteImport } from './routes/admin/branches/index'
 import { Route as AdminUsersIdRouteImport } from './routes/admin/users/$id'
 import { Route as AdminStaffIdRouteImport } from './routes/admin/staff/$id'
 import { Route as AdminBranchesBranchIdRouteImport } from './routes/admin/branches/$branchId'
@@ -67,10 +68,10 @@ const AdminOrderRoute = AdminOrderRouteImport.update({
   path: '/order',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminBranchesRoute = AdminBranchesRouteImport.update({
-  id: '/branches',
-  path: '/branches',
-  getParentRoute: () => AdminRouteRoute,
+const ClientReviewRoute = ClientReviewRouteImport.update({
+  id: '/_client/review',
+  path: '/review',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ClientMenuRoute = ClientMenuRouteImport.update({
   id: '/_client/menu',
@@ -97,6 +98,11 @@ const AdminStaffIndexRoute = AdminStaffIndexRouteImport.update({
   path: '/staff/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminBranchesIndexRoute = AdminBranchesIndexRouteImport.update({
+  id: '/branches/',
+  path: '/branches/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminUsersIdRoute = AdminUsersIdRouteImport.update({
   id: '/users/$id',
   path: '/users/$id',
@@ -108,9 +114,9 @@ const AdminStaffIdRoute = AdminStaffIdRouteImport.update({
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminBranchesBranchIdRoute = AdminBranchesBranchIdRouteImport.update({
-  id: '/$branchId',
-  path: '/$branchId',
-  getParentRoute: () => AdminBranchesRoute,
+  id: '/branches/$branchId',
+  path: '/branches/$branchId',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -121,7 +127,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof ClientCartRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
-  '/admin/branches': typeof AdminBranchesRouteWithChildren
+  '/review': typeof ClientReviewRoute
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
+  '/admin/branches/': typeof AdminBranchesIndexRoute
   '/admin/staff/': typeof AdminStaffIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
 }
@@ -139,7 +146,7 @@ export interface FileRoutesByTo {
   '/cart': typeof ClientCartRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
-  '/admin/branches': typeof AdminBranchesRouteWithChildren
+  '/review': typeof ClientReviewRoute
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
+  '/admin/branches': typeof AdminBranchesIndexRoute
   '/admin/staff': typeof AdminStaffIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
 }
@@ -159,7 +167,7 @@ export interface FileRoutesById {
   '/_client/cart': typeof ClientCartRoute
   '/_client/loyalty': typeof ClientLoyaltyRoute
   '/_client/menu': typeof ClientMenuRoute
-  '/admin/branches': typeof AdminBranchesRouteWithChildren
+  '/_client/review': typeof ClientReviewRoute
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
+  '/admin/branches/': typeof AdminBranchesIndexRoute
   '/admin/staff/': typeof AdminStaffIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
 }
@@ -180,7 +189,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/loyalty'
     | '/menu'
-    | '/admin/branches'
+    | '/review'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/admin/branches/$branchId'
     | '/admin/staff/$id'
     | '/admin/users/$id'
+    | '/admin/branches/'
     | '/admin/staff/'
     | '/admin/users/'
   fileRoutesByTo: FileRoutesByTo
@@ -198,7 +208,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/loyalty'
     | '/menu'
-    | '/admin/branches'
+    | '/review'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/admin/branches/$branchId'
     | '/admin/staff/$id'
     | '/admin/users/$id'
+    | '/admin/branches'
     | '/admin/staff'
     | '/admin/users'
   id:
@@ -217,7 +228,7 @@ export interface FileRouteTypes {
     | '/_client/cart'
     | '/_client/loyalty'
     | '/_client/menu'
-    | '/admin/branches'
+    | '/_client/review'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/admin/branches/$branchId'
     | '/admin/staff/$id'
     | '/admin/users/$id'
+    | '/admin/branches/'
     | '/admin/staff/'
     | '/admin/users/'
   fileRoutesById: FileRoutesById
@@ -237,6 +249,7 @@ export interface RootRouteChildren {
   ClientCartRoute: typeof ClientCartRoute
   ClientLoyaltyRoute: typeof ClientLoyaltyRoute
   ClientMenuRoute: typeof ClientMenuRoute
+  ClientReviewRoute: typeof ClientReviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -297,12 +310,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrderRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/admin/branches': {
-      id: '/admin/branches'
-      path: '/branches'
-      fullPath: '/admin/branches'
-      preLoaderRoute: typeof AdminBranchesRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/_client/review': {
+      id: '/_client/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ClientReviewRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_client/menu': {
       id: '/_client/menu'
@@ -339,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStaffIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/branches/': {
+      id: '/admin/branches/'
+      path: '/branches'
+      fullPath: '/admin/branches/'
+      preLoaderRoute: typeof AdminBranchesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/users/$id': {
       id: '/admin/users/$id'
       path: '/users/$id'
@@ -355,46 +375,36 @@ declare module '@tanstack/react-router' {
     }
     '/admin/branches/$branchId': {
       id: '/admin/branches/$branchId'
-      path: '/$branchId'
+      path: '/branches/$branchId'
       fullPath: '/admin/branches/$branchId'
       preLoaderRoute: typeof AdminBranchesBranchIdRouteImport
-      parentRoute: typeof AdminBranchesRoute
+      parentRoute: typeof AdminRouteRoute
     }
   }
 }
 
-interface AdminBranchesRouteChildren {
-  AdminBranchesBranchIdRoute: typeof AdminBranchesBranchIdRoute
-}
-
-const AdminBranchesRouteChildren: AdminBranchesRouteChildren = {
-  AdminBranchesBranchIdRoute: AdminBranchesBranchIdRoute,
-}
-
-const AdminBranchesRouteWithChildren = AdminBranchesRoute._addFileChildren(
-  AdminBranchesRouteChildren,
-)
-
 interface AdminRouteRouteChildren {
-  AdminBranchesRoute: typeof AdminBranchesRouteWithChildren
   AdminOrderRoute: typeof AdminOrderRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminBranchesBranchIdRoute: typeof AdminBranchesBranchIdRoute
   AdminStaffIdRoute: typeof AdminStaffIdRoute
   AdminUsersIdRoute: typeof AdminUsersIdRoute
+  AdminBranchesIndexRoute: typeof AdminBranchesIndexRoute
   AdminStaffIndexRoute: typeof AdminStaffIndexRoute
   AdminUsersIndexRoute: typeof AdminUsersIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
-  AdminBranchesRoute: AdminBranchesRouteWithChildren,
   AdminOrderRoute: AdminOrderRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminRewardsRoute: AdminRewardsRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminBranchesBranchIdRoute: AdminBranchesBranchIdRoute,
   AdminStaffIdRoute: AdminStaffIdRoute,
   AdminUsersIdRoute: AdminUsersIdRoute,
+  AdminBranchesIndexRoute: AdminBranchesIndexRoute,
   AdminStaffIndexRoute: AdminStaffIndexRoute,
   AdminUsersIndexRoute: AdminUsersIndexRoute,
 }
@@ -411,6 +421,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClientCartRoute: ClientCartRoute,
   ClientLoyaltyRoute: ClientLoyaltyRoute,
   ClientMenuRoute: ClientMenuRoute,
+  ClientReviewRoute: ClientReviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

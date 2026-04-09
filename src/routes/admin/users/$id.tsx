@@ -14,15 +14,16 @@ import {
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
-import { RewardCard } from "@/components/ui/reward-card";
+import { RewardCard } from "@/features/rewards/components/reward-card";
 import {
   useGetV1Branches,
   useGetV1Rewards,
+  useGetV1RewardsUserUserIdHistory,
   useGetV1UsersUserId,
   usePostV1RewardsRedeem,
   usePostV1RewardsVisit,
 } from "@/lib/api";
-import type { RewardSchema } from "@/lib/schemas";
+import type { ReedemRewardDto, RewardSchema } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/users/$id")({
   component: RouteComponent,
@@ -44,11 +45,20 @@ function RouteComponent() {
   });
 
   const { data: rewardsData, isLoading: isLoadingRewards } = useGetV1Rewards();
+
+  const {
+    data: historyData,
+    isLoading: isLoadingHistory,
+    mutate: mutateHistory,
+  } = useGetV1RewardsUserUserIdHistory(params.id);
+
   const { data: branchesData } = useGetV1Branches();
 
   const user = data && data.status === 200 ? data.data : null;
   const rewards =
     rewardsData && rewardsData.status === 200 ? rewardsData.data : [];
+  const history =
+    historyData && historyData.status === 200 ? historyData.data : [];
   const branches =
     branchesData && branchesData.status === 200 ? branchesData.data : [];
 
@@ -65,7 +75,7 @@ function RouteComponent() {
     );
   }
 
-  if ((isLoading || isLoadingRewards) && !user) {
+  if ((isLoading || isLoadingRewards || isLoadingHistory) && !user) {
     return (
       <div className="min-h-screen bg-background-light">
         <div className="p-8">
@@ -218,20 +228,27 @@ function RouteComponent() {
                   Recompensas Disponibles
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {rewards.map((reward) => (
-                    <RewardCard
-                      key={reward.id}
-                      title={reward.name}
-                      description={reward.description}
-                      icon={Utensils}
-                      isAvailable={
-                        reward.status === "active" &&
-                        user.totalVisits >= Number(reward.cost)
-                      }
-                      points={Number(reward.cost)}
-                      onRedeem={() => setSelectedReward(reward)}
-                    />
-                  ))}
+                  {rewards.map((reward) => {
+                    const isRedeemed = history.some(
+                      (h) => h.rewardId === reward.id && h.userId === user.id,
+                    );
+                    const hasPoints = user.totalVisits >= Number(reward.cost);
+
+                    return (
+                      <RewardCard
+                        key={reward.id}
+                        title={reward.name}
+                        description={reward.description}
+                        icon={Utensils}
+                        isRedeemed={isRedeemed}
+                        isAvailable={
+                          reward.status === "active" && hasPoints && !isRedeemed
+                        }
+                        points={Number(reward.cost)}
+                        onRedeem={() => setSelectedReward(reward)}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </main>
@@ -269,7 +286,7 @@ function RouteComponent() {
           reward={selectedReward}
           user={user}
           branchId={branches[0]?.id}
-          onSave={(newBalance) => {
+          onSave={(data) => {
             mutate((prev) => {
               if (!prev) return prev;
 
@@ -278,8 +295,21 @@ function RouteComponent() {
                   ...prev,
                   data: {
                     ...prev.data,
-                    totalVisits: newBalance,
+                    totalVisits: Number(data.newBalance),
                   },
+                };
+              }
+
+              return prev;
+            });
+
+            mutateHistory((prev) => {
+              if (!prev) return prev;
+
+              if (prev.status === 200) {
+                return {
+                  ...prev,
+                  data: [...prev.data, data.redemption],
                 };
               }
 
@@ -416,7 +446,7 @@ function RedeemRewardModal({
   reward: RewardSchema;
   user: { id: string; firstName: string; lastName: string };
   branchId?: string;
-  onSave?: (newBalance: number) => void;
+  onSave?: (data: ReedemRewardDto) => void;
 }) {
   const { trigger, isMutating } = usePostV1RewardsRedeem();
 
@@ -434,7 +464,7 @@ function RedeemRewardModal({
 
     if (result.status === 200) {
       toast.success("Recompensa canjeada con éxito");
-      onSave?.(Number(result.data.newBalance));
+      onSave?.(result.data);
       onClose();
     } else {
       toast.error(result.data.message || "Error al canjear recompensa");

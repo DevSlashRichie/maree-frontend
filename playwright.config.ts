@@ -18,6 +18,7 @@ export default defineConfig({
     },
     {
       name: "admin",
+      dependencies: ["setup"],
       testDir: "./tests/admin",
       testMatch: /^(?!.*admin-setup).*\.spec\.ts$/,
       use: {

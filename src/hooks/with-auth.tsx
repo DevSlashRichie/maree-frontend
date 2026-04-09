@@ -13,29 +13,58 @@ import { useAuthStore } from "./use-auth-store";
  */
 export async function requireAuth({
   location,
-  navigateTo = "/",
+  navigateTo = "/login",
 }: {
   location: { href: string };
   navigateTo?: string;
 }) {
-  const { isAuthenticated, setAuth, clearAuth, isInDev } =
-    useAuthStore.getState();
+  const {
+    isAuthenticated,
+    setAuth,
+    clearAuth,
+    isInDev,
+    checkSession,
+    expiresAt,
+    isInitialChecked,
+    setInitialChecked,
+  } = useAuthStore.getState();
 
   // Recommendation 6: Keep Dev Environment Bypass (Intentionally bypassing in dev)
   if (isInDev) {
     return;
   }
 
-  // Already authenticated in store
+  // Check locally stored session expiration
   if (isAuthenticated) {
-    return;
+    if (checkSession()) {
+      return;
+    }
+  }
+
+  // If we haven't checked the session yet (e.g., direct link entry), try now
+  if (!isInitialChecked) {
+    try {
+      const { data: user, status } = await getV1UsersMe();
+
+      if (user && status === 200) {
+        setAuth(user);
+        console.info("Session validated via initial check in beforeLoad");
+        return;
+      }
+    } catch (err) {
+      console.debug("Initial session check failed", err);
+    } finally {
+      setInitialChecked();
+    }
   }
 
   try {
     const { data: user, status } = await getV1UsersMe();
 
     if (user && status === 200) {
-      setAuth(user);
+      // Note: We don't have the expiresAt here from getV1UsersMe usually
+      // but we update the actor.
+      setAuth(user, expiresAt || undefined);
       console.info("Session validated via beforeLoad");
       return;
     } else {
@@ -46,8 +75,6 @@ export async function requireAuth({
     clearAuth();
   }
 
-  // Recommendation 2: Use Router's location instead of global window.location
-  // Recommendation 1: Throw redirect to move the guard to the Router layer
   throw redirect({
     to: navigateTo,
     search: {
