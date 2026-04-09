@@ -49,9 +49,7 @@ export function RewardCard({
           </span>
         )}
       </div>
-      <h4 className="font-display text-lg text-charcoal mb-1">
-        {title}
-      </h4>
+      <h4 className="font-display text-lg text-charcoal mb-1">{title}</h4>
       <p className="text-xs text-gray-500 mb-4 line-clamp-2">{description}</p>
       {isRedeemed ? (
         <button
