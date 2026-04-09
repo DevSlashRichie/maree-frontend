@@ -1,69 +1,42 @@
+import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
-  Cake,
   Calendar,
-  Coffee,
+  Check,
   DollarSign,
-  IceCream,
   Phone,
+  Plus,
   User as UserIcon,
   Users,
   Utensils,
-  UtensilsCrossed,
 } from "lucide-react";
-import { RewardCard } from "@/components/ui/reward-card";
-import { useGetV1UsersUserId } from "@/lib/api";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { Modal } from "@/components/ui/modal";
+import { RewardCard } from "@/features/rewards/components/reward-card";
+import {
+  useGetV1Branches,
+  useGetV1Rewards,
+  useGetV1RewardsUserUserIdHistory,
+  useGetV1UsersUserId,
+  usePostV1RewardsRedeem,
+  usePostV1RewardsVisit,
+} from "@/lib/api";
+import type { ReedemRewardDto, RewardSchema } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/users/$id")({
   component: RouteComponent,
 });
 
-const REWARDS_DATA = [
-  {
-    id: 1,
-    title: "Crepa Dulce Gratis",
-    description:
-      "Elige cualquier crepa dulce de nuestro menú clásico para celebrar.",
-    icon: UtensilsCrossed,
-    isAvailable: true,
-  },
-  {
-    id: 2,
-    title: "Café de Especialidad",
-    description: "Un café latte o cappuccino mediano preparado por baristas.",
-    icon: Coffee,
-    isAvailable: false,
-    points: 50,
-  },
-  {
-    id: 3,
-    title: "Bebida de Temporada",
-    description: "Prueba nuestra bebida especial del mes totalmente gratis.",
-    icon: IceCream,
-    isAvailable: true,
-  },
-  {
-    id: 4,
-    title: "Postre Especial",
-    description: "Un postre artesanal hecho en casa para endulzar tu día.",
-    icon: Cake,
-    isAvailable: false,
-    points: 75,
-  },
-  {
-    id: 5,
-    title: "Combo Pareja",
-    description: "Descuento especial en nuestro combo para dos personas.",
-    icon: Utensils,
-    isAvailable: false,
-    points: 150,
-  },
-];
-
 function RouteComponent() {
   const params = Route.useParams();
-  const { data, isLoading, error } = useGetV1UsersUserId(params.id, {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedReward, setSelectedReward] = useState<RewardSchema | null>(
+    null,
+  );
+
+  const { data, isLoading, error, mutate } = useGetV1UsersUserId(params.id, {
     swr: {
       keepPreviousData: true,
       revalidateOnFocus: false,
@@ -71,7 +44,23 @@ function RouteComponent() {
     },
   });
 
+  const { data: rewardsData, isLoading: isLoadingRewards } = useGetV1Rewards();
+
+  const {
+    data: historyData,
+    isLoading: isLoadingHistory,
+    mutate: mutateHistory,
+  } = useGetV1RewardsUserUserIdHistory(params.id);
+
+  const { data: branchesData } = useGetV1Branches();
+
   const user = data && data.status === 200 ? data.data : null;
+  const rewards =
+    rewardsData && rewardsData.status === 200 ? rewardsData.data : [];
+  const history =
+    historyData && historyData.status === 200 ? historyData.data : [];
+  const branches =
+    branchesData && branchesData.status === 200 ? branchesData.data : [];
 
   if (error || (data && data.status !== 200)) {
     return (
@@ -86,7 +75,7 @@ function RouteComponent() {
     );
   }
 
-  if (isLoading && !user) {
+  if ((isLoading || isLoadingRewards || isLoadingHistory) && !user) {
     return (
       <div className="min-h-screen bg-background-light">
         <div className="p-8">
@@ -202,9 +191,19 @@ function RouteComponent() {
                       Total Visitas
                     </span>
                   </div>
-                  <p className="text-text-main font-medium ml-8">
-                    {user.totalVisits} visitas
-                  </p>
+                  <div className="flex items-center justify-between ml-8">
+                    <p className="text-text-main font-medium">
+                      {user.totalVisits} visitas
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(true)}
+                      className="text-sm bg-gray-100 hover:bg-gray-200 text-text-main px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-medium"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Añadir
+                    </button>
+                  </div>
                 </div>
 
                 <div className="p-6">
@@ -229,22 +228,274 @@ function RouteComponent() {
                   Recompensas Disponibles
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {REWARDS_DATA.map((reward) => (
-                    <RewardCard
-                      key={reward.id}
-                      title={reward.title}
-                      description={reward.description}
-                      icon={reward.icon}
-                      isAvailable={reward.isAvailable}
-                      points={reward.points}
-                    />
-                  ))}
+                  {rewards.map((reward) => {
+                    const isRedeemed = history.some(
+                      (h) => h.rewardId === reward.id && h.userId === user.id,
+                    );
+                    const hasPoints = user.totalVisits >= Number(reward.cost);
+
+                    return (
+                      <RewardCard
+                        key={reward.id}
+                        title={reward.name}
+                        description={reward.description}
+                        icon={Utensils}
+                        isRedeemed={isRedeemed}
+                        isAvailable={
+                          reward.status === "active" && hasPoints && !isRedeemed
+                        }
+                        points={Number(reward.cost)}
+                        onRedeem={() => setSelectedReward(reward)}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </main>
           </div>
         </div>
       </div>
+
+      <AddVisitsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        user={user}
+        onSave={(amount) => {
+          mutate((prev) => {
+            if (!prev) return prev;
+
+            if (prev.status === 200) {
+              return {
+                ...prev,
+                data: {
+                  ...prev.data,
+                  totalVisits: amount,
+                },
+              };
+            }
+
+            return prev;
+          });
+        }}
+      />
+
+      {selectedReward && (
+        <RedeemRewardModal
+          isOpen={!!selectedReward}
+          onClose={() => setSelectedReward(null)}
+          reward={selectedReward}
+          user={user}
+          branchId={branches[0]?.id}
+          onSave={(data) => {
+            mutate((prev) => {
+              if (!prev) return prev;
+
+              if (prev.status === 200) {
+                return {
+                  ...prev,
+                  data: {
+                    ...prev.data,
+                    totalVisits: Number(data.newBalance),
+                  },
+                };
+              }
+
+              return prev;
+            });
+
+            mutateHistory((prev) => {
+              if (!prev) return prev;
+
+              if (prev.status === 200) {
+                return {
+                  ...prev,
+                  data: [...prev.data, data.redemption],
+                };
+              }
+
+              return prev;
+            });
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+function AddVisitsModal({
+  isOpen,
+  onClose,
+  user,
+  onSave,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  user: { id: string; firstName: string; lastName: string };
+  onSave?: (newAmount: number) => void;
+}) {
+  const { trigger } = usePostV1RewardsVisit();
+
+  const form = useForm({
+    defaultValues: {
+      visits: 1,
+    },
+    onSubmit: async ({ value }) => {
+      const result = await trigger({
+        userId: user.id,
+        amount: value.visits,
+      });
+
+      if (result.status === 200) {
+        onSave?.(Number(result.data.newBalance));
+      } else {
+        toast.error(result.data.message);
+      }
+
+      form.reset();
+      onClose();
+    },
+  });
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Añadir Visitas"
+      description={`¿Cuántas visitas deseas añadir para ${user.firstName} ${user.lastName}?`}
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+        }}
+        className="mt-4 flex flex-col gap-4"
+      >
+        <div>
+          <label
+            htmlFor="visits"
+            className="block text-sm font-medium text-text-main/80 mb-1"
+          >
+            Número de Visitas
+          </label>
+          <form.Field
+            name="visits"
+            validators={{
+              onChange: ({ value }) =>
+                value < 1 ? "Debe ser al menos 1 visita" : undefined,
+            }}
+          >
+            {(field) => (
+              <>
+                <input
+                  id="visits"
+                  type="number"
+                  min="1"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(Number(e.target.value))}
+                  onBlur={field.handleBlur}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-colors"
+                />
+                {field.state.meta.errors ? (
+                  <p className="text-red-500 text-xs mt-1">
+                    {field.state.meta.errors.join(", ")}
+                  </p>
+                ) : null}
+              </>
+            )}
+          </form.Field>
+        </div>
+        <div className="flex justify-end gap-3 mt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl text-text-main/60 hover:text-text-main hover:bg-gray-50 transition-colors font-medium text-sm"
+          >
+            Cancelar
+          </button>
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+          >
+            {([canSubmit, isSubmitting]) => (
+              <button
+                type="submit"
+                disabled={!canSubmit || isSubmitting}
+                className="bg-secondary text-text-main px-4 py-2 rounded-xl font-medium hover:bg-secondary/90 transition-colors flex items-center justify-center text-sm disabled:opacity-50"
+              >
+                <Plus className="w-4 h-4 mr-1.5" />
+                {isSubmitting ? "Añadiendo..." : "Añadir Visitas"}
+              </button>
+            )}
+          </form.Subscribe>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+function RedeemRewardModal({
+  isOpen,
+  onClose,
+  reward,
+  user,
+  branchId,
+  onSave,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  reward: RewardSchema;
+  user: { id: string; firstName: string; lastName: string };
+  branchId?: string;
+  onSave?: (data: ReedemRewardDto) => void;
+}) {
+  const { trigger, isMutating } = usePostV1RewardsRedeem();
+
+  const handleRedeem = async () => {
+    if (!branchId) {
+      toast.error("No hay sucursales disponibles para realizar el canje");
+      return;
+    }
+
+    const result = await trigger({
+      userId: user.id,
+      rewardId: reward.id,
+      branchId,
+    });
+
+    if (result.status === 200) {
+      toast.success("Recompensa canjeada con éxito");
+      onSave?.(result.data);
+      onClose();
+    } else {
+      toast.error(result.data.message || "Error al canjear recompensa");
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Confirmar Canje"
+      description={`¿Estás seguro de que deseas canjear "${reward.name}" por ${reward.cost} visitas para ${user.firstName} ${user.lastName}?`}
+    >
+      <div className="flex justify-end gap-3 mt-6">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-2 rounded-xl text-text-main/60 hover:text-text-main hover:bg-gray-50 transition-colors font-medium text-sm"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          onClick={handleRedeem}
+          disabled={isMutating}
+          className="bg-secondary text-text-main px-4 py-2 rounded-xl font-medium hover:bg-secondary/90 transition-colors flex items-center justify-center text-sm disabled:opacity-50"
+        >
+          <Check className="w-4 h-4 mr-1.5" />
+          {isMutating ? "Canjeando..." : "Confirmar Canje"}
+        </button>
+      </div>
+    </Modal>
   );
 }
