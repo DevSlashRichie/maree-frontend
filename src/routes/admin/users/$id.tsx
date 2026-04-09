@@ -14,7 +14,7 @@ import {
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
-import { RewardCard } from "@/components/ui/reward-card";
+import { RewardCard } from "@/features/rewards/components/reward-card";
 import {
   useGetV1Branches,
   useGetV1Rewards,
