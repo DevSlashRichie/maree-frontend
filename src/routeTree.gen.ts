@@ -17,9 +17,11 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
 import { Route as AdminReportsRouteImport } from './routes/admin/reports'
 import { Route as AdminOrderRouteImport } from './routes/admin/order'
+import { Route as AdminCreateProductRouteImport } from './routes/admin/create-product'
 import { Route as ClientReviewRouteImport } from './routes/_client/review'
 import { Route as ClientMenuRouteImport } from './routes/_client/menu'
 import { Route as ClientLoyaltyRouteImport } from './routes/_client/loyalty'
+import { Route as ClientCustomizeProductRouteImport } from './routes/_client/customize-product'
 import { Route as ClientCartRouteImport } from './routes/_client/cart'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminStaffIndexRouteImport } from './routes/admin/staff/index'
@@ -68,6 +70,11 @@ const AdminOrderRoute = AdminOrderRouteImport.update({
   path: '/order',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminCreateProductRoute = AdminCreateProductRouteImport.update({
+  id: '/create-product',
+  path: '/create-product',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const ClientReviewRoute = ClientReviewRouteImport.update({
   id: '/_client/review',
   path: '/review',
@@ -81,6 +88,11 @@ const ClientMenuRoute = ClientMenuRouteImport.update({
 const ClientLoyaltyRoute = ClientLoyaltyRouteImport.update({
   id: '/_client/loyalty',
   path: '/loyalty',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientCustomizeProductRoute = ClientCustomizeProductRouteImport.update({
+  id: '/_client/customize-product',
+  path: '/customize-product',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClientCartRoute = ClientCartRouteImport.update({
@@ -125,9 +137,11 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/cart': typeof ClientCartRoute
+  '/customize-product': typeof ClientCustomizeProductRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
   '/review': typeof ClientReviewRoute
+  '/admin/create-product': typeof AdminCreateProductRoute
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
@@ -144,9 +158,11 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/cart': typeof ClientCartRoute
+  '/customize-product': typeof ClientCustomizeProductRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
   '/review': typeof ClientReviewRoute
+  '/admin/create-product': typeof AdminCreateProductRoute
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
@@ -165,9 +181,11 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/_client/cart': typeof ClientCartRoute
+  '/_client/customize-product': typeof ClientCustomizeProductRoute
   '/_client/loyalty': typeof ClientLoyaltyRoute
   '/_client/menu': typeof ClientMenuRoute
   '/_client/review': typeof ClientReviewRoute
+  '/admin/create-product': typeof AdminCreateProductRoute
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
@@ -187,9 +205,11 @@ export interface FileRouteTypes {
     | '/about'
     | '/login'
     | '/cart'
+    | '/customize-product'
     | '/loyalty'
     | '/menu'
     | '/review'
+    | '/admin/create-product'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
@@ -206,9 +226,11 @@ export interface FileRouteTypes {
     | '/about'
     | '/login'
     | '/cart'
+    | '/customize-product'
     | '/loyalty'
     | '/menu'
     | '/review'
+    | '/admin/create-product'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
@@ -226,9 +248,11 @@ export interface FileRouteTypes {
     | '/about'
     | '/login'
     | '/_client/cart'
+    | '/_client/customize-product'
     | '/_client/loyalty'
     | '/_client/menu'
     | '/_client/review'
+    | '/admin/create-product'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
@@ -247,6 +271,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   LoginRoute: typeof LoginRoute
   ClientCartRoute: typeof ClientCartRoute
+  ClientCustomizeProductRoute: typeof ClientCustomizeProductRoute
   ClientLoyaltyRoute: typeof ClientLoyaltyRoute
   ClientMenuRoute: typeof ClientMenuRoute
   ClientReviewRoute: typeof ClientReviewRoute
@@ -310,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrderRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/create-product': {
+      id: '/admin/create-product'
+      path: '/create-product'
+      fullPath: '/admin/create-product'
+      preLoaderRoute: typeof AdminCreateProductRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/_client/review': {
       id: '/_client/review'
       path: '/review'
@@ -329,6 +361,13 @@ declare module '@tanstack/react-router' {
       path: '/loyalty'
       fullPath: '/loyalty'
       preLoaderRoute: typeof ClientLoyaltyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_client/customize-product': {
+      id: '/_client/customize-product'
+      path: '/customize-product'
+      fullPath: '/customize-product'
+      preLoaderRoute: typeof ClientCustomizeProductRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_client/cart': {
@@ -384,6 +423,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteRouteChildren {
+  AdminCreateProductRoute: typeof AdminCreateProductRoute
   AdminOrderRoute: typeof AdminOrderRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
@@ -397,6 +437,7 @@ interface AdminRouteRouteChildren {
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminCreateProductRoute: AdminCreateProductRoute,
   AdminOrderRoute: AdminOrderRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminRewardsRoute: AdminRewardsRoute,
@@ -419,6 +460,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   LoginRoute: LoginRoute,
   ClientCartRoute: ClientCartRoute,
+  ClientCustomizeProductRoute: ClientCustomizeProductRoute,
   ClientLoyaltyRoute: ClientLoyaltyRoute,
   ClientMenuRoute: ClientMenuRoute,
   ClientReviewRoute: ClientReviewRoute,
