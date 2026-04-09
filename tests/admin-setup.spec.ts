@@ -1,21 +1,40 @@
-import fs from "node:fs";
 import { test as setup } from "@playwright/test";
 
 const adminAuthFile = ".auth/admin.json";
 
-setup("authenticate as admin", async ({ page, context }) => {
-  await page.goto("/login");
+setup("authenticate as admin", async ({ page }) => {
+  await page.goto("/login?next=/admin");
 
   await page.fill('input[name="phone"]', "4427536211");
-  await page.click('button[type="submit"]');
+
+  // Wait for login request and response
+  await Promise.all([
+    page.waitForResponse(
+      (res) => {
+        return (
+          res.url().includes("/auth/login") ||
+          res.url().includes("localhost:8383/auth/login")
+        );
+      },
+      {
+        timeout: 15000,
+      },
+    ),
+    (async () => {
+      await page.getByLabel("Teléfono").fill("4427536211");
+      await page.getByRole("button", { name: /Continuar/i }).click();
+    })(),
+  ]);
+
+  // Wait for navigation after login
+  await page.waitForFunction(() =>
+    window.location.pathname.startsWith("/admin"),
+  );
 
   await page.waitForLoadState("networkidle");
-  await page.waitForTimeout(1000);
 
-  await page.goto("/admin");
-  await page.waitForLoadState("networkidle");
+  // Log URL to see if redirected
+  console.log("Current URL:", page.url());
 
-  const state = await context.storageState();
-  fs.mkdirSync(".auth", { recursive: true });
-  fs.writeFileSync(adminAuthFile, JSON.stringify(state));
+  await page.context().storageState({ path: adminAuthFile });
 });
