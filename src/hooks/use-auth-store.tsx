@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { create } from "zustand";
 import type { Actor } from "@/lib/schemas";
 
@@ -7,28 +8,58 @@ const IS_DEV = import.meta.env.VITE_DISABLE_AUTH === "true";
 interface AuthState {
   actor: Actor | null;
   isAuthenticated: boolean;
-  setAuth: (actor: Actor) => void;
+  expiresAt: string | null;
+  isInitialChecked: boolean;
+  setAuth: (actor: Actor, expiresAt?: string) => void;
   clearAuth: () => void;
-  login: (role?: "administrator") => void;
-  logout: () => Promise<void>;
+  setInitialChecked: () => void;
+  checkSession: () => boolean;
   isInDev: boolean;
 }
 
-export const useAuthStore = create<AuthState>()((set) => ({
+const SESSION_EXPIRY_KEY = "maree_session_expiry";
+
+export const useAuthStore = create<AuthState>()((set, get) => ({
   actor: null,
   isAuthenticated: false,
-  setAuth: (actor) => set({ actor, isAuthenticated: true }),
-  clearAuth: () => set({ actor: null, isAuthenticated: false }),
-  login: () => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL;
-    window.location.href = `${baseUrl}/auth/v1/login`;
-  },
-  logout: async () => {
-    // Clear local state
-    set({ actor: null, isAuthenticated: false });
+  expiresAt: localStorage.getItem(SESSION_EXPIRY_KEY),
+  isInitialChecked: false,
+  setAuth: (actor, expiresAt) => {
+    if (expiresAt) {
+      localStorage.setItem(SESSION_EXPIRY_KEY, expiresAt);
+    }
 
-    const baseUrl = import.meta.env.VITE_API_BASE_URL;
-    window.location.href = `${baseUrl}/auth/v1/logout`;
+    set({
+      actor,
+      isAuthenticated: true,
+      expiresAt: expiresAt || localStorage.getItem(SESSION_EXPIRY_KEY) || null,
+      isInitialChecked: true,
+    });
+  },
+  clearAuth: () => {
+    localStorage.removeItem(SESSION_EXPIRY_KEY);
+
+    set({
+      actor: null,
+      isAuthenticated: false,
+      expiresAt: null,
+      isInitialChecked: true,
+    });
+  },
+  setInitialChecked: () => set({ isInitialChecked: true }),
+  checkSession: () => {
+    const { expiresAt, isAuthenticated, clearAuth } = get();
+    if (!expiresAt) return isAuthenticated;
+
+    const expiryDate = new Date(expiresAt);
+    if (expiryDate <= new Date()) {
+      console.info("Session expired based on expiresAt");
+      toast.error("Sesión expirada.");
+      clearAuth();
+      return false;
+    }
+
+    return isAuthenticated;
   },
   isInDev: IS_DEV,
 }));

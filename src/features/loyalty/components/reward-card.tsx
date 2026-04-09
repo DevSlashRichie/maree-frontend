@@ -1,3 +1,4 @@
+import cn from "classnames";
 import type { LucideIcon } from "lucide-react";
 
 interface RewardCardProps {
@@ -21,22 +22,23 @@ export function RewardCard({
 }: RewardCardProps) {
   return (
     <div
-      className={`bg-card-light p-5 rounded-xl border border-accent/30 hover:shadow-md transition-shadow group cursor-pointer ${
-        !isAvailable || isRedeemed ? "opacity-75" : ""
-      }`}
+      className={cn(
+        "bg-card-light p-5 rounded-xl border border-accent/30 hover:shadow-md transition-shadow group cursor-pointer",
+        { "opacity-75": !isAvailable || isRedeemed },
+      )}
     >
       <div className="flex justify-between items-start mb-4">
         <div
-          className={`p-3 rounded-full ${
-            isAvailable
-              ? "bg-secondary/20 text-charcoal"
-              : "bg-primary/20 text-primary"
-          }`}
+          className={cn("p-3 rounded-full", {
+            "bg-secondary/20 text-charcoal": isAvailable && !isRedeemed,
+            "bg-primary/20 text-primary": !isAvailable && !isRedeemed,
+            "bg-gray-100 text-gray-400": isRedeemed,
+          })}
         >
           <Icon className="w-5 h-5" />
         </div>
         {isRedeemed ? (
-          <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-bold uppercase tracking-wider">
+          <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-bold uppercase tracking-wider">
             Canjeado
           </span>
         ) : isAvailable ? (
@@ -55,9 +57,9 @@ export function RewardCard({
         <button
           type="button"
           disabled
-          className="w-full py-2 bg-gray-100 text-gray-400 rounded-lg text-xs font-bold uppercase tracking-widest cursor-not-allowed"
+          className="w-full py-2 bg-gray-50 text-gray-400 rounded-lg text-xs font-bold uppercase tracking-widest cursor-not-allowed border border-gray-100"
         >
-          Canjeado
+          Ya Canjeado
         </button>
       ) : isAvailable ? (
         <button
