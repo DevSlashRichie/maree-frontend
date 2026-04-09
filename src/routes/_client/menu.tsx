@@ -30,8 +30,6 @@ function RouteComponent() {
 
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
-  const categories = categoriesData?.data?.categories ?? [];
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: categories are required.
   useEffect(() => {
     const observerOptions = {
@@ -94,6 +92,8 @@ function RouteComponent() {
     );
   }
 
+  const categories = categoriesData?.data?.categories ?? [];
+
   const variants = (productsData?.data?.variants ??
     []) as GetV1ProductsVariants200VariantsItem[];
 
@@ -155,11 +155,6 @@ function RouteComponent() {
                     <Subheading className="text-4xl md:text-4xl font-display lowercase italic tracking-tight text-gray-900">
                       {category.name}
                     </Subheading>
-                    {category.description && (
-                      <p className="max-w-xl text-sm md:text-base text-text-main/50 font-light leading-relaxed italic mt-2 border-t border-pink-soft/10 pt-4">
-                        {category.description}
-                      </p>
-                    )}
                   </div>
                 </div>
 
