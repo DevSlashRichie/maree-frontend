@@ -7,6 +7,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { Check, ChevronDown, MapPin, Settings } from "lucide-react";
 import { Fragment, useState } from "react";
+import { useSetBranch } from "@/hooks/use-set-branch";
 import { useGetV1Branches } from "@/lib/api";
 
 export interface Branch {
@@ -17,6 +18,8 @@ export interface Branch {
 
 export function BranchSelector() {
   const navigate = useNavigate();
+
+  const setBranch = useSetBranch((state) => state.setBranch);
 
   const { data, isLoading } = useGetV1Branches();
 
@@ -90,11 +93,7 @@ export function BranchSelector() {
                         key={branch.id}
                         type="button"
                         onClick={() => {
-                          setSelected(branch);
-                          navigate({
-                            to: "/admin/branches/$branchId",
-                            params: { branchId: branch.id },
-                          });
+                          setBranch(branch);
                           close();
                         }}
                         className={`
