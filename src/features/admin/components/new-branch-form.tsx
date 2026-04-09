@@ -116,13 +116,18 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
         >
           Estado
         </label>
-        <input
+        <select
           id="state"
           value={form.state}
           onChange={(e) => setForm({ ...form, state: e.target.value })}
           className="px-4 py-2.5 rounded-xl border border-secondary/20 text-sm font-semibold text-text-main outline-none focus:border-secondary"
-          placeholder="Open/Close"
-        />
+        >
+          <option value="" disabled>
+            Selecciona un estado
+          </option>
+          <option value="open">Open</option>
+          <option value="close">Close</option>
+        </select>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -212,7 +217,7 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
 
             const res = await createBranch({
               name: form.name,
-              state: form.state,
+              state: form.state === "open" ? "active" : "inactive",
               schedules: form.schedules.map(({ id, ...rest }) => ({
                 ...rest,
                 timezone: "America/Mexico_City",
