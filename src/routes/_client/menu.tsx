@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FoodCard } from "@/components/card";
 import { Subheading } from "@/components/typography";
 import { CategoryFilters } from "@/layouts/category-filters";
