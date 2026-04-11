@@ -1,53 +1,102 @@
 import type { Category } from "@/features/products/components/category-picker";
 
-export function findCategory(tree: Category[], id: string): Category | null {
-  for (const node of tree) {
-    if (node.id === id) return node;
-    if (node.children) {
-      const found = findCategory(node.children, id);
-      if (found) return found;
-    }
-  }
-  return null;
+interface IngredientItem {
+  id: string;
+  name: string;
+  image?: string;
+  categoryId: string;
 }
 
-export function findRootCategory(
+interface IngredientGroup {
+  path: string[];
+  items: IngredientItem[];
+}
+
+export interface IngredientOption {
+  id: string;
+  productName: string;
+  categoryName: string;
+  image?: string;
+}
+
+function dedupeById<T extends { id: string }>(items: T[]) {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+}
+
+export function normalizeText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .trim()
+    .toLowerCase();
+}
+
+export function getBranchKey(name: string) {
+  const normalized = normalizeText(name);
+  if (normalized.startsWith("dulc")) return "dulce";
+  if (normalized.startsWith("salad")) return "salado";
+  return normalized;
+}
+
+export function normalizeCategories(
+  payload: Category[] | { categories?: Category[] } | null | undefined,
+): Category[] {
+  if (Array.isArray(payload)) return payload;
+  if (payload && Array.isArray(payload.categories)) return payload.categories;
+  return [];
+}
+
+export function findCategoryPathById(
   tree: Category[],
   id: string,
-): Category | null {
+  currentPath: Category[] = [],
+): Category[] {
   for (const node of tree) {
-    if (node.id === id) return node;
-    if (node.children) {
-      const found = findCategory(node.children, id);
-      if (found) return node;
+    const nextPath = [...currentPath, node];
+    if (node.id === id) return nextPath;
+    if (node.children?.length) {
+      const found = findCategoryPathById(node.children, id, nextPath);
+      if (found.length) return found;
     }
   }
-  return null;
+  return [];
 }
 
-export function collectLeaves(node: Category): Category[] {
-  if (!node.children || node.children.length === 0) return [node];
-  return node.children.flatMap(collectLeaves);
+export function pathIncludesBranch(path: string[], branchKey: string) {
+  return path.some((segment) => getBranchKey(segment) === branchKey);
 }
 
-export function getIngredientGroupsForCategory(
-  tree: Category[],
-  categoryId: string,
-): Category[] {
-  const ingredientRoot = tree.find(
-    (n) => n.name.toLowerCase() === "ingredient",
+export function getVisibleIngredientOptions(
+  groups: IngredientGroup[],
+  variantPath: string[],
+  rootCategoryName: string,
+): IngredientOption[] {
+  const rootKey = getBranchKey(rootCategoryName);
+  const selectedBranchKey = variantPath
+    .map((step) => getBranchKey(step))
+    .find((step) => step === "dulce" || step === "salado");
+
+  const filteredGroups =
+    rootKey === "crepa" && selectedBranchKey
+      ? groups.filter((group) =>
+          pathIncludesBranch(group.path, selectedBranchKey),
+        )
+      : groups;
+
+  return dedupeById(
+    filteredGroups.flatMap((group) => {
+      const categoryName = group.path.at(-1) ?? "Ingrediente";
+      return group.items.map((item) => ({
+        id: item.id,
+        productName: item.name,
+        categoryName,
+        image: item.image,
+      }));
+    }),
   );
-  if (!ingredientRoot || !ingredientRoot.children) return [];
-
-  const variantRoot = findRootCategory(tree, categoryId);
-  if (!variantRoot) return [];
-
-  const variantRootName = variantRoot.name.toLowerCase();
-
-  const matchingGroup = ingredientRoot.children.find(
-    (group) => group.name.toLowerCase() === variantRootName,
-  );
-
-  if (!matchingGroup || !matchingGroup.children) return [];
-  return matchingGroup.children;
 }

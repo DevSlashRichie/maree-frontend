@@ -1,11 +1,18 @@
-import { Plus, X } from "lucide-react";
+import { Minus, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
 import type { Category } from "@/features/products/components/category-picker";
 import {
   useGetV1ProductsCategories,
+  useGetV1ProductsIngredients,
   useGetV1ProductsVariantId,
 } from "@/lib/api";
-import { getIngredientGroupsForCategory } from "./customize-product-utils.tsx";
+import {
+  findCategoryPathById,
+  getVisibleIngredientOptions,
+  type IngredientOption,
+  normalizeCategories,
+  normalizeText,
+} from "./customize-product-utils.tsx";
 
 interface Component {
   id: string;
@@ -16,10 +23,10 @@ interface Component {
 }
 
 interface SelectedExtra {
-  componentId: string;
   productId: string;
   productName: string;
-  price: string;
+  categoryName: string;
+  price: number;
   quantity: number;
 }
 
@@ -27,17 +34,27 @@ interface CustomizeOrderProps {
   variantId: string;
 }
 
+const EXTRA_PRICE = 15;
+
+function formatCurrency(value: number) {
+  return value.toLocaleString("es-MX", { minimumFractionDigits: 2 });
+}
+
 export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
   const { data: variantResponse, isLoading: variantLoading } =
     useGetV1ProductsVariantId(variantId);
   const { data: categoriesResponse, isLoading: categoriesLoading } =
     useGetV1ProductsCategories();
+  const { data: ingredientsResponse, isLoading: ingredientsLoading } =
+    useGetV1ProductsIngredients();
 
   const [removedComponents, setRemovedComponents] = useState<Set<string>>(
     new Set(),
   );
   const [addedExtras, setAddedExtras] = useState<SelectedExtra[]>([]);
   const [notes, setNotes] = useState("");
+  const [ingredientSearch, setIngredientSearch] = useState("");
+  const [showIngredientDropdown, setShowIngredientDropdown] = useState(false);
 
   if (variantLoading || categoriesLoading) {
     return (
@@ -60,20 +77,58 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
     );
   }
 
-  const variant = variantResponse.data;
-  const categories: Category[] = categoriesResponse.data;
-  const ingredientGroups = getIngredientGroupsForCategory(
-    categories,
-    variant.categoryId,
+  const variant = variantResponse.data as {
+    id: string;
+    name: string;
+    image: string | null;
+    price: string;
+    categoryId: string;
+    path?: string[];
+    components: Component[];
+  };
+
+  const categories = normalizeCategories(
+    categoriesResponse.data as Category[] | { categories?: Category[] },
   );
+  const categoryPath = findCategoryPathById(categories, variant.categoryId);
+  const categoryPathNames = categoryPath.map((node) => node.name);
+  const resolvedPath =
+    Array.isArray(variant.path) && variant.path.length > 0
+      ? variant.path
+      : categoryPathNames;
+
+  const currentCategoryName = categoryPath.at(-1)?.name ?? "Sin categoría";
+  const categoryLabel =
+    resolvedPath.length > 0 ? resolvedPath.join(" / ") : currentCategoryName;
+  const rootCategoryName =
+    categoryPath[0]?.name ?? resolvedPath[0] ?? currentCategoryName;
+
+  const ingredientGroups =
+    ingredientsResponse?.status === 200 ? ingredientsResponse.data : [];
+  const ingredientOptions = getVisibleIngredientOptions(
+    ingredientGroups,
+    resolvedPath,
+    rootCategoryName,
+  );
+
+  const filteredIngredients = ingredientOptions.filter((ingredient) => {
+    const query = normalizeText(ingredientSearch);
+    const alreadyAdded = addedExtras.some(
+      (extra) => extra.productId === ingredient.id,
+    );
+    if (alreadyAdded) return false;
+    if (!query) return true;
+    return normalizeText(ingredient.productName).includes(query);
+  });
 
   const activeComponents = variant.components.filter(
-    (c) => !removedComponents.has(c.id),
+    (component) => !removedComponents.has(component.id),
   );
 
-  const basePrice = parseFloat(variant.price);
+  const basePriceValue = Number.parseFloat(variant.price);
+  const basePrice = Number.isFinite(basePriceValue) ? basePriceValue : 0;
   const extrasTotal = addedExtras.reduce(
-    (sum, e) => sum + parseFloat(e.price) * e.quantity,
+    (sum, extra) => sum + extra.price * extra.quantity,
     0,
   );
   const total = basePrice + extrasTotal;
@@ -88,213 +143,303 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
     });
   };
 
-  const addExtra = (cat: Category) => {
+  const addExtra = (ingredient: IngredientOption) => {
     setAddedExtras((prev) => {
-      const existing = prev.find((e) => e.productId === cat.id);
+      const existing = prev.find((extra) => extra.productId === ingredient.id);
       if (existing) {
-        return prev.map((e) =>
-          e.productId === cat.id ? { ...e, quantity: e.quantity + 1 } : e,
+        return prev.map((extra) =>
+          extra.productId === ingredient.id
+            ? { ...extra, quantity: extra.quantity + 1 }
+            : extra,
         );
       }
+
       return [
         ...prev,
         {
-          componentId: "",
-          productId: cat.id,
-          productName: cat.name,
-          price: "15",
+          productId: ingredient.id,
+          productName: ingredient.productName,
+          categoryName: ingredient.categoryName,
+          price: EXTRA_PRICE,
           quantity: 1,
         },
       ];
     });
+
+    setIngredientSearch("");
+    setShowIngredientDropdown(false);
   };
 
-  const removeExtra = (productId: string) => {
-    setAddedExtras((prev) => prev.filter((e) => e.productId !== productId));
+  const increaseExtra = (productId: string) => {
+    setAddedExtras((prev) =>
+      prev.map((extra) =>
+        extra.productId === productId
+          ? { ...extra, quantity: extra.quantity + 1 }
+          : extra,
+      ),
+    );
+  };
+
+  const decreaseExtra = (productId: string) => {
+    setAddedExtras((prev) =>
+      prev
+        .map((extra) =>
+          extra.productId === productId
+            ? { ...extra, quantity: Math.max(0, extra.quantity - 1) }
+            : extra,
+        )
+        .filter((extra) => extra.quantity > 0),
+    );
   };
 
   return (
-    <div className="min-h-screen bg-background-light pb-28">
-      <div className="relative w-full h-72 overflow-hidden">
-        {variant.image ? (
-          <img
-            src={variant.image}
-            alt={variant.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-pink-soft/20" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-0 left-0 px-6 pb-6">
-          <h1 className="font-display text-4xl text-white font-normal m-0">
-            {variant.name}
-          </h1>
-          <p className="text-white/60 text-sm mt-1">
-            {variant.components.length} ingredientes incluidos
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-4 pt-8 flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-2xl font-normal text-text-main m-0">
-              Tu Selección
-            </h2>
-            <span className="font-display text-2xl text-text-main">
-              ${total.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-            </span>
+    <div className="min-h-screen bg-linear-to-b from-background-light via-background-light to-pink-soft/10 pb-64 sm:pb-56">
+      <div className="max-w-3xl mx-auto px-4 pt-4 pb-8 flex flex-col gap-5 md:gap-6">
+        <div className="rounded-3xl overflow-hidden border border-pink-soft/35 bg-card-light shadow-sm">
+          <div className="relative h-52 sm:h-64">
+            {variant.image ? (
+              <img
+                src={variant.image}
+                alt={variant.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-pink-soft/20" />
+            )}
+            <div className="absolute inset-0 bg-linear-to-t from-black/65 via-black/20 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 sm:px-5 sm:pb-5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 m-0">
+                Personaliza tu orden
+              </p>
+              <h1 className="font-display text-3xl sm:text-4xl text-white font-normal m-0 mt-1">
+                {variant.name}
+              </h1>
+              <p className="text-white/75 text-xs sm:text-sm mt-1 m-0">
+                {categoryLabel}
+              </p>
+            </div>
           </div>
-          <hr className="border-pink-soft/20 m-0" />
+
+          <div className="px-4 py-4 sm:px-5 sm:py-5 bg-background-light/70 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-text-main/35 m-0">
+                Precio base
+              </p>
+              <p className="font-display text-xl text-text-main m-0 mt-1">
+                ${formatCurrency(basePrice)}
+              </p>
+            </div>
+            {variant.image && (
+              <a
+                href={variant.image}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-secondary hover:text-secondary/70 transition-colors"
+              >
+                Ver imagen
+              </a>
+            )}
+          </div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-main/30 m-0">
+        <section className="rounded-3xl border border-pink-soft/35 bg-card-light px-4 py-4 sm:px-5 sm:py-5 shadow-sm flex flex-col gap-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-text-main/35 m-0">
             Ingredientes base
           </p>
-          <div className="bg-card-light rounded-2xl border border-pink-soft/40 px-4">
+          <div className="grid grid-cols-1 gap-2">
             {variant.components.map((component) => {
               const isRemoved = removedComponents.has(component.id);
               return (
-                <div
+                <article
                   key={component.id}
-                  className="flex items-center justify-between py-3 border-b border-pink-soft/20 last:border-0"
+                  className={`rounded-2xl border px-3 py-3 transition-colors ${
+                    isRemoved
+                      ? "border-red-200/70 bg-red-50/45"
+                      : "border-pink-soft/30 bg-background-light"
+                  }`}
                 >
-                  <span
-                    className={`text-sm transition-colors ${isRemoved ? "line-through text-text-main/25" : "text-text-main"}`}
-                  >
-                    {component.productName}
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-text-main/40 font-mono">
-                      Incl.
-                    </span>
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p
+                        className={`text-sm m-0 ${
+                          isRemoved
+                            ? "line-through text-text-main/35"
+                            : "text-text-main"
+                        }`}
+                      >
+                        {component.productName}
+                      </p>
+                      <p className="text-[11px] text-text-main/40 m-0 mt-1">
+                        Cantidad base: {component.quantity}
+                      </p>
+                    </div>
                     {component.isRemovable ? (
                       <button
                         type="button"
                         onClick={() => toggleComponent(component)}
-                        className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                        className={`rounded-xl px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-all cursor-pointer ${
                           isRemoved
-                            ? "border-pink-soft/30 bg-background-light text-text-main/30 hover:border-pink-soft/60"
-                            : "border-pink-soft/40 bg-background-light text-text-main/50 hover:border-red-300 hover:text-red-400"
+                            ? "border border-pink-soft/40 text-text-main/60 bg-background-light"
+                            : "border border-red-200 text-red-500 bg-red-50 hover:bg-red-100"
                         }`}
                       >
-                        {isRemoved ? (
-                          <Plus className="w-3 h-3" />
-                        ) : (
-                          <X className="w-3 h-3" />
-                        )}
+                        {isRemoved ? "Reactivar" : "Quitar"}
                       </button>
                     ) : (
-                      <div className="w-6 h-6 rounded-full border border-pink-soft/20 flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 rounded-full bg-pink-soft/30" />
-                      </div>
+                      <span className="text-[11px] text-text-main/35">
+                        Fijo
+                      </span>
                     )}
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
-        </div>
+        </section>
 
-        {ingredientGroups.map((group) => (
-          <div key={group.id} className="flex flex-col gap-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-text-main/30 m-0">
-              {group.name}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {(group.children ?? []).map((ingredient) => {
-                const added = addedExtras.find(
-                  (e) => e.productId === ingredient.id,
-                );
-                return (
-                  <div key={ingredient.id} className="flex items-center gap-1">
+        <section className="rounded-3xl border border-pink-soft/35 bg-card-light px-4 py-4 sm:px-5 sm:py-5 shadow-sm flex flex-col gap-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-text-main/35 m-0">
+            Agregar ingredientes
+          </p>
+
+          {ingredientsLoading ? (
+            <div className="rounded-2xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
+              Cargando ingredientes...
+            </div>
+          ) : ingredientOptions.length === 0 ? (
+            <div className="rounded-2xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
+              No hay ingredientes disponibles para esta categoría.
+            </div>
+          ) : (
+            <div className="relative">
+              <div className="flex items-center gap-2 rounded-xl border border-pink-soft/30 bg-background-light px-3 py-2.5">
+                <Search className="w-4 h-4 text-text-main/30" />
+                <input
+                  type="text"
+                  value={ingredientSearch}
+                  onChange={(event) => {
+                    setIngredientSearch(event.target.value);
+                    setShowIngredientDropdown(true);
+                  }}
+                  onFocus={() => setShowIngredientDropdown(true)}
+                  onBlur={() =>
+                    setTimeout(() => setShowIngredientDropdown(false), 150)
+                  }
+                  placeholder="Buscar ingrediente para agregar"
+                  className="w-full bg-transparent text-sm text-text-main placeholder:text-text-main/30 focus:outline-none"
+                />
+              </div>
+
+              {showIngredientDropdown && filteredIngredients.length > 0 && (
+                <div className="absolute z-20 left-0 right-0 mt-1 max-h-56 overflow-auto rounded-xl border border-pink-soft/30 bg-card-light shadow-sm">
+                  {filteredIngredients.map((ingredient) => (
                     <button
+                      key={ingredient.id}
                       type="button"
-                      onClick={() => addExtra(ingredient)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm transition-all cursor-pointer active:scale-95 ${
-                        added
-                          ? "bg-secondary/10 border-secondary/30 text-secondary"
-                          : "bg-card-light border-pink-soft/40 text-text-main/70 hover:border-pink-soft hover:bg-pink-soft/10 hover:text-text-main"
-                      }`}
+                      onMouseDown={() => addExtra(ingredient)}
+                      className="w-full text-left px-3 py-2.5 border-b border-pink-soft/10 last:border-b-0 hover:bg-pink-soft/10 transition-colors cursor-pointer"
                     >
-                      {added && (
-                        <span className="font-mono text-xs font-bold">
-                          {added.quantity}×
-                        </span>
-                      )}
-                      {ingredient.name}
-                      <span className="text-xs text-text-main/40 font-mono">
-                        +$15
+                      <span className="block text-sm text-text-main">
+                        {ingredient.productName}
+                      </span>
+                      <span className="block text-[11px] text-text-main/35">
+                        {ingredient.categoryName} · +$
+                        {formatCurrency(EXTRA_PRICE)}
                       </span>
                     </button>
-                    {added && (
-                      <button
-                        type="button"
-                        onClick={() => removeExtra(ingredient.id)}
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-text-main/20 hover:text-red-400 transition-colors cursor-pointer"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          )}
 
-        <div className="flex flex-col gap-2">
+          {addedExtras.length > 0 && (
+            <div className="grid grid-cols-1 gap-2 mt-1">
+              {addedExtras.map((extra) => (
+                <article
+                  key={extra.productId}
+                  className="rounded-2xl border border-secondary/20 bg-secondary/5 px-3 py-3"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm text-text-main m-0">
+                        {extra.productName}
+                      </p>
+                      <p className="text-[11px] text-text-main/40 m-0 mt-0.5">
+                        {extra.categoryName} · ${formatCurrency(extra.price)}{" "}
+                        c/u
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => decreaseExtra(extra.productId)}
+                      className="text-text-main/25 hover:text-red-400 transition-colors cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <button
+                      type="button"
+                      onClick={() => decreaseExtra(extra.productId)}
+                      className="w-7 h-7 rounded-lg border border-pink-soft/30 flex items-center justify-center text-text-main/55 hover:text-text-main transition-colors cursor-pointer"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="text-xs font-semibold text-text-main min-w-8 text-center">
+                      {extra.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => increaseExtra(extra.productId)}
+                      className="w-7 h-7 rounded-lg border border-pink-soft/30 flex items-center justify-center text-text-main/55 hover:text-text-main transition-colors cursor-pointer"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-3xl border border-pink-soft/35 bg-card-light px-4 py-4 sm:px-5 sm:py-5 shadow-sm flex flex-col gap-2">
           <label
             htmlFor="notes"
-            className="text-[10px] font-bold uppercase tracking-widest text-text-main/30"
+            className="text-[10px] font-bold uppercase tracking-widest text-text-main/35"
           >
             Notas adicionales
           </label>
           <textarea
             id="notes"
             value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            onChange={(event) => setNotes(event.target.value)}
             placeholder="¿Alguna alergia o petición especial?"
             rows={3}
-            className="w-full bg-card-light border border-pink-soft/30 rounded-xl px-4 py-3 text-sm text-text-main placeholder:text-text-main/25 focus:outline-none focus:border-pink-soft/60 transition-colors resize-none"
+            className="w-full bg-background-light border border-pink-soft/30 rounded-xl px-4 py-3 text-sm text-text-main placeholder:text-text-main/25 focus:outline-none focus:border-pink-soft/60 transition-colors resize-none"
           />
-        </div>
+        </section>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-background-light/90 backdrop-blur-sm border-t border-pink-soft/20 px-4 py-4">
-        <div className="max-w-2xl mx-auto flex items-center gap-4">
-          <div className="flex-1">
-            {addedExtras.length > 0 && (
-              <div className="flex flex-col gap-0.5 mb-1">
-                {addedExtras.map((e) => (
-                  <p
-                    key={e.productId}
-                    className="text-[11px] text-text-main/40 m-0"
-                  >
-                    + {e.productName} ×{e.quantity} — $
-                    {(parseFloat(e.price) * e.quantity).toLocaleString(
-                      "es-MX",
-                      { minimumFractionDigits: 2 },
-                    )}
-                  </p>
-                ))}
-              </div>
-            )}
-            <p className="text-xs text-text-main/40 m-0">
+      <div className="fixed left-0 right-0 z-60 border-t border-pink-soft/30 bg-card-light/95 shadow-[0_-6px_20px_rgba(0,0,0,0.08)] backdrop-blur-sm px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] bottom-18 sm:bottom-0">
+        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-text-main/50 m-0">
               {activeComponents.length} ingrediente
               {activeComponents.length !== 1 ? "s" : ""}
-              {removedComponents.size > 0 &&
-                `, ${removedComponents.size} eliminado${removedComponents.size !== 1 ? "s" : ""}`}
+              {removedComponents.size > 0
+                ? `, ${removedComponents.size} eliminado${removedComponents.size !== 1 ? "s" : ""}`
+                : ""}
+            </p>
+            <p className="text-base font-semibold text-text-main m-0 mt-0.5">
+              Total: ${formatCurrency(total)}
             </p>
           </div>
           <button
             type="button"
-            className="bg-charcoal text-white rounded-xl px-6 py-3 text-[11px] font-bold uppercase tracking-widest hover:bg-charcoal/90 active:scale-[0.99] transition-all cursor-pointer whitespace-nowrap"
+            className="w-full sm:w-auto bg-charcoal text-white rounded-xl px-5 sm:px-6 py-3.5 text-sm font-bold uppercase tracking-wide hover:bg-charcoal/90 active:scale-[0.99] transition-all cursor-pointer whitespace-nowrap"
           >
-            Añadir al Carrito — $
-            {total.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+            Añadir al carrito · ${formatCurrency(total)}
           </button>
         </div>
       </div>
