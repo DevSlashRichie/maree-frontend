@@ -5,6 +5,7 @@ interface IngredientItem {
   name: string;
   image?: string;
   categoryId: string;
+  price?: string;
 }
 
 interface IngredientGroup {
@@ -17,6 +18,7 @@ export interface IngredientOption {
   productName: string;
   categoryName: string;
   image?: string;
+  unitPriceCents: number;
 }
 
 function dedupeById<T extends { id: string }>(items: T[]) {
@@ -34,6 +36,12 @@ export function normalizeText(value: string) {
     .replace(/\p{Diacritic}/gu, "")
     .trim()
     .toLowerCase();
+}
+
+function parsePriceToCents(value?: string) {
+  if (!value) return 0;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 export function getBranchKey(name: string) {
@@ -96,6 +104,7 @@ export function getVisibleIngredientOptions(
         productName: item.name,
         categoryName,
         image: item.image,
+        unitPriceCents: parsePriceToCents(item.price),
       }));
     }),
   );

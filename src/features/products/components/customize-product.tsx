@@ -26,7 +26,7 @@ interface SelectedExtra {
   productId: string;
   productName: string;
   categoryName: string;
-  price: number;
+  unitPriceCents: number;
   quantity: number;
 }
 
@@ -34,10 +34,11 @@ interface CustomizeOrderProps {
   variantId: string;
 }
 
-const EXTRA_PRICE = 15;
-
-function formatCurrency(value: number) {
-  return value.toLocaleString("es-MX", { minimumFractionDigits: 2 });
+function formatCurrencyFromCents(valueInCents: number) {
+  return (valueInCents / 100).toLocaleString("es-MX", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
@@ -125,13 +126,13 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
     (component) => !removedComponents.has(component.id),
   );
 
-  const basePriceValue = Number.parseFloat(variant.price);
-  const basePrice = Number.isFinite(basePriceValue) ? basePriceValue : 0;
-  const extrasTotal = addedExtras.reduce(
-    (sum, extra) => sum + extra.price * extra.quantity,
+  const basePriceValue = Number.parseInt(variant.price, 10);
+  const basePriceCents = Number.isFinite(basePriceValue) ? basePriceValue : 0;
+  const extrasTotalCents = addedExtras.reduce(
+    (sum, extra) => sum + extra.unitPriceCents * extra.quantity,
     0,
   );
-  const total = basePrice + extrasTotal;
+  const totalCents = basePriceCents + extrasTotalCents;
 
   const toggleComponent = (component: Component) => {
     if (!component.isRemovable) return;
@@ -160,7 +161,7 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
           productId: ingredient.id,
           productName: ingredient.productName,
           categoryName: ingredient.categoryName,
-          price: EXTRA_PRICE,
+          unitPriceCents: ingredient.unitPriceCents,
           quantity: 1,
         },
       ];
@@ -226,7 +227,7 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
                 Precio base
               </p>
               <p className="font-display text-xl text-text-main m-0 mt-1">
-                ${formatCurrency(basePrice)}
+                ${formatCurrencyFromCents(basePriceCents)}
               </p>
             </div>
             {variant.image && (
@@ -344,7 +345,7 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
                       </span>
                       <span className="block text-[11px] text-text-main/35">
                         {ingredient.categoryName} · +$
-                        {formatCurrency(EXTRA_PRICE)}
+                        {formatCurrencyFromCents(ingredient.unitPriceCents)}
                       </span>
                     </button>
                   ))}
@@ -366,8 +367,8 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
                         {extra.productName}
                       </p>
                       <p className="text-[11px] text-text-main/40 m-0 mt-0.5">
-                        {extra.categoryName} · ${formatCurrency(extra.price)}{" "}
-                        c/u
+                        {extra.categoryName} · $
+                        {formatCurrencyFromCents(extra.unitPriceCents)} c/u
                       </p>
                     </div>
                     <button
@@ -432,14 +433,14 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
                 : ""}
             </p>
             <p className="text-base font-semibold text-text-main m-0 mt-0.5">
-              Total: ${formatCurrency(total)}
+              Total: ${formatCurrencyFromCents(totalCents)}
             </p>
           </div>
           <button
             type="button"
             className="w-full sm:w-auto bg-charcoal text-white rounded-xl px-5 sm:px-6 py-3.5 text-sm font-bold uppercase tracking-wide hover:bg-charcoal/90 active:scale-[0.99] transition-all cursor-pointer whitespace-nowrap"
           >
-            Añadir al carrito · ${formatCurrency(total)}
+            Añadir al carrito · ${formatCurrencyFromCents(totalCents)}
           </button>
         </div>
       </div>
