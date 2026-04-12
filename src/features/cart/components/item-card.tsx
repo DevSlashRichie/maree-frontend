@@ -1,88 +1,114 @@
-import { Minus, Plus, X } from "lucide-react";
-import { QtyButton } from "./qty-button";
+import { Minus, Pencil, Plus, Trash2 } from "lucide-react";
 
 interface ItemCardProps {
   id: string;
   name: string;
   description?: string;
-  price: number;
+  unitPriceCents: number;
   quantity: number;
   imageUrl: string;
-  modifyLink: string;
   onRemove?: () => void;
   onIncrement?: () => void;
   onDecrement?: () => void;
+  onCustomize?: () => void;
+}
+
+function formatCurrencyFromCents(valueInCents: number) {
+  return (valueInCents / 100).toLocaleString("es-MX", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export function ItemCard({
+  id,
   name,
   description,
-  price,
+  unitPriceCents,
   quantity,
   imageUrl,
-  modifyLink,
   onRemove,
   onIncrement,
   onDecrement,
+  onCustomize,
 }: ItemCardProps) {
+  const lineTotalCents = unitPriceCents * quantity;
+
   return (
-    <div className="relative bg-card-light rounded-2xl border border-pink-soft/40 px-5 py-4 flex items-center gap-5">
-      <div className="group/remove absolute top-3 right-4">
-        <button
-          type="button"
-          onClick={onRemove}
-          className="w-5 h-5 rounded-full bg-white border border-pink-soft/40 flex items-center justify-center text-text-main/30 hover:text-red-400 hover:border-red-300 active:scale-95 transition-all cursor-pointer"
-        >
-          <X className="w-2.5 h-2.5" />
-        </button>
-        <span className="pointer-events-none absolute -top-7 right-0 whitespace-nowrap bg-charcoal text-white text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover/remove:opacity-100 transition-opacity">
-          Eliminar
-        </span>
-      </div>
+    <article
+      className="bg-card-light rounded-2xl border border-pink-soft/35 p-3 sm:p-4 flex flex-col gap-3"
+      data-item-id={id}
+    >
+      <div className="flex items-start gap-3">
+        <img
+          src={imageUrl}
+          alt={name}
+          className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover shrink-0 border border-pink-soft/20"
+        />
 
-      <img
-        src={imageUrl}
-        alt={name}
-        className="w-20 h-20 rounded-full object-cover shrink-0"
-      />
-
-      <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
-        <div>
-          <h3 className="font-display text-lg font-normal text-text-main m-0">
+        <div className="min-w-0 flex-1">
+          <h3 className="font-display text-xl sm:text-2xl font-normal text-text-main m-0 leading-tight">
             {name}
           </h3>
           {description && (
-            <p className="text-sm text-text-main/40 mt-0.5 m-0">
+            <p className="text-xs sm:text-sm text-text-main/55 mt-1 m-0 line-clamp-3">
               {description}
             </p>
           )}
+          <p className="text-xs text-text-main/45 m-0 mt-1.5">
+            Precio unitario: ${formatCurrencyFromCents(unitPriceCents)}
+          </p>
         </div>
-        <a
-          href={modifyLink}
-          className="text-[10px] font-bold uppercase tracking-widest text-secondary mt-3 w-fit no-underline hover:underline"
-        >
-          Modificar
-        </a>
       </div>
 
-      <div className="flex items-center gap-3 shrink-0 self-end pb-1">
-        <QtyButton
-          onClick={onDecrement}
-          icon={<Minus className="w-3 h-3" />}
-          tooltip="Quitar uno"
-        />
-        <span className="font-mono text-sm text-text-main w-4 text-center">
-          {quantity}
-        </span>
-        <QtyButton
-          onClick={onIncrement}
-          icon={<Plus className="w-3 h-3" />}
-          tooltip="Agregar uno"
-        />
-        <span className="font-display text-base text-text-main min-w-[64px] text-right">
-          ${price.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-        </span>
+      <div className="flex items-center justify-between gap-2">
+        <div className="inline-flex items-center gap-2 rounded-xl border border-pink-soft/35 bg-background-light px-2 py-1.5">
+          <button
+            type="button"
+            onClick={onDecrement}
+            disabled={quantity <= 1}
+            className="w-9 h-9 rounded-lg border border-pink-soft/35 bg-white flex items-center justify-center text-text-main/60 hover:text-text-main disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            aria-label="Quitar uno"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+          <span className="text-sm font-semibold text-text-main min-w-7 text-center">
+            {quantity}
+          </span>
+          <button
+            type="button"
+            onClick={onIncrement}
+            className="w-9 h-9 rounded-lg border border-pink-soft/35 bg-white flex items-center justify-center text-text-main/60 hover:text-text-main transition-colors cursor-pointer"
+            aria-label="Agregar uno"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+
+        <p className="font-display text-lg sm:text-xl text-text-main m-0">
+          ${formatCurrencyFromCents(lineTotalCents)}
+        </p>
       </div>
-    </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={onCustomize}
+          disabled={!onCustomize}
+          className="rounded-xl border border-pink-soft/35 bg-background-light px-3 py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-wide text-text-main/60 flex items-center justify-center gap-1.5 disabled:opacity-45 disabled:cursor-not-allowed hover:bg-pink-soft/10 transition-colors cursor-pointer"
+        >
+          <Pencil className="w-3.5 h-3.5" />
+          Personalizar
+        </button>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-wide text-red-500 flex items-center justify-center gap-1.5 hover:bg-red-100 transition-colors cursor-pointer"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          Quitar
+        </button>
+      </div>
+    </article>
   );
 }

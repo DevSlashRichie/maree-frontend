@@ -1,6 +1,8 @@
-import { Minus, Plus, Search, X } from "lucide-react";
-import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { Check, Minus, Plus, Search, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { Category } from "@/features/products/components/category-picker";
+import { useCartStore } from "@/hooks/use-cart-store";
 import {
   useGetV1ProductsCategories,
   useGetV1ProductsIngredients,
@@ -32,6 +34,7 @@ interface SelectedExtra {
 
 interface CustomizeOrderProps {
   variantId: string;
+  itemId?: string;
 }
 
 function formatCurrencyFromCents(valueInCents: number) {
@@ -41,9 +44,19 @@ function formatCurrencyFromCents(valueInCents: number) {
   });
 }
 
-export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
+export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
+  const navigate = useNavigate();
+  const addItem = useCartStore((state) => state.addItem);
+  const updateItemCustomization = useCartStore(
+    (state) => state.updateItemCustomization,
+  );
+  const editingItem = useCartStore((state) =>
+    itemId ? state.items.find((item) => item.itemId === itemId) : undefined,
+  );
+  const resolvedVariantId = editingItem?.variantId ?? variantId;
+  const isEditing = Boolean(itemId && editingItem);
   const { data: variantResponse, isLoading: variantLoading } =
-    useGetV1ProductsVariantId(variantId);
+    useGetV1ProductsVariantId(resolvedVariantId);
   const { data: categoriesResponse, isLoading: categoriesLoading } =
     useGetV1ProductsCategories();
   const { data: ingredientsResponse, isLoading: ingredientsLoading } =
@@ -56,29 +69,29 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
   const [notes, setNotes] = useState("");
   const [ingredientSearch, setIngredientSearch] = useState("");
   const [showIngredientDropdown, setShowIngredientDropdown] = useState(false);
+  const [showAddedToCartScreen, setShowAddedToCartScreen] = useState(false);
+  const [draftKey, setDraftKey] = useState<string | null>(null);
 
-  if (variantLoading || categoriesLoading) {
-    return (
-      <div className="min-h-screen bg-background-light flex items-center justify-center">
-        <p className="text-sm text-text-main/40">Cargando...</p>
-      </div>
-    );
-  }
+  const hasValidVariant = Boolean(
+    variantResponse && variantResponse.status === 200,
+  );
+  const hasValidCategories = Boolean(
+    categoriesResponse && categoriesResponse.status === 200,
+  );
 
-  if (
-    !variantResponse ||
-    variantResponse.status !== 200 ||
-    !categoriesResponse ||
-    categoriesResponse.status !== 200
-  ) {
-    return (
-      <div className="min-h-screen bg-background-light flex items-center justify-center">
-        <p className="text-sm text-red-400">Error al cargar el producto.</p>
-      </div>
-    );
-  }
-
-  const variant = variantResponse.data as {
+  const variant = (
+    hasValidVariant
+      ? variantResponse?.data
+      : {
+          id: "",
+          name: "",
+          image: null,
+          price: "0",
+          categoryId: "",
+          path: [],
+          components: [],
+        }
+  ) as {
     id: string;
     name: string;
     image: string | null;
@@ -88,9 +101,11 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
     components: Component[];
   };
 
-  const categories = normalizeCategories(
-    categoriesResponse.data as Category[] | { categories?: Category[] },
-  );
+  const categories = hasValidCategories
+    ? normalizeCategories(
+        categoriesResponse?.data as Category[] | { categories?: Category[] },
+      )
+    : [];
   const categoryPath = findCategoryPathById(categories, variant.categoryId);
   const categoryPathNames = categoryPath.map((node) => node.name);
   const resolvedPath =
@@ -192,6 +207,114 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
         .filter((extra) => extra.quantity > 0),
     );
   };
+
+  useEffect(() => {
+    if (!hasValidVariant) return;
+
+    if (isEditing && editingItem) {
+      if (ingredientsLoading) return;
+      const nextKey = `edit:${editingItem.itemId}`;
+      if (draftKey === nextKey) return;
+
+      const nextRemoved = new Set<string>();
+      for (const modifier of editingItem.modifiers) {
+        if (modifier.delta >= 0) continue;
+        const matchingComponent = variant.components.find(
+          (component) => component.productId === modifier.id,
+        );
+        if (matchingComponent?.isRemovable) {
+          nextRemoved.add(matchingComponent.id);
+        }
+      }
+
+      const nextExtras = editingItem.modifiers
+        .filter((modifier) => modifier.delta > 0)
+        .map((modifier) => {
+          const option = ingredientOptions.find(
+            (item) => item.id === modifier.id,
+          );
+          return {
+            productId: modifier.id,
+            productName: option?.productName ?? "Ingrediente extra",
+            categoryName: option?.categoryName ?? "Ingrediente",
+            unitPriceCents: option?.unitPriceCents ?? 0,
+            quantity: modifier.delta,
+          };
+        });
+
+      setRemovedComponents(nextRemoved);
+      setAddedExtras(nextExtras);
+      setNotes(editingItem.itemNotes);
+      setDraftKey(nextKey);
+      return;
+    }
+
+    const nextKey = `new:${variant.id}`;
+    if (draftKey === nextKey) return;
+
+    setRemovedComponents(new Set());
+    setAddedExtras([]);
+    setNotes("");
+    setDraftKey(nextKey);
+  }, [
+    draftKey,
+    editingItem,
+    hasValidVariant,
+    ingredientOptions,
+    ingredientsLoading,
+    isEditing,
+    variant.components,
+    variant.id,
+  ]);
+
+  const handleAddToCart = () => {
+    if (!hasValidVariant) return;
+
+    const removedModifiers = variant.components
+      .filter((component) => removedComponents.has(component.id))
+      .map((component) => ({
+        id: component.productId,
+        delta: -Math.max(1, component.quantity),
+      }));
+
+    const extraModifiers = addedExtras.map((extra) => ({
+      id: extra.productId,
+      delta: extra.quantity,
+    }));
+
+    const payload = {
+      variantId: variant.id,
+      itemNotes: notes.trim(),
+      modifiers: [...removedModifiers, ...extraModifiers],
+      displayName: variant.name,
+      displayImage: variant.image ?? undefined,
+      unitPriceCents: totalCents,
+    };
+
+    if (isEditing && editingItem) {
+      updateItemCustomization(editingItem.itemId, payload);
+    } else {
+      addItem(payload);
+    }
+
+    setShowAddedToCartScreen(true);
+  };
+
+  if (variantLoading || categoriesLoading) {
+    return (
+      <div className="min-h-screen bg-background-light flex items-center justify-center">
+        <p className="text-sm text-text-main/40">Cargando...</p>
+      </div>
+    );
+  }
+
+  if (!hasValidVariant || !hasValidCategories) {
+    return (
+      <div className="min-h-screen bg-background-light flex items-center justify-center">
+        <p className="text-sm text-red-400">Error al cargar el producto.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-b from-background-light via-background-light to-pink-soft/10 pb-64 sm:pb-56">
@@ -422,7 +545,7 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
         </section>
       </div>
 
-      <div className="fixed left-0 right-0 z-60 border-t border-pink-soft/30 bg-card-light/95 shadow-[0_-6px_20px_rgba(0,0,0,0.08)] backdrop-blur-sm px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] bottom-18 sm:bottom-0">
+      <div className="fixed inset-x-0 bottom-0 z-60 border-t border-pink-soft/30 bg-card-light/95 shadow-[0_-8px_24px_rgba(0,0,0,0.12)] backdrop-blur-sm px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-text-main/50 m-0">
@@ -438,12 +561,53 @@ export function CustomizeProduct({ variantId }: CustomizeOrderProps) {
           </div>
           <button
             type="button"
-            className="w-full sm:w-auto bg-charcoal text-white rounded-xl px-5 sm:px-6 py-3.5 text-sm font-bold uppercase tracking-wide hover:bg-charcoal/90 active:scale-[0.99] transition-all cursor-pointer whitespace-nowrap"
+            onClick={handleAddToCart}
+            className="w-full sm:w-auto bg-charcoal text-white rounded-xl px-5 sm:px-6 py-4 text-base sm:text-sm font-bold uppercase tracking-wide hover:bg-charcoal/90 active:scale-[0.99] transition-all cursor-pointer whitespace-nowrap"
           >
-            Añadir al carrito · ${formatCurrencyFromCents(totalCents)}
+            {isEditing ? "Guardar cambios" : "Añadir al carrito"} · $
+            {formatCurrencyFromCents(totalCents)}
           </button>
         </div>
       </div>
+
+      {showAddedToCartScreen && (
+        <div className="fixed inset-0 z-70 bg-black/45 backdrop-blur-[2px] px-4 py-6 flex items-end sm:items-center justify-center">
+          <div className="w-full max-w-md rounded-3xl border border-pink-soft/40 bg-card-light shadow-xl p-5 sm:p-6 flex flex-col gap-4">
+            <div className="w-10 h-10 rounded-full bg-secondary/15 text-secondary flex items-center justify-center">
+              <Check className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-text-main/40 m-0">
+                Listo
+              </p>
+              <h2 className="font-display text-3xl text-text-main font-normal m-0 mt-1">
+                {isEditing ? "Cambios guardados" : "Producto agregado"}
+              </h2>
+              <p className="text-sm text-text-main/55 m-0 mt-1.5">
+                {isEditing
+                  ? "Tu producto personalizado fue actualizado en el carrito."
+                  : "Tu orden personalizada ya esta en el carrito."}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/menu" })}
+                className="w-full rounded-xl border border-pink-soft/40 px-4 py-3 text-sm font-bold uppercase tracking-wide text-text-main bg-background-light hover:bg-pink-soft/10 transition-colors cursor-pointer"
+              >
+                Seguir comprando
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/cart" })}
+                className="w-full rounded-xl bg-charcoal px-4 py-3 text-sm font-bold uppercase tracking-wide text-white hover:bg-charcoal/90 transition-colors cursor-pointer"
+              >
+                Ir al carrito
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
