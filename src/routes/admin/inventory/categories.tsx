@@ -5,12 +5,12 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Plus, Pencil, Trash2, Folder } from "lucide-react";
-import { useMemo, useState, useCallback } from "react";
-import { useGetV1ProductsCategories } from "@/lib/api";
-import type { GetV1ProductsCategories200CategoriesItem } from "@/lib/schemas";
+import { Folder, Pencil, Plus, Trash2 } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { CategoryForm } from "@/features/admin/inventory/components/category-form";
+import { useGetV1ProductsCategories } from "@/lib/api";
+import type { GetV1ProductsCategories200CategoriesItem } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/inventory/categories")({
   component: CategoriesPage,
