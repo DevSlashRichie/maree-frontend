@@ -31,17 +31,6 @@ type EditableFields = "weekday" | "fromTime" | "toTime";
 export function CreateBranchForm({ onClose, onSuccess }: Props) {
   const postBranch = usePostV1Branches();
 
-  const createBranch = (data: {
-    name: string;
-    state: string;
-    schedules: {
-      weekday: number;
-      fromTime: string;
-      toTime: string;
-      timezone: string;
-    }[];
-  }) => postBranch.trigger(data);
-
   const isCreatingBranch = postBranch.isMutating;
 
   const [form, setForm] = useState<{
@@ -215,7 +204,7 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
               return;
             }
 
-            const res = await createBranch({
+            const res = await postBranch.trigger({
               name: form.name,
               state: form.state === "open" ? "active" : "inactive",
               schedules: form.schedules.map(({ id, ...rest }) => ({
