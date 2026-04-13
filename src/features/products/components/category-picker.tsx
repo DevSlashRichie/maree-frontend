@@ -15,6 +15,14 @@ interface CategoryPickerProps {
   onPathChange?: (path: Category[]) => void;
 }
 
+function normalizeCategories(
+  payload: Category[] | { categories?: Category[] } | null | undefined,
+): Category[] {
+  if (Array.isArray(payload)) return payload;
+  if (payload && Array.isArray(payload.categories)) return payload.categories;
+  return [];
+}
+
 export function CategoryPicker({
   value,
   onChange,
@@ -29,9 +37,16 @@ export function CategoryPicker({
   if (!response || response.status !== 200)
     return <p className="text-xs text-red-400">Error al cargar categorías.</p>;
 
-  const categories: Category[] = response.data;
+  const categories = normalizeCategories(
+    response.data as Category[] | { categories?: Category[] },
+  );
+  const parentChildren = path[path.length - 1]?.children;
   const currentOptions =
-    path.length === 0 ? categories : (path[path.length - 1].children ?? []);
+    path.length === 0
+      ? categories
+      : Array.isArray(parentChildren)
+        ? parentChildren
+        : [];
   const isLeaf = (cat: Category) => !cat.children || cat.children.length === 0;
 
   const handleSelect = (cat: Category) => {
