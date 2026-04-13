@@ -11,6 +11,7 @@ import { IngredientRow } from "./ingredient-row";
 
 type CreateProductPayload = {
   name: string;
+  description: string;
   status: "active" | "inactive";
   categoryId: string;
   price: number;
@@ -99,6 +100,7 @@ export function CreateProduct() {
     useGetV1ProductsIngredients();
 
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [categoryId, setCategoryId] = useState("");
   const [price, setPrice] = useState("");
@@ -236,6 +238,7 @@ export function CreateProduct() {
 
       const payload: CreateProductPayload = {
         name,
+        description,
         status: isActive ? "active" : "inactive",
         categoryId,
         price: parsedPrice,
@@ -289,6 +292,11 @@ export function CreateProduct() {
                 <p className="mt-2 text-lg font-semibold text-text-main m-0">
                   {lastPayload.name}
                 </p>
+                {lastPayload.description && (
+                  <p className="mt-1 text-sm text-text-main/60 m-0 whitespace-pre-wrap">
+                    {lastPayload.description}
+                  </p>
+                )}
                 <div className="mt-3 text-sm text-text-main/65 space-y-1">
                   <p className="m-0">Estado: {lastPayload.status}</p>
                   <p className="m-0">Categoría ID: {lastPayload.categoryId}</p>
@@ -356,6 +364,7 @@ export function CreateProduct() {
               setFormError(null);
               setName("");
               setPrice("");
+              setDescription("");
               setCategoryId("");
               setIsActive(true);
               setImageFile(null);
@@ -432,6 +441,23 @@ export function CreateProduct() {
                 placeholder="Ej. Crepa Personalizada"
                 required
                 className="w-full bg-background-light border border-pink-soft/30 rounded-xl px-4 py-3 text-sm text-text-main placeholder:text-text-main/25 focus:outline-none focus:border-pink-soft/60 transition-colors"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="product-description"
+                className="text-sm font-medium text-text-main"
+              >
+                Descripción
+              </label>
+              <textarea
+                id="product-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe el producto..."
+                rows={3}
+                className="w-full bg-background-light border border-pink-soft/30 rounded-xl px-4 py-3 text-sm text-text-main placeholder:text-text-main/25 focus:outline-none focus:border-pink-soft/60 transition-colors resize-y"
               />
             </div>
 
