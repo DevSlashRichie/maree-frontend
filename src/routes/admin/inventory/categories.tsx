@@ -3,9 +3,18 @@ import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   useReactTable,
+  type ExpandedState,
 } from "@tanstack/react-table";
-import { Folder, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Folder,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { CategoryForm } from "@/features/admin/inventory/components/category-form";
@@ -23,6 +32,7 @@ function CategoriesPage() {
   const [selectedCategory, setSelectedCategory] = useState<
     GetCategoriesDtoItem | undefined
   >(undefined);
+  const [expanded, setExpanded] = useState<ExpandedState>({});
 
   const { data, isLoading, error, mutate } = useGetV1ProductsCategories({
     swr: {
@@ -52,11 +62,29 @@ function CategoriesPage() {
       columnHelper.accessor("name", {
         header: "Nombre",
         cell: (info) => (
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
-              <Folder className="w-5 h-5 text-secondary" />
+          <div
+            className="flex items-center gap-2"
+            style={{ paddingLeft: `${info.row.depth * 2}rem` }}
+          >
+            {info.row.getCanExpand() ? (
+              <button
+                className="text-black"
+                {...{
+                  onClick: info.row.getToggleExpandedHandler(),
+                  style: { cursor: "pointer" },
+                }}
+              >
+                {info.row.getIsExpanded() ? <ChevronDown /> : <ChevronRight />}
+              </button>
+            ) : (
+              ""
+            )}
+            <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+              <Folder className="w-4 h-4 text-secondary" />
             </div>
-            <p className="font-medium text-text-main">{info.getValue()}</p>
+            <p className="font-medium text-text-main truncate">
+              {info.getValue()}
+            </p>
           </div>
         ),
       }),
@@ -96,7 +124,15 @@ function CategoriesPage() {
   const table = useReactTable<GetCategoriesDtoItem>({
     data: categories,
     columns,
+    state: {
+      expanded,
+    },
+    onExpandedChange: setExpanded,
+    getSubRows: (row) =>
+      row.children && row.children.length > 0 ? row.children : undefined,
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getRowId: (row) => row.id,
   });
 
   const handleSubmit = async () => {
@@ -128,7 +164,7 @@ function CategoriesPage() {
         <button
           type="button"
           onClick={handleCreate}
-          className="flex items-center gap-2 bg-secondary text-white px-6 py-3 rounded-full font-medium hover:bg-secondary/90 transition-all shadow-lg shadow-secondary/20"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors"
         >
           <Plus className="w-5 h-5" />
           <span>Nueva Categoría</span>
@@ -154,9 +190,9 @@ function CategoriesPage() {
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                       </th>
                     ))}
                   </tr>
@@ -208,6 +244,9 @@ function CategoriesPage() {
           initialData={selectedCategory}
           categories={categories}
           onSubmit={handleSubmit}
+          onClose={() => {
+            setIsModalOpen(false);
+          }}
         />
       </Modal>
     </div>
