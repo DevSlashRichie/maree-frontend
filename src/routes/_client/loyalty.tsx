@@ -8,8 +8,18 @@ import { Modal } from "@/components/ui/modal";
 import { LoyaltyCard } from "@/features/loyalty/components/loyalty-card";
 import { RewardCard } from "@/features/loyalty/components/reward-card";
 import { useGetV1Loyalty, useGetV1Rewards } from "@/lib/api";
+import { requireAuth } from "@/hooks/with-auth";
 
 export const Route = createFileRoute("/_client/loyalty")({
+  beforeLoad: async ({ location }) => {
+    await requireAuth({ location, navigateTo: "/login" });
+  },
+
+  pendingComponent: () => (
+    <div className="flex items-center justify-center h-screen">
+      <p className="text-lg text-muted-foreground">Loading...</p>
+    </div>
+  ),
   component: RouteComponent,
 });
 
@@ -162,6 +172,11 @@ function RouteComponent() {
                   Historial
                 </h3>
                 <div className="bg-card-light dark:bg-card-dark rounded-xl border border-accent/20 overflow-hidden">
+                  {!apiHistory.length ? (
+                    <div className="text-center p-3 text-gray-400 italic">
+                      No hay nada en el historial
+                    </div>
+                  ) : null}
                   <ul className="divide-y divide-accent/20">
                     {apiHistory.slice(0, 3).map((item) => (
                       <HistoryItem
