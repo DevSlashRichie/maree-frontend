@@ -1,10 +1,15 @@
 import { useForm } from "@tanstack/react-form";
+import toast from "react-hot-toast";
+import {
+  usePatchV1ProductsCategoriesId,
+  usePostV1ProductsCategories,
+} from "@/lib/api";
 import type { GetV1ProductsCategories200CategoriesItem } from "@/lib/schemas";
 
 interface CategoryFormProps {
   initialData?: GetV1ProductsCategories200CategoriesItem;
   categories: GetV1ProductsCategories200CategoriesItem[];
-  onSubmit: (values: { name: string; parentId: string | null }) => void;
+  onSubmit: () => void;
   isLoading?: boolean;
 }
 
@@ -14,13 +19,38 @@ export function CategoryForm({
   onSubmit,
   isLoading,
 }: CategoryFormProps) {
+  const { trigger: createCategory } = usePostV1ProductsCategories();
+  const { trigger: updateCategory } = usePatchV1ProductsCategoriesId(
+    initialData?.id || "",
+  );
+
   const form = useForm({
     defaultValues: {
       name: initialData?.name || "",
-      parentId: null as string | null,
+      parentId: (initialData?.parentId || null) as string | null,
     },
     onSubmit: async ({ value }) => {
-      onSubmit(value);
+      try {
+        if (initialData) {
+          const result = await updateCategory(value);
+          if (result.status === 200) {
+            toast.success("Categoría actualizada");
+          } else {
+            throw new Error("Error al actualizar");
+          }
+        } else {
+          const result = await createCategory(value);
+          if (result.status === 201) {
+            toast.success("Categoría creada");
+          } else {
+            throw new Error("Error al crear");
+          }
+        }
+        onSubmit();
+      } catch (error) {
+        console.error("Error saving category:", error);
+        toast.error("Error al guardar la categoría");
+      }
     },
   });
 
@@ -61,11 +91,10 @@ export function CategoryForm({
               onChange={(e) => field.handleChange(e.target.value)}
               type="text"
               placeholder="Ej. Bebidas, Postres..."
-              className={`w-full px-4 py-3 rounded-2xl border bg-gray-50 transition-all outline-none focus:ring-2 focus:ring-secondary/20 ${
-                field.state.meta.errors.length > 0
+              className={`w-full px-4 py-3 rounded-2xl border bg-gray-50 transition-all outline-none focus:ring-2 focus:ring-secondary/20 ${field.state.meta.errors.length > 0
                   ? "border-red-500 focus:border-red-500"
                   : "border-gray-200 focus:border-secondary"
-              }`}
+                }`}
             />
             {field.state.meta.errors.length > 0 && (
               <p className="text-xs text-red-500 ml-1">

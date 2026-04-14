@@ -103,12 +103,7 @@ function CategoriesPage() {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const handleSubmit = async (values: any) => {
-    // TODO: Implement actual API call when endpoints are available
-    console.log("Submitting category:", values);
-    alert(
-      "Funcionalidad de guardado pendiente de endpoints de API (POST/PATCH /v1/products/categories)",
-    );
+  const handleSubmit = async () => {
     setIsModalOpen(false);
     mutate();
   };
