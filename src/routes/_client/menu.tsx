@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FoodCard } from "@/components/card";
 import { Subheading } from "@/components/typography";
 import { CategoryFilters } from "@/layouts/category-filters";
@@ -8,6 +8,7 @@ import {
   useGetV1ProductsCategories,
   useGetV1ProductsVariants,
 } from "@/lib/api";
+import type { GetCategoriesDtoItem } from "@/lib/schemas";
 import type { GetV1ProductsVariants200VariantsItem } from "@/lib/schemas";
 
 export const Route = createFileRoute("/_client/menu")({
@@ -30,6 +31,28 @@ function RouteComponent() {
 
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
+  const categories = useMemo(() => {
+    const flattenPublicCategories = (
+      items: GetCategoriesDtoItem[],
+    ): GetCategoriesDtoItem[] => {
+      return items.flatMap((cat) => {
+        const children = cat.children
+          ? flattenPublicCategories(cat.children)
+          : [];
+        return cat.public ? [cat, ...children] : children;
+      });
+    };
+
+    const cats =
+      categoriesData &&
+      categoriesData.status === 200 &&
+      "categories" in categoriesData.data
+        ? categoriesData.data.categories
+        : [];
+
+    return flattenPublicCategories(cats);
+  }, [categoriesData]);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: categories are required.
   useEffect(() => {
     const observerOptions = {
@@ -51,12 +74,12 @@ function RouteComponent() {
       observerOptions,
     );
 
-    Object.values(sectionRefs.current).forEach((section) => {
+    for (const section of Object.values(sectionRefs.current)) {
       if (section) observer.observe(section);
-    });
+    }
 
     return () => observer.disconnect();
-  }, [categoriesData]);
+  }, [categories]);
 
   if (isLoadingCategories || isLoadingProducts) {
     return (
@@ -91,8 +114,6 @@ function RouteComponent() {
       </div>
     );
   }
-
-  const categories = categoriesData?.data?.categories ?? [];
 
   const variants = (productsData?.data?.variants ??
     []) as GetV1ProductsVariants200VariantsItem[];
