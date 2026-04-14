@@ -116,9 +116,6 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   const currentCategoryName = categoryPath.at(-1)?.name ?? "Sin categoría";
   const categoryLabel =
     resolvedPath.length > 0 ? resolvedPath.join(" / ") : currentCategoryName;
-  // biome-ignore lint/correctness/noUnusedVariables: testing purposes
-  const rootCategoryName =
-    categoryPath[0]?.name ?? resolvedPath[0] ?? currentCategoryName;
 
   const ingredientGroups =
     ingredientsResponse?.status === 200 ? ingredientsResponse.data : [];
