@@ -29,23 +29,23 @@ export const Route = createFileRoute("/admin/staff/")({
 });
 
 const ROLES = [
-  { value: "admin", label: "Administrador" },
-  { value: "manager", label: "Gerente" },
-  { value: "barista", label: "Barista" },
+  { value: "administrator", label: "Administrador" },
+  { value: "supervisor", label: "Gerente" },
+  { value: "waiter", label: "Mesero" },
   { value: "cashier", label: "Cajero" },
 ];
 
 const roleColors: Record<string, string> = {
-  admin: "bg-purple-100 text-purple-700",
-  manager: "bg-blue-100 text-blue-700",
-  barista: "bg-green-100 text-green-700",
+  administrator: "bg-purple-100 text-purple-700",
+  supervisor: "bg-blue-100 text-blue-700",
+  waiter: "bg-green-100 text-green-700",
   cashier: "bg-yellow-100 text-yellow-700",
 };
 
 const roleLabels: Record<string, string> = {
-  admin: "Administrador",
-  manager: "Gerente",
-  barista: "Barista",
+  administrator: "Administrador",
+  supervisor: "Gerente",
+  waiter: "Mesero",
   cashier: "Cajero",
 };
 
@@ -441,9 +441,9 @@ function RouteComponent() {
 
   const handleSuccess = () => {
     if (selectedBranch) {
-      mutateBranch(undefined, { revalidate: true });
+      mutateBranch();
     } else {
-      mutateAll(undefined, { revalidate: true });
+      mutateAll();
     }
   };
 
