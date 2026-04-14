@@ -93,6 +93,7 @@ export function BranchSelector() {
                         key={branch.id}
                         type="button"
                         onClick={() => {
+                          setSelected(branch);
                           setBranch(branch);
                           close();
                         }}
