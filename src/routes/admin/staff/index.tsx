@@ -14,8 +14,14 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
-import { useGetV1UsersStaff } from "@/lib/api";
+import { useBranchStore } from "@/hooks/use-branch-store";
+import {
+  useGetV1BranchesIdStaff,
+  useGetV1UsersStaff,
+  usePostAuthRegister,
+} from "@/lib/api";
 import type { Actor } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/staff/")({
@@ -23,7 +29,7 @@ export const Route = createFileRoute("/admin/staff/")({
 });
 
 const ROLES = [
-  { value: "administrator", label: "Administrador" },
+  { value: "admin", label: "Administrador" },
   { value: "manager", label: "Gerente" },
   { value: "barista", label: "Barista" },
   { value: "cashier", label: "Cajero" },
@@ -102,13 +108,27 @@ const columns = [
   }),
 ];
 
+interface StaffPayload {
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone: string;
+  role: string;
+  branchId?: string;
+}
+
 function StaffFormModal({
   isOpen,
   onClose,
+  onSuccess,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
 }) {
+  const { trigger: registerUser, isMutating } = usePostAuthRegister();
+  const { selectedBranch } = useBranchStore();
+
   const form = useForm({
     defaultValues: {
       firstName: "",
@@ -118,9 +138,73 @@ function StaffFormModal({
       role: "barista",
     },
     onSubmit: async ({ value }) => {
-      console.log("Creating staff:", value);
-      onClose();
-      form.reset();
+      try {
+        const payload: StaffPayload = {
+          firstName: value.firstName,
+          lastName: value.lastName,
+          phone: value.phone,
+          role: value.role,
+          // ✅ Solo incluir email si tiene contenido real — z.email().optional()
+          // rechaza string vacío "" pero acepta undefined
+          ...(value.email.trim() !== "" && { email: value.email.trim() }),
+          ...(selectedBranch?.id && { branchId: selectedBranch.id }),
+        };
+
+        const result = (await registerUser(payload)) as {
+          status?: number;
+          statusCode?: number;
+          data?: { message?: string | string[] };
+        };
+
+        const status = result?.status || result?.statusCode;
+
+        if (status === 201) {
+          toast.success(
+            selectedBranch
+              ? `Staff agregado a ${selectedBranch.name}`
+              : "Staff creado correctamente",
+          );
+          form.reset();
+          onSuccess();
+          onClose();
+          return;
+        }
+
+        if (status === 409) {
+          toast.error("El teléfono o email ya está en uso");
+          return;
+        }
+
+        const errorData = result?.data as
+          | { message?: string | string[] }
+          | undefined;
+        const message = Array.isArray(errorData?.message)
+          ? errorData.message.join(", ")
+          : (errorData?.message ??
+            `Error inesperado (${status ?? "sin status"})`);
+        toast.error(message);
+      } catch (error) {
+        const err = error as {
+          response?: {
+            status?: number;
+            data?: { message?: string | string[] };
+          };
+          message?: string;
+        };
+
+        if (err.response?.status === 409) {
+          toast.error("El teléfono o email ya está en uso");
+          return;
+        }
+
+        const message = Array.isArray(err.response?.data?.message)
+          ? err.response.data.message.join(", ")
+          : (err.response?.data?.message ??
+            err.message ??
+            "Error del servidor");
+
+        toast.error(message);
+      }
     },
   });
 
@@ -271,10 +355,10 @@ function StaffFormModal({
             {(canSubmit) => (
               <button
                 type="submit"
-                disabled={!canSubmit}
+                disabled={!canSubmit || isMutating}
                 className="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50"
               >
-                Crear Staff
+                {isMutating ? "Creando..." : "Crear Staff"}
               </button>
             )}
           </form.Subscribe>
@@ -289,26 +373,54 @@ const LIMIT = 5;
 function RouteComponent() {
   const [page, setPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const { selectedBranch } = useBranchStore();
 
-  const { data, isLoading, error } = useGetV1UsersStaff(
+  const {
+    data: allStaffData,
+    isLoading: isAllStaffLoading,
+    error,
+    mutate: mutateAll,
+  } = useGetV1UsersStaff(
     { page, limit: LIMIT },
     {
       swr: {
         keepPreviousData: true,
         revalidateOnFocus: false,
         shouldRetryOnError: false,
+        enabled: !selectedBranch,
       },
     },
   );
 
+  const {
+    data: branchStaffData,
+    isLoading: isBranchStaffLoading,
+    mutate: mutateBranch,
+  } = useGetV1BranchesIdStaff(selectedBranch?.id ?? "", {
+    swr: {
+      keepPreviousData: true,
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      enabled: !!selectedBranch,
+    },
+  });
+
+  const isLoading = selectedBranch ? isBranchStaffLoading : isAllStaffLoading;
+
   const staff = useMemo(() => {
-    return data && data.status === 200 && Array.isArray(data.data?.users)
-      ? data.data.users
+    if (selectedBranch) {
+      return branchStaffData?.status === 200 ? branchStaffData.data : [];
+    }
+    return allStaffData?.status === 200 &&
+      Array.isArray(allStaffData.data?.users)
+      ? allStaffData.data.users
       : [];
-  }, [data]);
+  }, [selectedBranch, branchStaffData, allStaffData]);
 
   const total =
-    data && data.status === 200 && data.data?.total ? data.data.total : 0;
+    !selectedBranch && allStaffData?.status === 200 && allStaffData.data?.total
+      ? allStaffData.data.total
+      : staff.length;
   const totalPages = Math.ceil(total / LIMIT);
   const start = total > 0 ? (page - 1) * LIMIT + 1 : 0;
   const end = Math.min(page * LIMIT, total);
@@ -320,14 +432,25 @@ function RouteComponent() {
   });
 
   const handlePrevPage = () => {
-    if (page > 1) setPage((page) => page - 1);
+    if (page > 1) setPage((p) => p - 1);
   };
 
   const handleNextPage = () => {
-    if (page < totalPages) setPage((page) => page + 1);
+    if (page < totalPages) setPage((p) => p + 1);
   };
 
-  if (error || (data && data.status !== 200)) {
+  const handleSuccess = () => {
+    if (selectedBranch) {
+      mutateBranch(undefined, { revalidate: true });
+    } else {
+      mutateAll(undefined, { revalidate: true });
+    }
+  };
+
+  if (
+    error ||
+    (!selectedBranch && allStaffData && allStaffData.status !== 200)
+  ) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
         <div className="text-center">
@@ -346,9 +469,18 @@ function RouteComponent() {
               <h1 className="font-display text-4xl text-text-main font-bold mb-2 uppercase tracking-wide">
                 Staff
               </h1>
-              <p className="font-body text-text-main/60">
-                Gestiona los miembros del equipo
-              </p>
+              {selectedBranch ? (
+                <p className="font-body text-sm text-text-main/60">
+                  Mostrando staff de{" "}
+                  <span className="font-semibold text-text-main">
+                    {selectedBranch.name}
+                  </span>
+                </p>
+              ) : (
+                <p className="font-body text-text-main/60">
+                  Gestiona los miembros del equipo
+                </p>
+              )}
             </div>
             <button
               type="button"
@@ -366,24 +498,22 @@ function RouteComponent() {
                 <table className="w-full">
                   <thead>
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-text-main/70 bg-gray-50 border-b border-gray-100">
-                        Nombre
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-text-main/70 bg-gray-50 border-b border-gray-100">
-                        Teléfono
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-text-main/70 bg-gray-50 border-b border-gray-100">
-                        Rol
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-text-main/70 bg-gray-50 border-b border-gray-100">
-                        Fecha de creación
-                      </th>
+                      {["Nombre", "Teléfono", "Rol", "Fecha de creación"].map(
+                        (h) => (
+                          <th
+                            key={h}
+                            className="px-6 py-4 text-left text-sm font-semibold text-text-main/70 bg-gray-50 border-b border-gray-100"
+                          >
+                            {h}
+                          </th>
+                        ),
+                      )}
                     </tr>
                   </thead>
                   <tbody>
                     {[...Array(LIMIT)].map((_, i) => (
                       <tr
-                        // biome-ignore lint/suspicious/noArrayIndexKey: this requires to be index
+                        // biome-ignore lint/suspicious/noArrayIndexKey: skeleton rows
                         key={`skeleton-${i}`}
                         className="border-b border-gray-100 last:border-0"
                       >
@@ -462,24 +592,26 @@ function RouteComponent() {
                   <span className="text-sm text-text-main/60">
                     Mostrando {start}-{end} de {total}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handlePrevPage}
-                      disabled={page === 1 || isLoading}
-                      className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <ChevronLeft className="w-5 h-5 text-text-main" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleNextPage}
-                      disabled={page >= totalPages || isLoading}
-                      className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <ChevronRight className="w-5 h-5 text-text-main" />
-                    </button>
-                  </div>
+                  {!selectedBranch && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handlePrevPage}
+                        disabled={page === 1 || isLoading}
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft className="w-5 h-5 text-text-main" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleNextPage}
+                        disabled={page >= totalPages || isLoading}
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="w-5 h-5 text-text-main" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -490,6 +622,7 @@ function RouteComponent() {
       <StaffFormModal
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
+        onSuccess={handleSuccess}
       />
     </div>
   );

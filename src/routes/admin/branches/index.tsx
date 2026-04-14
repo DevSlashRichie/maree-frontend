@@ -3,7 +3,7 @@ import { MapPin, Plus } from "lucide-react";
 import { useState } from "react";
 import { CreateBranchForm } from "@/features/admin/components/new-branch-form";
 import { useGetV1Branches } from "@/lib/api";
-import { Modal } from "../../../components/modal";
+import { Modal } from "../../../components/ui/modal";
 import { BranchCard } from "../../../features/admin/components/branch-card";
 
 export const Route = createFileRoute("/admin/branches/")({
