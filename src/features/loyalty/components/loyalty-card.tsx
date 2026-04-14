@@ -11,7 +11,6 @@ export function LoyaltyCard() {
   const { data, isLoading } = useGetV1Loyalty();
 
   const {
-    data: googleData,
     mutate: fetchGoogleWallet,
     isValidating: isGeneratingGoogle,
   } = useGetV1LoyaltyGoogleWallet();
