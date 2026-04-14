@@ -1,29 +1,52 @@
 import cn from "classnames";
-import { QrCode } from "lucide-react";
+import { Loader2, QrCode } from "lucide-react"; // Verifica si es 'lucide-react' o 'lucide-center' en tu proyecto
 import { useState } from "react";
-// @ts-expect-error - bad imports for some reason.
-import { QRCode } from "react-qr-code";
-import { useGetV1Loyalty } from "@/lib/api";
+import QRCode from "react-qr-code";
+import { useGetV1Loyalty, useGetV1LoyaltyGoogleWallet } from "@/lib/api";
 import { Modal } from "../../../components/ui/modal";
 
 export function LoyaltyCard() {
   const [isQRExpanded, setIsQRExpanded] = useState(false);
 
   const { data, isLoading } = useGetV1Loyalty();
+
+  const {
+    data: googleData,
+    mutate: fetchGoogleWallet,
+    isValidating: isGeneratingGoogle,
+  } = useGetV1LoyaltyGoogleWallet();
+
   const TOTAL_STAMPS = 6;
+
+  const handleGoogleWalletClick = async () => {
+    try {
+      const result = await fetchGoogleWallet();
+
+      if (result?.status === 200 && result.data?.saveURL) {
+        window.open(result.data.saveURL, "_blank");
+      }
+    } catch (error) {
+      console.error("Error generating wallet link:", error);
+    }
+  };
 
   if (isLoading) {
     return (
-      <div className="w-full aspect-[1.58/1] rounded-2xl overflow-hidden shadow-2xl bg-primary animate-pulse" />
+      <div className="w-full aspect-[1.58/1] rounded-2xl overflow-hidden shadow-2xl bg-charcoal/50 animate-pulse flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-white/20 animate-spin" />
+      </div>
     );
   }
 
   if (!data || data.status !== 200) {
-    return <div>{data?.data.message}</div>;
+    return (
+      <div className="text-white">
+        Error: {data?.data?.message || "No data"}
+      </div>
+    );
   }
 
   const current = data.data.currentBalance ?? 0;
-
   const stamps_ = Array.from({ length: TOTAL_STAMPS }, (_, i) => ({
     id: i,
     filled: i < current,
@@ -35,19 +58,16 @@ export function LoyaltyCard() {
         <div className="relative p-6 pb-4 pattern-grid-lg">
           <div className="absolute top-4 right-4 w-32 h-32 bg-secondary opacity-10 rounded-full blur-2xl" />
           <div className="absolute bottom-0 left-4 w-24 h-24 bg-accent opacity-20 rounded-full blur-xl" />
-
           <div className="relative flex justify-between items-start">
-            <div>
-              <h2 className="font-display text-3xl text-white tracking-widest">
-                MARÉE
-              </h2>
-            </div>
+            <h2 className="font-display text-3xl text-white tracking-widest uppercase">
+              MARÉE
+            </h2>
           </div>
         </div>
 
         <div className="px-6 py-4">
           <div className="grid grid-cols-3 gap-3 justify-center items-center">
-            {stamps_.map((stamp, _index) => (
+            {stamps_.map((stamp) => (
               <div
                 key={stamp.id}
                 className="w-full flex justify-center items-center"
@@ -56,8 +76,8 @@ export function LoyaltyCard() {
                   className={cn(
                     "flex items-center justify-center border rounded-full w-[60px] h-[60px]",
                     {
-                      "text-white/20": !stamp.filled,
-                      "text-white": stamp.filled,
+                      "border-white/10 text-white/10": !stamp.filled,
+                      "border-white/40 text-white bg-white/5": stamp.filled,
                     },
                   )}
                 >
@@ -78,65 +98,75 @@ export function LoyaltyCard() {
 
         <div className="flex justify-between items-end p-6 border-t border-white/10">
           <div className="flex flex-col gap-1">
-            <p className="text-white/50 text-xs uppercase tracking-wider">
+            <p className="text-white/50 text-[10px] uppercase tracking-widest">
               Titular
             </p>
             <p className="text-white font-display text-lg tracking-wide">
               {data.data.firstName}
             </p>
             <p className="text-white/50 text-xs font-mono">
-              Teléfono: {data.data.phone}
+              Tel: {data.data.phone}
             </p>
           </div>
           <button
             type="button"
             onClick={() => setIsQRExpanded(true)}
-            className="bg-white p-2 rounded-lg cursor-pointer hover:scale-105 transition-transform"
+            className="bg-white p-2 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg"
           >
-            <QrCode className="w-8 h-8 text-primary" />
+            <QrCode className="w-7 h-7 text-charcoal" />
           </button>
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <button
-          type="button"
-          className="w-full cursor-pointer transition-all active:scale-95 hover:opacity-90"
-        >
+      <div className="flex flex-col gap-3 items-center w-full max-w-[210px] mx-auto">
+        <button type="button" className="w-full active:scale-95 transition-all">
           <img
             src="/apple-wallet-button.svg"
-            alt="Agregar a Apple Wallet"
-            className="h-12 w-auto mx-auto"
+            alt="Apple Wallet"
+            className="h-12 w-full object-contain"
           />
         </button>
 
-        <button
-          type="button"
-          className="w-full cursor-pointer transition-all active:scale-95 hover:opacity-90"
-        >
-          <img
-            src="/google-wallet-button.svg"
-            alt="Agregar a Google Wallet"
-            className="w-full h-12 object-contain"
-          />
-        </button>
+        <div className="w-full h-12 relative">
+          <button
+            type="button"
+            disabled={isGeneratingGoogle}
+            onClick={handleGoogleWalletClick}
+            className={cn(
+              "w-full h-full cursor-pointer transition-all active:scale-95 flex items-center justify-center",
+              { "bg-[#1e1e1e] rounded-[8px]": isGeneratingGoogle },
+            )}
+          >
+            {isGeneratingGoogle ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-white/70" />
+                <span className="text-white/70 text-xs font-medium">
+                  Cargando...
+                </span>
+              </div>
+            ) : (
+              <img
+                src="/google-wallet-button.svg"
+                alt="Google Wallet"
+                className="w-full h-full object-contain"
+              />
+            )}
+          </button>
+        </div>
       </div>
 
       <Modal
         isOpen={isQRExpanded}
         onClose={() => setIsQRExpanded(false)}
         title="Código de Fidelidad"
-        description="Muéstralo al pagar"
+        description="Muéstralo en caja para acumular puntos"
       >
-        <div className="flex flex-col items-center">
-          <div className="bg-white p-4 rounded-xl border border-gray-200 dark:border-gray-600 mb-4">
-            <QRCode size={180} value={data.data.phone} />
+        <div className="flex flex-col items-center py-4">
+          <div className="bg-white p-4 rounded-2xl shadow-xl mb-4">
+            <QRCode size={200} value={data.data.phone} />
           </div>
-          <p className="font-display text-lg text-primary">
+          <p className="font-display text-xl text-primary">
             {data.data.firstName}
-          </p>
-          <p className="text-sm text-gray-500 font-mono">
-            Teléfono: {data.data.phone}
           </p>
         </div>
       </Modal>
