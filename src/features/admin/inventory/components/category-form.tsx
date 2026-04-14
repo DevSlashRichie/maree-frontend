@@ -30,6 +30,7 @@ export function CategoryForm({
     defaultValues: {
       name: initialData?.name || "",
       parentId: (initialData?.parentId || null) as string | null,
+      public: initialData?.public ?? true,
     },
     onSubmit: async ({ value }) => {
       try {
@@ -140,6 +141,34 @@ export function CategoryForm({
               <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-text-main/40">
                 <span className="material-symbols-outlined">expand_more</span>
               </div>
+            </div>
+          </div>
+        )}
+      </form.Field>
+
+      <form.Field name="public">
+        {(field) => (
+          <div className="flex items-center gap-3 px-1">
+            <button
+              type="button"
+              onClick={() => field.handleChange(!field.state.value)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-secondary/20 ${
+                field.state.value ? "bg-secondary" : "bg-gray-200"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  field.state.value ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-text-main/80">
+                Pública
+              </span>
+              <span className="text-xs text-text-main/40">
+                Determina si la categoría es visible para los clientes
+              </span>
             </div>
           </div>
         )}

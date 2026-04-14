@@ -1,38 +1,49 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { OrderColumn } from "@/features/orders/components/order-card-group";
-import { useGetV1Orders } from "@/lib/api.ts";
+import { patchV1OrdersIdStatus, useGetV1Orders } from "@/lib/api.ts";
+import type { GetV1Orders200Item } from "@/lib/schemas";
 import { OrderDetails } from "./order-details";
 
 export function Orders() {
-  const { data, isLoading } = useGetV1Orders();
+  const { data, isLoading, mutate } = useGetV1Orders();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeOrderInModalId, setActiveOrderIdInModal] = useState("s");
+  const [activeOrder, setActiveOrder] = useState<GetV1Orders200Item | null>(
+    null,
+  );
 
-  if (isLoading) {
-    return <div>Cargando...</div>;
-  }
-  if (!data) {
-    return <div>`Error`</div>;
-  }
+  const handleStatusChange = async (
+    orderId: string,
+    action: "forward" | "backward",
+  ) => {
+    await patchV1OrdersIdStatus(orderId, { action });
+    mutate();
+  };
 
-  if (data.status !== 200) {
-    return <div>`Error: ${data?.data.message}`</div>;
-  }
+  const handleForward = async (orderId: string) => {
+    await handleStatusChange(orderId, "forward");
+    setIsModalOpen(false);
+  };
 
-  // const cleanedData = data.data.map((item) => ({
-  //   order: {
-  //     ...item.order,
-  //     total: Number(item.order.total) || 0,
-  //   },
-  //   user: item.user,
-  // }));
-  const cleanedData = data.data;
+  const handleBackward = async (orderId: string) => {
+    await handleStatusChange(orderId, "backward");
+    setIsModalOpen(false);
+  };
 
   const orderOnClickHandler = (orderId: string) => {
-    setActiveOrderIdInModal(orderId);
+    const order =
+      data?.status === 200
+        ? (data.data.find((o) => o.order.id === orderId) ?? null)
+        : null;
+    setActiveOrder(order);
     setIsModalOpen(true);
   };
+
+  if (isLoading) return <div>Cargando...</div>;
+  if (!data) return <div>Error</div>;
+  if (data.status !== 200) return <div>Error: {data?.data.message}</div>;
+
+  const orders = data.data;
 
   return (
     <>
@@ -40,29 +51,21 @@ export function Orders() {
         <div className="flex-1">
           <OrderColumn
             title="Incoming"
-            orders={cleanedData.filter(
-              (order) => order.order.status === "pending",
-            )}
+            orders={orders.filter((o) => o.order.status === "pending")}
             orderOnClickHandler={orderOnClickHandler}
           />
         </div>
-
         <div className="flex-1">
           <OrderColumn
             title="Preparation"
-            orders={cleanedData.filter(
-              (order) => order.order.status === "processing",
-            )}
+            orders={orders.filter((o) => o.order.status === "set")}
             orderOnClickHandler={orderOnClickHandler}
           />
         </div>
-
         <div className="flex-1">
           <OrderColumn
             title="Ready"
-            orders={cleanedData.filter(
-              (order) => order.order.status === "ready",
-            )}
+            orders={orders.filter((o) => o.order.status === "ready")}
             orderOnClickHandler={orderOnClickHandler}
           />
         </div>
@@ -70,12 +73,20 @@ export function Orders() {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-        }}
+        onClose={() => setIsModalOpen(false)}
         title="Orden de usuario"
       >
-        <OrderDetails id={activeOrderInModalId}></OrderDetails>
+        {activeOrder && (
+          <OrderDetails
+            order={activeOrder}
+            onForward={() => handleForward(activeOrder.order.id)}
+            onBackward={
+              activeOrder.order.status !== "pending"
+                ? () => handleBackward(activeOrder.order.id)
+                : undefined
+            }
+          />
+        )}
       </Modal>
     </>
   );
