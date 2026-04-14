@@ -7,8 +7,8 @@ import { HistoryItem } from "@/components/ui/history-item";
 import { Modal } from "@/components/ui/modal";
 import { LoyaltyCard } from "@/features/loyalty/components/loyalty-card";
 import { RewardCard } from "@/features/loyalty/components/reward-card";
-import { useGetV1Loyalty, useGetV1Rewards } from "@/lib/api";
 import { requireAuth } from "@/hooks/with-auth";
+import { useGetV1Loyalty, useGetV1Rewards } from "@/lib/api";
 
 export const Route = createFileRoute("/_client/loyalty")({
   beforeLoad: async ({ location }) => {
