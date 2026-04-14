@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   createColumnHelper,
+  type ExpandedState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
   useReactTable,
-  type ExpandedState,
 } from "@tanstack/react-table";
 import {
   ChevronDown,
@@ -190,9 +190,9 @@ function CategoriesPage() {
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
                       </th>
                     ))}
                   </tr>
