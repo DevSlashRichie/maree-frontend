@@ -11,6 +11,7 @@ interface CategoryFormProps {
   categories: GetCategoriesDtoItem[];
   onSubmit: () => void;
   isLoading?: boolean;
+  onClose?: () => void;
 }
 
 export function CategoryForm({
@@ -18,6 +19,7 @@ export function CategoryForm({
   categories,
   onSubmit,
   isLoading,
+  onClose,
 }: CategoryFormProps) {
   const { trigger: createCategory } = usePostV1ProductsCategories();
   const { trigger: updateCategory } = usePatchV1ProductsCategoriesId(
@@ -54,9 +56,13 @@ export function CategoryForm({
     },
   });
 
+  const aux = (input: any) => {
+    return input.flatMap((node: any) => [node, ...aux(node.children ?? [])]);
+  };
+
   // Filter out the current category from being its own parent
-  const availableParents = categories.filter(
-    (cat) => cat.id !== initialData?.id,
+  const availableParents = aux(categories).filter(
+    (cat: GetCategoriesDtoItem) => cat.id !== initialData?.id,
   );
 
   return (
@@ -125,7 +131,7 @@ export function CategoryForm({
                 className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 transition-all outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary appearance-none cursor-pointer"
               >
                 <option value="">Ninguna (Categoría Principal)</option>
-                {availableParents.map((cat) => (
+                {availableParents.map((cat: GetCategoriesDtoItem) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
                   </option>
@@ -139,7 +145,14 @@ export function CategoryForm({
         )}
       </form.Field>
 
-      <div className="pt-4">
+      <div className="flex justify-end gap-3 pt-4">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-6 py-2 text-sm font-medium text-gray-500 hover:text-text-main transition-colors"
+        >
+          Cancelar
+        </button>
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
         >
@@ -147,7 +160,7 @@ export function CategoryForm({
             <button
               type="submit"
               disabled={!canSubmit || isSubmitting || isLoading}
-              className="w-full bg-secondary text-white py-4 rounded-2xl font-bold hover:bg-secondary/90 transition-all shadow-lg shadow-secondary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50"
             >
               {isSubmitting || isLoading
                 ? "Guardando..."
