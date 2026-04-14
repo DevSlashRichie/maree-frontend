@@ -1,6 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Calendar, Clock, Globe, MapPin } from "lucide-react";
-import { useGetV1BranchesId } from "@/lib/api";
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Globe,
+  MapPin,
+  Pencil,
+} from "lucide-react";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { Modal } from "@/components/ui/modal";
+import { useGetV1BranchesId, usePatchV1BranchesId } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/branches/$branchId")({
   component: RouteComponent,
@@ -16,10 +26,251 @@ const WEEKDAYS = [
   "Sábado",
 ];
 
+const generateId = () => crypto.randomUUID();
+
+type Schedule = {
+  id: string;
+  weekday: number;
+  fromTime: string;
+  toTime: string;
+  timezone: string;
+};
+
+function EditBranchModal({
+  isOpen,
+  onClose,
+  branchId,
+  initialName,
+  initialState,
+  initialSchedules,
+  onSuccess,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  branchId: string;
+  initialName: string;
+  initialState: string;
+  initialSchedules: Schedule[];
+  onSuccess: () => void;
+}) {
+  const { trigger: patchBranch, isMutating } = usePatchV1BranchesId(branchId);
+
+  const [form, setForm] = useState({
+    name: initialName,
+    state: initialState,
+    schedules: initialSchedules.map((s) => ({ ...s })),
+  });
+  const [error, setError] = useState<string | null>(null);
+
+  const addSchedule = () => {
+    setForm({
+      ...form,
+      schedules: [
+        ...form.schedules,
+        {
+          id: generateId(),
+          weekday: 1,
+          fromTime: "",
+          toTime: "",
+          timezone: "America/Mexico_City",
+        },
+      ],
+    });
+  };
+
+  const updateSchedule = (
+    id: string,
+    field: keyof Omit<Schedule, "id">,
+    value: string | number,
+  ) => {
+    setForm({
+      ...form,
+      schedules: form.schedules.map((s) =>
+        s.id === id ? { ...s, [field]: value } : s,
+      ),
+    });
+  };
+
+  const removeSchedule = (id: string) => {
+    setForm({
+      ...form,
+      schedules: form.schedules.filter((s) => s.id !== id),
+    });
+  };
+
+  const handleSubmit = async () => {
+    setError(null);
+
+    if (!form.name || !form.state) {
+      setError("Completa todos los campos");
+      return;
+    }
+
+    const result = await patchBranch({
+      name: form.name,
+      state: form.state as "active" | "inactive",
+      schedules: form.schedules.map(({ id, ...rest }) => rest),
+    });
+
+    if (result.status === 200) {
+      toast.success("Sucursal actualizada");
+      onSuccess();
+      onClose();
+      return;
+    }
+
+    if (result.status === 404) {
+      setError("Sucursal no encontrada");
+      return;
+    }
+
+    setError("Error inesperado al guardar");
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Editar sucursal"
+      description="Actualiza los datos de la sucursal"
+      maxWidth="md"
+    >
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="branch-name"
+            className="text-[10px] uppercase tracking-[0.15em] text-text-main/40 font-semibold"
+          >
+            Nombre
+          </label>
+          <input
+            id="branch-name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="px-4 py-2.5 rounded-xl border border-secondary/20 text-sm font-semibold text-text-main outline-none focus:border-secondary"
+            placeholder="Sucursal Centro"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="branch-state"
+            className="text-[10px] uppercase tracking-[0.15em] text-text-main/40 font-semibold"
+          >
+            Estado
+          </label>
+          <select
+            id="branch-state"
+            value={form.state === "active" ? "open" : "close"}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                state: e.target.value === "open" ? "active" : "inactive",
+              })
+            }
+            className="px-4 py-2.5 rounded-xl border border-secondary/20 text-sm font-semibold text-text-main outline-none focus:border-secondary"
+          >
+            <option value="open">Open</option>
+            <option value="close">Close</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between items-center">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-text-main/40 font-semibold">
+              Horarios
+            </p>
+            <button
+              type="button"
+              onClick={addSchedule}
+              className="text-xs font-bold text-secondary"
+            >
+              + Agregar
+            </button>
+          </div>
+
+          {form.schedules.length === 0 && (
+            <p className="text-xs text-text-main/40">Sin horarios</p>
+          )}
+
+          {form.schedules.map((s) => (
+            <div
+              key={s.id}
+              className="flex items-center gap-2 p-2 rounded-xl border border-secondary/10"
+            >
+              <select
+                id={`weekday-${s.id}`}
+                value={s.weekday}
+                onChange={(e) =>
+                  updateSchedule(s.id, "weekday", Number(e.target.value))
+                }
+                className="text-sm border rounded-lg px-2 py-1"
+              >
+                {WEEKDAYS.map((day, index) => (
+                  <option key={day} value={index}>
+                    {day}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                id={`from-${s.id}`}
+                type="time"
+                value={s.fromTime}
+                onChange={(e) =>
+                  updateSchedule(s.id, "fromTime", e.target.value)
+                }
+                className="text-sm border rounded-lg px-2 py-1"
+              />
+
+              <input
+                id={`to-${s.id}`}
+                type="time"
+                value={s.toTime}
+                onChange={(e) => updateSchedule(s.id, "toTime", e.target.value)}
+                className="text-sm border rounded-lg px-2 py-1"
+              />
+
+              <button
+                type="button"
+                onClick={() => removeSchedule(s.id)}
+                className="text-xs text-red-500 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {error && <p className="text-xs text-red-500 font-semibold">{error}</p>}
+
+        <div className="flex justify-end gap-3 mt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-semibold text-text-main/50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            disabled={isMutating}
+            onClick={handleSubmit}
+            className="px-6 py-2 rounded-full bg-[#2F3437] text-white text-xs font-bold tracking-widest uppercase disabled:opacity-50"
+          >
+            {isMutating ? "Guardando..." : "Guardar"}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 function RouteComponent() {
   const { branchId } = Route.useParams();
   const navigate = useNavigate();
-  const { data, isLoading } = useGetV1BranchesId(branchId);
+  const { data, isLoading, mutate } = useGetV1BranchesId(branchId);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -88,6 +339,14 @@ function RouteComponent() {
               year: "numeric",
             })}
           </p>
+          <button
+            type="button"
+            onClick={() => setIsEditOpen(true)}
+            className="mt-3 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#2F3437] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#2F3437]/90 transition-colors"
+          >
+            <Pencil className="w-3 h-3" />
+            Editar
+          </button>
         </div>
       </div>
 
@@ -154,6 +413,22 @@ function RouteComponent() {
           </div>
         )}
       </div>
+
+      <EditBranchModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        branchId={branchId}
+        initialName={branch.name}
+        initialState={branch.state}
+        initialSchedules={schedules.map((s) => ({
+          id: s.id,
+          weekday: s.weekday,
+          fromTime: s.fromTime,
+          toTime: s.toTime,
+          timezone: s.timezone,
+        }))}
+        onSuccess={() => mutate()}
+      />
     </div>
   );
 }
