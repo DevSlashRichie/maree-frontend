@@ -20,7 +20,6 @@ import { Route as AdminOrderRouteImport } from './routes/admin/order'
 import { Route as ClientReviewRouteImport } from './routes/_client/review'
 import { Route as ClientMenuRouteImport } from './routes/_client/menu'
 import { Route as ClientLoyaltyRouteImport } from './routes/_client/loyalty'
-import { Route as ClientCustomizeProductRouteImport } from './routes/_client/customize-product'
 import { Route as ClientCartRouteImport } from './routes/_client/cart'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminStaffIndexRouteImport } from './routes/admin/staff/index'
@@ -84,11 +83,6 @@ const ClientLoyaltyRoute = ClientLoyaltyRouteImport.update({
   path: '/loyalty',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ClientCustomizeProductRoute = ClientCustomizeProductRouteImport.update({
-  id: '/_client/customize-product',
-  path: '/customize-product',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ClientCartRoute = ClientCartRouteImport.update({
   id: '/_client/cart',
   path: '/cart',
@@ -131,7 +125,6 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/cart': typeof ClientCartRoute
-  '/customize-product': typeof ClientCustomizeProductRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
   '/review': typeof ClientReviewRoute
@@ -151,7 +144,6 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/cart': typeof ClientCartRoute
-  '/customize-product': typeof ClientCustomizeProductRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
   '/review': typeof ClientReviewRoute
@@ -173,7 +165,6 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/_client/cart': typeof ClientCartRoute
-  '/_client/customize-product': typeof ClientCustomizeProductRoute
   '/_client/loyalty': typeof ClientLoyaltyRoute
   '/_client/menu': typeof ClientMenuRoute
   '/_client/review': typeof ClientReviewRoute
@@ -196,7 +187,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/login'
     | '/cart'
-    | '/customize-product'
     | '/loyalty'
     | '/menu'
     | '/review'
@@ -216,7 +206,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/login'
     | '/cart'
-    | '/customize-product'
     | '/loyalty'
     | '/menu'
     | '/review'
@@ -237,7 +226,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/login'
     | '/_client/cart'
-    | '/_client/customize-product'
     | '/_client/loyalty'
     | '/_client/menu'
     | '/_client/review'
@@ -259,7 +247,6 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   LoginRoute: typeof LoginRoute
   ClientCartRoute: typeof ClientCartRoute
-  ClientCustomizeProductRoute: typeof ClientCustomizeProductRoute
   ClientLoyaltyRoute: typeof ClientLoyaltyRoute
   ClientMenuRoute: typeof ClientMenuRoute
   ClientReviewRoute: typeof ClientReviewRoute
@@ -342,13 +329,6 @@ declare module '@tanstack/react-router' {
       path: '/loyalty'
       fullPath: '/loyalty'
       preLoaderRoute: typeof ClientLoyaltyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_client/customize-product': {
-      id: '/_client/customize-product'
-      path: '/customize-product'
-      fullPath: '/customize-product'
-      preLoaderRoute: typeof ClientCustomizeProductRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_client/cart': {
@@ -439,7 +419,6 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   LoginRoute: LoginRoute,
   ClientCartRoute: ClientCartRoute,
-  ClientCustomizeProductRoute: ClientCustomizeProductRoute,
   ClientLoyaltyRoute: ClientLoyaltyRoute,
   ClientMenuRoute: ClientMenuRoute,
   ClientReviewRoute: ClientReviewRoute,
