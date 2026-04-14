@@ -6,7 +6,8 @@ import {
 } from "@headlessui/react";
 import { useNavigate } from "@tanstack/react-router";
 import { Check, ChevronDown, MapPin, Settings } from "lucide-react";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
+import { useBranchStore } from "@/hooks/use-branch-store";
 import { useGetV1Branches } from "@/lib/api";
 
 export interface Branch {
@@ -17,10 +18,8 @@ export interface Branch {
 
 export function BranchSelector() {
   const navigate = useNavigate();
-
+  const { selectedBranch, setSelectedBranch } = useBranchStore();
   const { data, isLoading } = useGetV1Branches();
-
-  const [selected, setSelected] = useState<Branch | null>(null);
 
   if (isLoading) {
     return <div>Cargando</div>;
@@ -47,7 +46,7 @@ export function BranchSelector() {
           >
             <MapPin className="w-3.5 h-3.5 shrink-0" />
             <span className="max-w-[130px] truncate">
-              {selected ? selected.name : "Selecciona Sucursal"}
+              {selectedBranch ? selectedBranch.name : "Selecciona Sucursal"}
             </span>
             <ChevronDown
               className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
@@ -71,7 +70,7 @@ export function BranchSelector() {
                   <button
                     type="button"
                     onClick={() => {
-                      setSelected(null);
+                      setSelectedBranch(null);
                       navigate({ to: "/admin/branches" });
                       close();
                     }}
@@ -103,18 +102,20 @@ export function BranchSelector() {
                   ) : null}
 
                   {data.data.map((branch: Branch) => {
-                    const isSelected = selected?.id === branch.id;
+                    const isSelected = selectedBranch?.id === branch.id;
 
                     return (
                       <button
                         key={branch.id}
                         type="button"
                         onClick={() => {
-                          setSelected(branch);
-                          navigate({
-                            to: "/admin/branches/$branchId",
-                            params: { branchId: branch.id },
-                          });
+                          setSelectedBranch(branch);
+                          if (location.pathname === "/admin/branches") {
+                            navigate({
+                              to: "/admin/branches/$branchId",
+                              params: { branchId: branch.id },
+                            });
+                          }
                           close();
                         }}
                         className={`

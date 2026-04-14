@@ -26,20 +26,21 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
 import { Tooltip } from "@/components/ui/tooltip";
+import { useBranchStore } from "@/hooks/use-branch-store";
 import {
   deleteV1RewardsRewardId,
   patchV1RewardsRewardId,
+  useGetV1BranchesIdRewards,
   useGetV1Rewards,
   usePostV1Rewards,
 } from "@/lib/api";
+import type { BranchDiscount } from "@/lib/schemas";
 import type { RewardSchema } from "@/lib/schemas/rewardSchema";
 
-// Route definition for admin rewards page
 export const Route = createFileRoute("/admin/rewards")({
   component: RouteComponent,
 });
 
-// Reward data structure used throughout the component
 type Reward = {
   id: string;
   title: string;
@@ -57,7 +58,6 @@ type Reward = {
   createdAt: string;
 };
 
-// Products that rewards can be applied to
 const AVAILABLE_PRODUCTS = [
   { id: "1", name: "Cappuccino" },
   { id: "2", name: "Latte" },
@@ -71,7 +71,6 @@ const AVAILABLE_PRODUCTS = [
   { id: "10", name: "Brownie" },
 ];
 
-// Icon options for reward cards
 const AVAILABLE_ICONS = [
   {
     value: "utensils-crossed",
@@ -84,57 +83,74 @@ const AVAILABLE_ICONS = [
   { value: "utensils", label: "Utensils", icon: Utensils },
 ];
 
-// Returns the icon component for a given icon name, defaults to UtensilsCrossed
 function getIconComponent(iconName: string) {
   const found = AVAILABLE_ICONS.find((i) => i.value === iconName);
   return found ? found.icon : UtensilsCrossed;
 }
 
-// Main component for managing loyalty program rewards
 function RouteComponent() {
-  // Fetch rewards data from API
+  const { selectedBranch } = useBranchStore();
+
   const {
     data: rewardsData,
     isLoading: isLoadingRewards,
     error: rewardsError,
     mutate,
   } = useGetV1Rewards({
-    fetch: {
-      credentials: "include",
-    },
+    fetch: { credentials: "include" },
+    swr: { enabled: !selectedBranch },
   });
 
-  // Mutation hook for creating new rewards
+  const { data: branchRewardsData, isLoading: isLoadingBranchRewards } =
+    useGetV1BranchesIdRewards(selectedBranch?.id ?? "", {
+      swr: { enabled: !!selectedBranch },
+    });
+
   const { trigger: createReward, isMutating: isCreatingReward } =
     usePostV1Rewards();
 
-  // Transform API reward data to local Reward type
-  const rewards: Reward[] =
-    rewardsData?.data?.map((r: RewardSchema) => ({
-      id: r.id,
-      title: r.name.replace("REWARD-", ""),
-      description: r.description,
-      icon: "utensils-crossed",
-      isAvailable: r.status === "active",
-      points: parseInt(r.cost, 10) || null,
-      discountType: r.discount.type as "percentage" | "fixed",
-      discountValue: parseInt(r.discount.value, 10),
-      applicableProducts:
-        r.discount.appliesTo.length > 0 ? r.discount.appliesTo : null,
-      status: r.status,
-      cost: r.cost,
-      discountId: r.discountId,
-      image: r.image,
-      createdAt: r.createdAt,
-    })) ?? [];
+  const rewards: Reward[] = selectedBranch
+    ? (branchRewardsData?.status === 200 ? branchRewardsData.data : []).map(
+        (r: BranchDiscount) => ({
+          id: r.id,
+          title: r.name.replace("REWARD-", ""),
+          description: "",
+          icon: "utensils-crossed",
+          isAvailable: r.state === "active",
+          points: null,
+          discountType: r.type as "percentage" | "fixed",
+          discountValue: r.value,
+          applicableProducts: r.appliesTo.length > 0 ? r.appliesTo : null,
+          status: r.state,
+          cost: "",
+          discountId: r.id,
+          image: null,
+          createdAt: r.createdAt,
+        }),
+      )
+    : (rewardsData?.data ?? []).map((r: RewardSchema) => ({
+        id: r.id,
+        title: r.name.replace("REWARD-", ""),
+        description: r.description,
+        icon: "utensils-crossed",
+        isAvailable: r.status === "active",
+        points: parseInt(r.cost, 10) || null,
+        discountType: r.discount.type as "percentage" | "fixed",
+        discountValue: parseInt(r.discount.value, 10),
+        applicableProducts:
+          r.discount.appliesTo.length > 0 ? r.discount.appliesTo : null,
+        status: r.status,
+        cost: r.cost,
+        discountId: r.discountId,
+        image: r.image,
+        createdAt: r.createdAt,
+      }));
 
-  // UI state management
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<Reward | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Form configuration with default values and submit handler
   const form = useForm({
     defaultValues: {
       title: "",
@@ -188,6 +204,7 @@ function RouteComponent() {
               value: value.discountValue,
               appliesTo: productName ? [productName] : [],
             },
+            branchId: selectedBranch?.id,
           });
 
           if (result.status === 201) {
@@ -206,7 +223,6 @@ function RouteComponent() {
     },
   });
 
-  // Populates form fields with reward data for editing
   const handleEdit = (reward: Reward) => {
     setEditingReward(reward);
     const hasRestriction =
@@ -230,14 +246,12 @@ function RouteComponent() {
     setIsFormOpen(true);
   };
 
-  // Resets form state and closes modal
   const resetForm = () => {
     form.reset();
     setEditingReward(null);
     setIsFormOpen(false);
   };
 
-  // Deletes a reward after confirmation with toast notifications
   const handleDelete = async (id: string) => {
     const f = async () => {
       try {
@@ -262,7 +276,6 @@ function RouteComponent() {
     });
   };
 
-  // Toggles reward availability status between active/inactive
   const toggleAvailability = async (id: string) => {
     const reward = rewards.find((r) => r.id === id);
     if (!reward) return;
@@ -270,9 +283,7 @@ function RouteComponent() {
     const newStatus = reward.isAvailable ? "inactive" : "active";
 
     try {
-      const result = await patchV1RewardsRewardId(id, {
-        status: newStatus,
-      });
+      const result = await patchV1RewardsRewardId(id, { status: newStatus });
 
       if (result.status === 200) {
         mutate();
@@ -288,8 +299,7 @@ function RouteComponent() {
     }
   };
 
-  // Loading state
-  if (isLoadingRewards) {
+  if (isLoadingRewards || isLoadingBranchRewards) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
         <div className="text-text-main">Cargando recompensas...</div>
@@ -297,7 +307,6 @@ function RouteComponent() {
     );
   }
 
-  // Error state
   if (rewardsError) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
@@ -318,6 +327,14 @@ function RouteComponent() {
               <p className="font-body text-text-main/60">
                 Gestiona las recompensas del programa de lealtad
               </p>
+              {selectedBranch && (
+                <p className="font-body text-sm text-text-main/50 mt-1">
+                  Mostrando recompensas de{" "}
+                  <span className="font-semibold text-text-main">
+                    {selectedBranch.name}
+                  </span>
+                </p>
+              )}
             </div>
             {!isFormOpen && (
               <button
@@ -331,7 +348,6 @@ function RouteComponent() {
             )}
           </div>
 
-          {/* Create/Edit Reward Modal */}
           <Modal
             isOpen={isFormOpen}
             onClose={() => setIsFormOpen(false)}
@@ -434,7 +450,6 @@ function RouteComponent() {
                       <div className="flex gap-2 flex-wrap">
                         {AVAILABLE_ICONS.map((icon) => {
                           const IconComponent = icon.icon;
-                          // Main rewards management UI
                           return (
                             <button
                               key={icon.value}
@@ -603,9 +618,8 @@ function RouteComponent() {
                         checked={field.state.value}
                         onChange={(checked) => {
                           field.handleChange(checked);
-                          if (!checked) {
+                          if (!checked)
                             form.setFieldValue("applicableProducts", "");
-                          }
                         }}
                         className={cn(
                           field.state.value ? "bg-primary" : "bg-gray-200",
@@ -710,9 +724,7 @@ function RouteComponent() {
                 <button
                   type="button"
                   data-testid="cancel-button"
-                  onClick={() => {
-                    setIsFormOpen(false);
-                  }}
+                  onClick={() => setIsFormOpen(false)}
                   className="px-6 py-2 text-sm font-medium text-gray-500 hover:text-text-main transition-colors"
                 >
                   Cancelar
@@ -739,7 +751,6 @@ function RouteComponent() {
             </form>
           </Modal>
 
-          {/* Rewards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {rewards.map((reward) => {
               const IconComponent = getIconComponent(reward.icon);
@@ -844,7 +855,6 @@ function RouteComponent() {
             })}
           </div>
 
-          {/* Empty state when no rewards exist */}
           {rewards.length === 0 && (
             <div className="text-center py-12">
               <p className="text-text-main/60">
