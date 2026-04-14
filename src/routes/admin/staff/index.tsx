@@ -29,23 +29,23 @@ export const Route = createFileRoute("/admin/staff/")({
 });
 
 const ROLES = [
-  { value: "admin", label: "Administrador" },
-  { value: "manager", label: "Gerente" },
-  { value: "barista", label: "Barista" },
+  { value: "administrator", label: "Administrador" },
+  { value: "supervisor", label: "Gerente" },
+  { value: "waiter", label: "Mesero" },
   { value: "cashier", label: "Cajero" },
 ];
 
 const roleColors: Record<string, string> = {
-  admin: "bg-purple-100 text-purple-700",
-  manager: "bg-blue-100 text-blue-700",
-  barista: "bg-green-100 text-green-700",
+  administrator: "bg-purple-100 text-purple-700",
+  supervisor: "bg-blue-100 text-blue-700",
+  waiter: "bg-green-100 text-green-700",
   cashier: "bg-yellow-100 text-yellow-700",
 };
 
 const roleLabels: Record<string, string> = {
-  admin: "Administrador",
-  manager: "Gerente",
-  barista: "Barista",
+  administrator: "Administrador",
+  supervisor: "Gerente",
+  waiter: "Mesero",
   cashier: "Cajero",
 };
 
@@ -135,7 +135,7 @@ function StaffFormModal({
       lastName: "",
       email: "",
       phone: "",
-      role: "barista",
+      role: "",
     },
     onSubmit: async ({ value }) => {
       try {
@@ -144,10 +144,7 @@ function StaffFormModal({
           lastName: value.lastName,
           phone: value.phone,
           role: value.role,
-          // ✅ Solo incluir email si tiene contenido real — z.email().optional()
-          // rechaza string vacío "" pero acepta undefined
-          ...(value.email.trim() !== "" && { email: value.email.trim() }),
-          ...(selectedBranch?.id && { branchId: selectedBranch.id }),
+          branchId: selectedBranch?.id,
         };
 
         const result = (await registerUser(payload)) as {
@@ -333,6 +330,9 @@ function StaffFormModal({
                 onChange={(e) => field.handleChange(e.target.value)}
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
               >
+                <option disabled value="">
+                  Selecciona un rol
+                </option>
                 {ROLES.map((role) => (
                   <option key={role.value} value={role.value}>
                     {role.label}
@@ -441,9 +441,9 @@ function RouteComponent() {
 
   const handleSuccess = () => {
     if (selectedBranch) {
-      mutateBranch(undefined, { revalidate: true });
+      mutateBranch();
     } else {
-      mutateAll(undefined, { revalidate: true });
+      mutateAll();
     }
   };
 
@@ -455,6 +455,18 @@ function RouteComponent() {
       <div className="min-h-screen bg-background-light flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-500 mb-4">Error al cargar staff</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedBranch) {
+    return (
+      <div className="min-h-screen bg-background-light flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-text-main/60">
+            Selecciona una sucursal para ver el staff
+          </p>
         </div>
       </div>
     );
