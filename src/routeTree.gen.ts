@@ -495,6 +495,7 @@ const AdminInventoryRouteRouteWithChildren =
 
 interface AdminRouteRouteChildren {
   AdminInventoryRouteRoute: typeof AdminInventoryRouteRouteWithChildren
+  AdminCreateProductRoute: typeof AdminCreateProductRoute
   AdminOrderRoute: typeof AdminOrderRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
@@ -509,6 +510,7 @@ interface AdminRouteRouteChildren {
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminInventoryRouteRoute: AdminInventoryRouteRouteWithChildren,
+  AdminCreateProductRoute: AdminCreateProductRoute,
   AdminOrderRoute: AdminOrderRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminRewardsRoute: AdminRewardsRoute,
