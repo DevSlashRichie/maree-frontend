@@ -17,15 +17,12 @@ export function OrderColumn({
       <h2 className="font-display text-lg text-text-main font-semibold px-1">
         {title}
       </h2>
-
       <div className="flex flex-col overflow-y-auto scrollbar-hide flex-1">
         {orders.map((order) => (
           <OrderCard
             key={order.order.id}
             order={order}
-            orderOnClickHandler={() => {
-              orderOnClickHandler(order.order.id);
-            }}
+            orderOnClickHandler={() => orderOnClickHandler(order.order.id)}
           />
         ))}
       </div>
