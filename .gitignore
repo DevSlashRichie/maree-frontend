@@ -31,4 +31,5 @@ src/lib/zods.ts
 test-results/
 
 playwright-report/
+.auth/
 
