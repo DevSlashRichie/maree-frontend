@@ -91,10 +91,11 @@ export function CategoryForm({
               onChange={(e) => field.handleChange(e.target.value)}
               type="text"
               placeholder="Ej. Bebidas, Postres..."
-              className={`w-full px-4 py-3 rounded-2xl border bg-gray-50 transition-all outline-none focus:ring-2 focus:ring-secondary/20 ${field.state.meta.errors.length > 0
+              className={`w-full px-4 py-3 rounded-2xl border bg-gray-50 transition-all outline-none focus:ring-2 focus:ring-secondary/20 ${
+                field.state.meta.errors.length > 0
                   ? "border-red-500 focus:border-red-500"
                   : "border-gray-200 focus:border-secondary"
-                }`}
+              }`}
             />
             {field.state.meta.errors.length > 0 && (
               <p className="text-xs text-red-500 ml-1">
