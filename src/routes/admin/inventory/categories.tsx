@@ -10,12 +10,12 @@ import {
 import {
   ChevronDown,
   ChevronRight,
+  Eye,
+  EyeOff,
   Folder,
   Pencil,
   Plus,
   Trash2,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { Modal } from "@/components/ui/modal";
