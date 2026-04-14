@@ -4,11 +4,11 @@ import {
   usePatchV1ProductsCategoriesId,
   usePostV1ProductsCategories,
 } from "@/lib/api";
-import type { GetV1ProductsCategories200CategoriesItem } from "@/lib/schemas";
+import type { GetCategoriesDtoItem } from "@/lib/schemas";
 
 interface CategoryFormProps {
-  initialData?: GetV1ProductsCategories200CategoriesItem;
-  categories: GetV1ProductsCategories200CategoriesItem[];
+  initialData?: GetCategoriesDtoItem;
+  categories: GetCategoriesDtoItem[];
   onSubmit: () => void;
   isLoading?: boolean;
 }

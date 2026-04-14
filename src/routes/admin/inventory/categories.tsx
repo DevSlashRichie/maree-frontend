@@ -10,19 +10,18 @@ import { useCallback, useMemo, useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { CategoryForm } from "@/features/admin/inventory/components/category-form";
 import { useGetV1ProductsCategories } from "@/lib/api";
-import type { GetV1ProductsCategories200CategoriesItem } from "@/lib/schemas";
+import type { GetCategoriesDtoItem } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/inventory/categories")({
   component: CategoriesPage,
 });
 
-const columnHelper =
-  createColumnHelper<GetV1ProductsCategories200CategoriesItem>();
+const columnHelper = createColumnHelper<GetCategoriesDtoItem>();
 
 function CategoriesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<
-    GetV1ProductsCategories200CategoriesItem | undefined
+    GetCategoriesDtoItem | undefined
   >(undefined);
 
   const { data, isLoading, error, mutate } = useGetV1ProductsCategories({
@@ -43,13 +42,10 @@ function CategoriesPage() {
     setIsModalOpen(true);
   }, []);
 
-  const handleEdit = useCallback(
-    (category: GetV1ProductsCategories200CategoriesItem) => {
-      setSelectedCategory(category);
-      setIsModalOpen(true);
-    },
-    [],
-  );
+  const handleEdit = useCallback((category: GetCategoriesDtoItem) => {
+    setSelectedCategory(category);
+    setIsModalOpen(true);
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -97,7 +93,7 @@ function CategoriesPage() {
     [handleEdit],
   );
 
-  const table = useReactTable({
+  const table = useReactTable<GetCategoriesDtoItem>({
     data: categories,
     columns,
     getCoreRowModel: getCoreRowModel(),
