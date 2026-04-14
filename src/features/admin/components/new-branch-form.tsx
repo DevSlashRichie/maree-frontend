@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { usePostV1Branches } from "@/lib/api";
-import type { CreateBranchDto } from "@/lib/schemas/createBranchDto";
 import type { PostV1Branches201 } from "@/lib/schemas/postV1Branches201";
 
 interface Props {
@@ -31,9 +30,6 @@ type EditableFields = "weekday" | "fromTime" | "toTime";
 
 export function CreateBranchForm({ onClose, onSuccess }: Props) {
   const postBranch = usePostV1Branches();
-
-  const createBranch = (data: CreateBranchDto) =>
-    postBranch.trigger(data as CreateBranchDto);
 
   const isCreatingBranch = postBranch.isMutating;
 
