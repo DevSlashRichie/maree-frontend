@@ -32,7 +32,7 @@ type EditableFields = "weekday" | "fromTime" | "toTime";
 export function CreateBranchForm({ onClose, onSuccess }: Props) {
   const postBranch = usePostV1Branches();
 
-  const createBranch = (data: CreateBranchDto) =>
+  const _createBranch = (data: CreateBranchDto) =>
     postBranch.trigger(data as CreateBranchDto);
 
   const isCreatingBranch = postBranch.isMutating;
