@@ -10,6 +10,8 @@ import {
 import {
   ChevronDown,
   ChevronRight,
+  Eye,
+  EyeOff,
   Folder,
   Pencil,
   Plus,
@@ -94,6 +96,28 @@ function CategoriesPage() {
           <span className="text-xs font-mono text-text-main/40 uppercase tracking-tighter">
             {info.getValue().split("-")[0]}...
           </span>
+        ),
+      }),
+      columnHelper.accessor("public", {
+        header: "Estado",
+        cell: (info) => (
+          <div className="flex items-center gap-1.5">
+            {info.getValue() ? (
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-100">
+                <Eye className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">
+                  Público
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gray-50 text-gray-400 border border-gray-100">
+                <EyeOff className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">
+                  Privado
+                </span>
+              </div>
+            )}
+          </div>
         ),
       }),
       columnHelper.display({
@@ -202,7 +226,9 @@ function CategoriesPage() {
                 {table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+                    className={`hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 ${
+                      !row.original.public ? "opacity-75 grayscale-[0.2]" : ""
+                    }`}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id} className="px-6 py-4">
