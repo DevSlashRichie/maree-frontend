@@ -208,7 +208,7 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
               return;
             }
 
-            const res = await createBranch({
+            const res = await postBranch.trigger({
               name: form.name,
               state: form.state === "open" ? "active" : "inactive",
               schedules: form.schedules.map(({ id, ...rest }) => ({
