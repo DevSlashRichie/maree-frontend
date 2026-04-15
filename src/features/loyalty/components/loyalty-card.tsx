@@ -1,19 +1,18 @@
 import cn from "classnames";
 import { Loader2, QrCode } from "lucide-react"; // Verifica si es 'lucide-react' o 'lucide-center' en tu proyecto
 import { useState } from "react";
-import QRCode from "react-qr-code";
+// @ts-expect-error - bad imports for some reason.
+import { QRCode } from "react-qr-code";
+import { Modal } from "@/components/ui/modal";
 import { useGetV1Loyalty, useGetV1LoyaltyGoogleWallet } from "@/lib/api";
-import { Modal } from "../../../components/ui/modal";
 
 export function LoyaltyCard() {
   const [isQRExpanded, setIsQRExpanded] = useState(false);
 
   const { data, isLoading } = useGetV1Loyalty();
 
-  const {
-    mutate: fetchGoogleWallet,
-    isValidating: isGeneratingGoogle,
-  } = useGetV1LoyaltyGoogleWallet();
+  const { mutate: fetchGoogleWallet, isValidating: isGeneratingGoogle } =
+    useGetV1LoyaltyGoogleWallet();
 
   const TOTAL_STAMPS = 6;
 
