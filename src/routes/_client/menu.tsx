@@ -9,7 +9,6 @@ import {
   useGetV1ProductsVariants,
 } from "@/lib/api";
 import type {
-  GetCategoriesDtoItem,
   GetV1ProductsVariants200VariantsItem,
 } from "@/lib/schemas";
 
