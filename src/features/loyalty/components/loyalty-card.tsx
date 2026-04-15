@@ -1,8 +1,8 @@
 import cn from "classnames";
 import { Loader2, QrCode } from "lucide-react";
 import { useState } from "react";
-import QRCode from "react-qr-code";
-
+// @ts-expect-error - bad imports for some reason.
+import { QRCode } from "react-qr-code";
 import { Modal } from "@/components/ui/modal";
 import { useGetV1Loyalty, useGetV1LoyaltyGoogleWallet } from "@/lib/api";
 
