@@ -5,9 +5,8 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Info, Package, Loader2, AlertCircle } from "lucide-react";
+import { Info, Package, Loader2, AlertCircle, Plus, Tag, Eye, EyeOff } from "lucide-react";
 import { useMemo, useState } from "react";
-// Asegúrate de que esta ruta apunte a tus hooks generados
 import { useGetV1ProductsVariants } from "@/lib/api"; 
 
 export const Route = createFileRoute("/admin/inventory/products")({
@@ -27,6 +26,10 @@ type Variant = {
     image: string | null;
     name: string;
     status: string;
+    // Asumiendo que el objeto product trae la categoría según tu esquema
+    category?: {
+      name: string;
+    };
   };
 };
 
@@ -34,25 +37,38 @@ const columnHelper = createColumnHelper<Variant>();
 
 const columns = [
   columnHelper.accessor("name", {
-    header: "Variante",
+    header: "Producto / Variante",
     cell: (info) => (
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center border border-secondary/20">
+        <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center border border-secondary/20 shrink-0">
           <Package className="w-5 h-5 text-secondary" />
         </div>
-        <div className="flex flex-col">
-          <span className="font-medium text-text-main">{info.getValue()}</span>
-          <span className="text-[10px] text-text-main/50 uppercase font-bold">
+        <div className="flex flex-col min-w-0">
+          <span className="font-medium text-text-main truncate">{info.getValue()}</span>
+          <span className="text-[10px] text-text-main/50 uppercase font-bold tracking-wider">
             {info.row.original.product.name}
           </span>
         </div>
       </div>
     ),
   }),
+  columnHelper.accessor("product.category.name", {
+    header: "Categoría",
+    cell: (info) => (
+      <div className="flex items-center gap-2">
+        <Tag className="w-3.5 h-3.5 text-text-main/40" />
+        <span className="text-text-main/70 text-sm">
+          {info.getValue() || "Sin categoría"}
+        </span>
+      </div>
+    ),
+  }),
   columnHelper.accessor("price", {
     header: "Precio",
     cell: (info) => (
-      <span className="font-semibold text-text-main">${info.getValue()}</span>
+      <span className="font-semibold text-text-main text-sm">
+        ${parseFloat(info.getValue()).toLocaleString()}
+      </span>
     ),
   }),
   columnHelper.accessor("product.status", {
@@ -60,27 +76,33 @@ const columns = [
     cell: (info) => {
       const isActive = info.getValue() === "active";
       return (
-        <span
-          className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
-            isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-          }`}
-        >
-          {isActive ? "Activo" : "Inactivo"}
-        </span>
+        <div className="flex items-center gap-1.5">
+          {isActive ? (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-100">
+              <Eye className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Activo</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 text-gray-400 border border-gray-100">
+              <EyeOff className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Inactivo</span>
+            </div>
+          )}
+        </div>
       );
     },
   }),
   columnHelper.display({
     id: "actions",
-    header: "Acción",
+    header: "Acciones",
     cell: (info) => (
       <Link
         to="/admin/products/$productId"
         params={{ productId: info.row.original.productId }}
-        className="group inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary text-white hover:bg-secondary/80 transition-all duration-200 font-semibold text-sm"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-white hover:bg-secondary/90 transition-colors font-semibold text-xs"
       >
-        <Info className="w-4 h-4" />
-        Detalles
+        <Info className="w-3.5 h-3.5" />
+        <span>Detalles</span>
       </Link>
     ),
   }),
@@ -89,8 +111,6 @@ const columns = [
 function ProductsComponent() {
   const [filterStatus, setFilterStatus] = useState("all");
 
-  // SOLUCIÓN: Pasamos undefined para evitar el error de [object Object] en la URL
-  // Esto hará que la petición sea simplemente /v1/products/variants sin query params inválidos
   const { data: apiResponse, isLoading, isError } = useGetV1ProductsVariants(undefined);
 
   const variants = useMemo(() => apiResponse?.data?.variants || [], [apiResponse]);
@@ -112,64 +132,85 @@ function ProductsComponent() {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-secondary" />
-        <p className="text-text-main/60">Cargando catálogo...</p>
+        <p className="text-text-main/60 font-body animate-pulse">Cargando inventario...</p>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="min-h-[400px] flex flex-col items-center justify-center gap-2 text-red-500">
-        <AlertCircle className="w-10 h-10" />
-        <p className="font-bold">Error al cargar datos. Verifica la conexión con la DB.</p>
+      <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
+        <div className="p-4 rounded-full bg-red-50">
+          <AlertCircle className="w-8 h-8 text-red-500" />
+        </div>
+        <p className="font-display font-bold text-red-500 text-lg">Error al conectar con la base de datos</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background-light p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-4xl font-bold text-text-main uppercase">Inventario</h1>
-            <p className="text-text-main/60">Datos reales desde la base de datos</p>
-          </div>
-
-          <div className="flex gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-            <div className="flex flex-col gap-1">
-              <label htmlFor="status-select" className="text-[10px] font-bold uppercase text-text-main/40 ml-1">
-                Estado
-              </label>
-              <select
-                id="status-select"
-                className="bg-gray-50 border-none rounded-lg text-sm"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="all">Todos</option>
-                <option value="active">Activos</option>
-                <option value="inactive">Inactivos</option>
-              </select>
-            </div>
-          </div>
+    <div className="flex flex-col gap-8 p-4 md:p-8">
+      {/* HEADER AL ESTILO CATEGORIAS */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h1 className="font-display text-4xl text-text-main font-bold mb-2 uppercase tracking-wide">
+            Inventario
+          </h1>
+          <p className="font-body text-text-main/60">
+            Gestiona los productos y sus variantes disponibles
+          </p>
         </div>
+        
+        <div className="flex flex-wrap items-center gap-4">
+          {/* FILTRO STATUS */}
+          <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
+            <span className="text-[10px] font-bold uppercase text-text-main/40 tracking-widest">Estado:</span>
+            <select
+              className="bg-transparent border-none text-sm font-semibold text-text-main focus:ring-0 cursor-pointer p-0"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">Todos</option>
+              <option value="active">Activos</option>
+              <option value="inactive">Inactivos</option>
+            </select>
+          </div>
 
-        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+          {/* BOTON NUEVO PRODUCTO */}
+          <Link
+            to="/admin/products/new"
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full hover:bg-primary/90 transition-all shadow-md shadow-primary/20 font-bold tracking-tight"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Nuevo Producto</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* TABLA CON ESTILO CATEGORIAS (Shadow y Bordes) */}
+      <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgba(232,213,213,0.3)] overflow-hidden border border-gray-100/50">
+        <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="bg-gray-50/50">
+                <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="px-6 py-5 text-left text-xs font-bold uppercase text-text-main/40 border-b border-gray-100">
+                    <th
+                      key={header.id}
+                      className="px-6 py-5 text-left text-xs font-bold uppercase tracking-widest text-text-main/50 bg-gray-50/50 border-b border-gray-100"
+                    >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
                 </tr>
               ))}
             </thead>
-            <tbody>
+            <tbody className="font-body">
               {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-b border-gray-50 hover:bg-gray-50/20 transition-colors">
+                <tr
+                  key={row.id}
+                  className="hover:bg-gray-50/50 transition-colors border-b border-gray-50 last:border-0"
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -179,13 +220,14 @@ function ProductsComponent() {
               ))}
             </tbody>
           </table>
-
-          {filteredData.length === 0 && (
-            <div className="p-20 text-center text-text-main/40 font-medium">
-              No se encontraron variantes en la base de datos.
-            </div>
-          )}
         </div>
+
+        {filteredData.length === 0 && (
+          <div className="p-20 text-center flex flex-col items-center gap-3">
+            <Package className="w-12 h-12 text-text-main/10" />
+            <p className="text-text-main/40 font-medium">No se encontraron productos en esta sección.</p>
+          </div>
+        )}
       </div>
     </div>
   );
