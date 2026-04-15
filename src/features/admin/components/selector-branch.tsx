@@ -4,11 +4,12 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import { useLocation, useNavigate } from "@tanstack/react-router";
-import { Check, ChevronDown, MapPin, Settings } from "lucide-react";
-import { Fragment } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { Check, ChevronDown, MapPin, Plus, Settings } from "lucide-react";
+import { Fragment, useEffect, useMemo } from "react";
 import { useBranchStore } from "@/hooks/use-branch-store";
-import { useGetV1Branches } from "@/lib/api";
+import { useGetV1Branches, useGetV1UsersMeBranch } from "@/lib/api";
+import type { GetV1Branches200Item } from "@/lib/schemas";
 
 export interface Branch {
   id: string;
@@ -20,15 +21,37 @@ export function BranchSelector() {
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedBranch, setSelectedBranch } = useBranchStore();
+  const { data: branchData, isLoading: branchLoading } =
+    useGetV1UsersMeBranch();
   const { data, isLoading } = useGetV1Branches();
 
-  if (isLoading) {
+  const userBranchId = branchData?.status === 200 ? branchData.data?.id : null;
+
+  const branches = useMemo(() => {
+    if (userBranchId && data?.status === 200) {
+      return data.data.filter((branch) => branch.id === userBranchId);
+    }
+    return data?.status === 200 ? data.data : [];
+  }, [data, userBranchId]);
+
+  useEffect(() => {
+    if (userBranchId && data?.status === 200 && !selectedBranch) {
+      const branch = data.data.find((b) => b.id === userBranchId);
+      if (branch) {
+        setSelectedBranch(branch as Branch);
+      }
+    }
+  }, [userBranchId, data, selectedBranch, setSelectedBranch]);
+
+  if (isLoading || branchLoading) {
     return <div>Cargando</div>;
   }
 
   if (!data || data.status !== 200) {
     return <div>{data?.data.message}</div>;
   }
+
+  const isStaff = !!userBranchId;
 
   return (
     <Popover className="relative">
@@ -67,25 +90,27 @@ export function BranchSelector() {
           >
             <PopoverPanel className="absolute right-0 mt-2 w-56 z-50 origin-top-right">
               <div className="rounded-2xl shadow-xl border border-secondary/20 bg-white overflow-hidden">
-                <div className="border-b border-secondary/10">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedBranch(null);
-                      navigate({ to: "/admin/branches" });
-                      close();
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer
+                {!isStaff && (
+                  <div className="border-b border-secondary/10">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedBranch(null);
+                        navigate({ to: "/admin/branches" });
+                        close();
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer
                       hover:bg-secondary/5 transition-colors duration-150 group"
-                  >
-                    <div className="w-7 h-7 rounded-full bg-secondary/10 group-hover:bg-secondary/20 flex items-center justify-center shrink-0">
-                      <Settings className="w-3.5 h-3.5 text-text-main/50" />
-                    </div>
-                    <p className="text-sm font-semibold text-text-main/80">
-                      Configuración
-                    </p>
-                  </button>
-                </div>
+                    >
+                      <div className="w-7 h-7 rounded-full bg-secondary/10 group-hover:bg-secondary/20 flex items-center justify-center shrink-0">
+                        <Settings className="w-3.5 h-3.5 text-text-main/50" />
+                      </div>
+                      <p className="text-sm font-semibold text-text-main/80">
+                        Configuración
+                      </p>
+                    </button>
+                  </div>
+                )}
 
                 <div className="px-4 py-3 border-b border-secondary/10">
                   <p className="text-[10px] uppercase tracking-[0.15em] text-text-main/40 font-semibold">
@@ -94,7 +119,7 @@ export function BranchSelector() {
                 </div>
 
                 <div className="py-1 max-h-80 overflow-y-scroll">
-                  {data.data.length === 0 ? (
+                  {branches.length === 0 ? (
                     <div className="px-4 py-3 border-b border-secondary/10">
                       <p className="text-[10px] uppercase tracking-[0.15em] text-text-main/40 font-semibold">
                         No hay sucursales
@@ -102,16 +127,16 @@ export function BranchSelector() {
                     </div>
                   ) : null}
 
-                  {data.data.map((branch: Branch) => {
+                  {branches.map((branch: GetV1Branches200Item) => {
                     const isSelected = selectedBranch?.id === branch.id;
 
                     return (
-                      <button
+                      <button 
                         key={branch.id}
                         type="button"
                         onClick={() => {
-                          setSelectedBranch(branch);
-                          if (location.pathname.startsWith("/admin/branches")) {
+                          setSelectedBranch(branch as Branch);
+                          if (location.pathname === "/admin/branches") {
                             navigate({
                               to: "/admin/branches/$branchId",
                               params: { branchId: branch.id },
@@ -140,6 +165,33 @@ export function BranchSelector() {
                     );
                   })}
                 </div>
+
+                {!isStaff && (
+                  <div className="border-b border-secondary/10">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedBranch(null);
+                        navigate({
+                          to: "/admin/branches",
+                          search: {
+                            modal: "new",
+                          },
+                        });
+                        close();
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer
+                        hover:bg-secondary/5 transition-colors duration-150 group"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-secondary/10 group-hover:bg-secondary/20 flex items-center justify-center shrink-0">
+                        <Plus className="w-3.5 h-3.5 text-text-main/50" />
+                      </div>
+                      <p className="text-sm font-semibold text-text-main/80">
+                        + Nueva Sucursal
+                      </p>
+                    </button>
+                  </div>
+                )}
               </div>
             </PopoverPanel>
           </Transition>
