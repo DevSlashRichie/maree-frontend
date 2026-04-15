@@ -5,81 +5,57 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Filter,
-  Info,
-  Layers,
-  Package,
-} from "lucide-react";
+import { Info, Package, Loader2, AlertCircle } from "lucide-react";
 import { useMemo, useState } from "react";
+// Asegúrate de que esta ruta apunte a tus hooks generados
+import { useGetV1ProductsVariants } from "@/lib/api"; 
 
 export const Route = createFileRoute("/admin/inventory/products")({
   component: ProductsComponent,
 });
 
-type Product = {
+type Variant = {
   id: string;
-  image: string | null;
   name: string;
-  status: string;
-  category_id: string;
-  created_at: string;
-  type: string;
+  description: string | null;
+  price: string;
+  image: string | null;
+  productId: string;
+  createdAt: string;
+  product: {
+    id: string;
+    image: string | null;
+    name: string;
+    status: string;
+  };
 };
 
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: "1",
-    image: null,
-    name: "Hamburguesa Clásica",
-    status: "active",
-    category_id: "comida",
-    created_at: "2024-03-20",
-    type: "food",
-  },
-  {
-    id: "2",
-    image: null,
-    name: "Refresco de Cola",
-    status: "inactive",
-    category_id: "bebida",
-    created_at: "2024-03-21",
-    type: "beverage",
-  },
-  {
-    id: "3",
-    image: null,
-    name: "Papas Fritas",
-    status: "active",
-    category_id: "comida",
-    created_at: "2024-03-22",
-    type: "food",
-  },
-];
-
-const columnHelper = createColumnHelper<Product>();
+const columnHelper = createColumnHelper<Variant>();
 
 const columns = [
   columnHelper.accessor("name", {
-    header: "Producto",
+    header: "Variante",
     cell: (info) => (
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center border border-gray-100">
-          <Package className="w-5 h-5 text-text-main" />
+        <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center border border-secondary/20">
+          <Package className="w-5 h-5 text-secondary" />
         </div>
-        <span className="font-medium text-text-main">{info.getValue()}</span>
+        <div className="flex flex-col">
+          <span className="font-medium text-text-main">{info.getValue()}</span>
+          <span className="text-[10px] text-text-main/50 uppercase font-bold">
+            {info.row.original.product.name}
+          </span>
+        </div>
       </div>
     ),
   }),
-  columnHelper.accessor("category_id", {
-    header: "Categoría",
+  columnHelper.accessor("price", {
+    header: "Precio",
     cell: (info) => (
-      <span className="capitalize text-text-main/70">{info.getValue()}</span>
+      <span className="font-semibold text-text-main">${info.getValue()}</span>
     ),
   }),
-  columnHelper.accessor("status", {
+  columnHelper.accessor("product.status", {
     header: "Estado",
     cell: (info) => {
       const isActive = info.getValue() === "active";
@@ -100,11 +76,11 @@ const columns = [
     cell: (info) => (
       <Link
         to="/admin/products/$productId"
-        params={{ productId: info.row.original.id }}
+        params={{ productId: info.row.original.productId }}
         className="group inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary text-white hover:bg-secondary/80 transition-all duration-200 font-semibold text-sm"
       >
         <Info className="w-4 h-4" />
-        Ver detalles
+        Detalles
       </Link>
     ),
   }),
@@ -112,16 +88,19 @@ const columns = [
 
 function ProductsComponent() {
   const [filterStatus, setFilterStatus] = useState("all");
-  const [filterCategory, setFilterCategory] = useState("all");
+
+  // SOLUCIÓN: Pasamos undefined para evitar el error de [object Object] en la URL
+  // Esto hará que la petición sea simplemente /v1/products/variants sin query params inválidos
+  const { data: apiResponse, isLoading, isError } = useGetV1ProductsVariants(undefined);
+
+  const variants = useMemo(() => apiResponse?.data?.variants || [], [apiResponse]);
 
   const filteredData = useMemo(() => {
-    return MOCK_PRODUCTS.filter((p) => {
-      const matchStatus = filterStatus === "all" || p.status === filterStatus;
-      const matchCategory =
-        filterCategory === "all" || p.category_id === filterCategory;
-      return matchStatus && matchCategory;
+    return variants.filter((v: Variant) => {
+      const matchStatus = filterStatus === "all" || v.product.status === filterStatus;
+      return matchStatus;
     });
-  }, [filterStatus, filterCategory]);
+  }, [variants, filterStatus]);
 
   const table = useReactTable({
     data: filteredData,
@@ -129,56 +108,47 @@ function ProductsComponent() {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  if (isLoading) {
+    return (
+      <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-secondary" />
+        <p className="text-text-main/60">Cargando catálogo...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-[400px] flex flex-col items-center justify-center gap-2 text-red-500">
+        <AlertCircle className="w-10 h-10" />
+        <p className="font-bold">Error al cargar datos. Verifica la conexión con la DB.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background-light p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-text-main uppercase">
-              Catálogo
-            </h1>
-            <p className="text-text-main/60">
-              Gestiona tus productos y existencias
-            </p>
+            <h1 className="text-4xl font-bold text-text-main uppercase">Inventario</h1>
+            <p className="text-text-main/60">Datos reales desde la base de datos</p>
           </div>
 
           <div className="flex gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
             <div className="flex flex-col gap-1">
-              {/* CORRECCIÓN: htmlFor asociado al id del select */}
-              <label
-                htmlFor="status-select"
-                className="text-[10px] font-bold uppercase text-text-main/40 ml-1"
-              >
+              <label htmlFor="status-select" className="text-[10px] font-bold uppercase text-text-main/40 ml-1">
                 Estado
               </label>
               <select
                 id="status-select"
-                className="bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-secondary/20"
+                className="bg-gray-50 border-none rounded-lg text-sm"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
               >
                 <option value="all">Todos</option>
                 <option value="active">Activos</option>
                 <option value="inactive">Inactivos</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-1">
-              {/* CORRECCIÓN: htmlFor asociado al id del select */}
-              <label
-                htmlFor="category-select"
-                className="text-[10px] font-bold uppercase text-text-main/40 ml-1"
-              >
-                Categoría
-              </label>
-              <select
-                id="category-select"
-                className="bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-secondary/20"
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-              >
-                <option value="all">Todas</option>
-                <option value="comida">Comida</option>
-                <option value="bebida">Bebida</option>
               </select>
             </div>
           </div>
@@ -190,14 +160,8 @@ function ProductsComponent() {
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="bg-gray-50/50">
                   {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="px-6 py-5 text-left text-xs font-bold uppercase tracking-widest text-text-main/40 border-b border-gray-100"
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                    <th key={header.id} className="px-6 py-5 text-left text-xs font-bold uppercase text-text-main/40 border-b border-gray-100">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
                 </tr>
@@ -205,16 +169,10 @@ function ProductsComponent() {
             </thead>
             <tbody>
               {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="border-b border-gray-50 last:border-none"
-                >
+                <tr key={row.id} className="border-b border-gray-50 hover:bg-gray-50/20 transition-colors">
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-6 py-4 text-text-main">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                    <td key={cell.id} className="px-6 py-4">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
                 </tr>
@@ -224,7 +182,7 @@ function ProductsComponent() {
 
           {filteredData.length === 0 && (
             <div className="p-20 text-center text-text-main/40 font-medium">
-              No se encontraron productos con esos filtros.
+              No se encontraron variantes en la base de datos.
             </div>
           )}
         </div>
