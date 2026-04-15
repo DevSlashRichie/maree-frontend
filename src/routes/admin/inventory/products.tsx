@@ -9,11 +9,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Package,
-  Tag,
   Info,
-  Layers
+  Layers,
+  Filter
 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/admin/inventory/products")({
   component: ProductsComponent,
@@ -30,24 +30,9 @@ type Product = {
 };
 
 const MOCK_PRODUCTS: Product[] = [
-  {
-    id: "550e8400-e29b-41d4-a716-446655440000",
-    image: null,
-    name: "Hamburguesa Clásica",
-    status: "active",
-    category_id: "cat-123",
-    created_at: "2024-03-20T10:00:00Z",
-    type: "food",
-  },
-  {
-    id: "610e8400-e29b-41d4-a716-446655440001",
-    image: "https://via.placeholder.com/150",
-    name: "Refresco de Cola",
-    status: "inactive",
-    category_id: "cat-456",
-    created_at: "2024-03-21T12:00:00Z",
-    type: "beverage",
-  },
+  { id: "1", image: null, name: "Hamburguesa Clásica", status: "active", category_id: "comida", created_at: "2024-03-20", type: "food" },
+  { id: "2", image: null, name: "Refresco de Cola", status: "inactive", category_id: "bebida", created_at: "2024-03-21", type: "beverage" },
+  { id: "3", image: null, name: "Papas Fritas", status: "active", category_id: "comida", created_at: "2024-03-22", type: "food" },
 ];
 
 const columnHelper = createColumnHelper<Product>();
@@ -57,33 +42,23 @@ const columns = [
     header: "Producto",
     cell: (info) => (
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center overflow-hidden border border-gray-100">
-          {info.row.original.image ? (
-            <img src={info.row.original.image} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <Package className="w-5 h-5 text-text-main" />
-          )}
+        <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center border border-gray-100">
+          <Package className="w-5 h-5 text-text-main" />
         </div>
         <span className="font-medium text-text-main">{info.getValue()}</span>
       </div>
     ),
   }),
-  columnHelper.accessor("type", {
-    header: "Tipo",
-    cell: (info) => (
-      <div className="flex items-center gap-2 text-text-main/70">
-        <Layers className="w-4 h-4" />
-        <span className="capitalize">{info.getValue()}</span>
-      </div>
-    ),
+  columnHelper.accessor("category_id", {
+    header: "Categoría",
+    cell: (info) => <span className="capitalize text-text-main/70">{info.getValue()}</span>,
   }),
   columnHelper.accessor("status", {
     header: "Estado",
     cell: (info) => {
-      const status = info.getValue();
-      const isActive = status === "active";
+      const isActive = info.getValue() === "active";
       return (
-        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
           isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
         }`}>
           {isActive ? "Activo" : "Inactivo"}
@@ -91,34 +66,80 @@ const columns = [
       );
     },
   }),
-  columnHelper.accessor("id", {
+  columnHelper.display({
+    id: "actions",
     header: "Acción",
-    cell: () => (
-      <div className="text-secondary hover:text-secondary-dark flex items-center gap-1 font-semibold">
+    cell: (info) => (
+      <Link 
+        to="/admin/products/$productId" 
+        params={{ productId: info.row.original.id }}
+        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/10 text-secondary hover:bg-secondary hover:text-white transition-all duration-200 font-semibold text-sm"
+      >
         <Info className="w-4 h-4" />
-        Ver más
-      </div>
+        Ver detalles
+      </Link>
     ),
   }),
 ];
 
 function ProductsComponent() {
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterCategory, setFilterCategory] = useState("all");
+
+  const filteredData = useMemo(() => {
+    return MOCK_PRODUCTS.filter((p) => {
+      const matchStatus = filterStatus === "all" || p.status === filterStatus;
+      const matchCategory = filterCategory === "all" || p.category_id === filterCategory;
+      return matchStatus && matchCategory;
+    });
+  }, [filterStatus, filterCategory]);
+
   const table = useReactTable({
-    data: MOCK_PRODUCTS,
+    data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
   return (
-    <div className="min-h-screen bg-background-light p-8 font-sans">
+    <div className="min-h-screen bg-background-light p-8">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold text-text-main uppercase tracking-tight">Productos</h1>
-          <p className="text-text-main/60">Catálogo general de inventario</p>
-        </header>
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-text-main uppercase">Catálogo</h1>
+            <p className="text-text-main/60">Gestiona tus productos y existencias</p>
+          </div>
+
+          {/* SECCIÓN DE FILTROS */}
+          <div className="flex gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold uppercase text-text-main/40 ml-1">Estado</label>
+              <select 
+                className="bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-secondary/20"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="all">Todos</option>
+                <option value="active">Activos</option>
+                <option value="inactive">Inactivos</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold uppercase text-text-main/40 ml-1">Categoría</label>
+              <select 
+                className="bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-secondary/20"
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+              >
+                <option value="all">Todas</option>
+                <option value="comida">Comida</option>
+                <option value="bebida">Bebida</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
-          <table className="w-full border-collapse">
+          <table className="w-full">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="bg-gray-50/50">
@@ -132,16 +153,10 @@ function ProductsComponent() {
             </thead>
             <tbody>
               {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="group hover:bg-secondary/5 transition-all duration-200">
+                <tr key={row.id} className="border-b border-gray-50 last:border-none">
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-6 py-4 border-b border-gray-50">
-                      <Link 
-                        to="/admin/products/$productId" 
-                        params={{ productId: row.original.id }}
-                        className="block w-full"
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </Link>
+                    <td key={cell.id} className="px-6 py-4 text-text-main">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
                 </tr>
@@ -149,13 +164,11 @@ function ProductsComponent() {
             </tbody>
           </table>
           
-          <div className="px-6 py-4 flex items-center justify-between bg-white text-sm text-text-main/50">
-             <span>Mostrando {MOCK_PRODUCTS.length} productos</span>
-             <div className="flex gap-2">
-                <button className="p-2 rounded-full hover:bg-gray-100"><ChevronLeft /></button>
-                <button className="p-2 rounded-full hover:bg-gray-100"><ChevronRight /></button>
-             </div>
-          </div>
+          {filteredData.length === 0 && (
+            <div className="p-20 text-center text-text-main/40 font-medium">
+              No se encontraron productos con esos filtros.
+            </div>
+          )}
         </div>
       </div>
     </div>
