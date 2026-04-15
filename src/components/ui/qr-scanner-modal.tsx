@@ -1,7 +1,7 @@
-import { Modal } from "@/components/ui/modal";
-import { QRScanner } from "@/components/ui/qr-scanner";
 import { useNavigate } from "@tanstack/react-router";
 import toast from "react-hot-toast";
+import { Modal } from "@/components/ui/modal";
+import { QRScanner } from "@/components/ui/qr-scanner";
 
 interface QRScannerModalProps {
   isOpen: boolean;

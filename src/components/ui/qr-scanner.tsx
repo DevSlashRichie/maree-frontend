@@ -1,4 +1,4 @@
-import { Scanner, type IDetectedBarcode } from "@yudiel/react-qr-scanner";
+import { type IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 
 interface QRScannerProps {
   onScan: (decodedText: string) => void;

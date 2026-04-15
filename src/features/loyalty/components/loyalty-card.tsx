@@ -11,10 +11,8 @@ export function LoyaltyCard() {
 
   const { data, isLoading } = useGetV1Loyalty();
 
-  const {
-    mutate: fetchGoogleWallet,
-    isValidating: isGeneratingGoogle,
-  } = useGetV1LoyaltyGoogleWallet();
+  const { mutate: fetchGoogleWallet, isValidating: isGeneratingGoogle } =
+    useGetV1LoyaltyGoogleWallet();
 
   const TOTAL_STAMPS = 6;
 

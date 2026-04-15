@@ -13,8 +13,8 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useGetV1Users } from "@/lib/api";
 import { QRScannerModal } from "@/components/ui/qr-scanner-modal";
+import { useGetV1Users } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/users/")({
   component: RouteComponent,
