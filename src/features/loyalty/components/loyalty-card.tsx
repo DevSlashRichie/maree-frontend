@@ -1,8 +1,8 @@
 import cn from "classnames";
 import { Loader2, QrCode } from "lucide-react";
 import { useState } from "react";
-import QRCode from "react-qr-code";
-
+// @ts-expect-error - bad imports for some reason.
+import { QRCode } from "react-qr-code";
 import { Modal } from "@/components/ui/modal";
 import { useGetV1Loyalty, useGetV1LoyaltyGoogleWallet } from "@/lib/api";
 
@@ -28,23 +28,8 @@ export function LoyaltyCard() {
     }
   };
 
-  const handleGoogleWalletClick = async () => {
-    try {
-      const result = await fetchGoogleWallet();
-
-      if (result?.status === 200 && result.data?.saveURL) {
-        window.open(result.data.saveURL, "_blank");
-      }
-    } catch (error) {
-      console.error("Error generating wallet link:", error);
-    }
-  };
-
   if (isLoading) {
     return (
-      <div className="w-full aspect-[1.58/1] rounded-2xl overflow-hidden shadow-2xl bg-charcoal/50 animate-pulse flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-white/20 animate-spin" />
-      </div>
       <div className="w-full aspect-[1.58/1] rounded-2xl overflow-hidden shadow-2xl bg-charcoal/50 animate-pulse flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-white/20 animate-spin" />
       </div>
@@ -57,14 +42,10 @@ export function LoyaltyCard() {
         Error: {data?.data?.message || "No data"}
       </div>
     );
-    return (
-      <div className="text-white">
-        Error: {data?.data?.message || "No data"}
-      </div>
-    );
   }
 
   const current = data.data.currentBalance ?? 0;
+
   const stamps_ = Array.from({ length: TOTAL_STAMPS }, (_, i) => ({
     id: i,
     filled: i < current,
@@ -90,8 +71,6 @@ export function LoyaltyCard() {
                   className={cn(
                     "flex items-center justify-center border rounded-full w-[60px] h-[60px]",
                     {
-                      "border-white/10 text-white/10": !stamp.filled,
-                      "border-white/40 text-white bg-white/5": stamp.filled,
                       "border-white/10 text-white/10": !stamp.filled,
                       "border-white/40 text-white bg-white/5": stamp.filled,
                     },
@@ -122,14 +101,12 @@ export function LoyaltyCard() {
             </p>
             <p className="text-white/50 text-xs font-mono">
               Tel: {data.data.phone}
-              Tel: {data.data.phone}
             </p>
           </div>
 
           <button
             type="button"
             onClick={() => setIsQRExpanded(true)}
-            className="bg-white p-2 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg"
             className="bg-white p-2 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg"
           >
             <QrCode className="w-7 h-7 text-charcoal" />
@@ -141,8 +118,6 @@ export function LoyaltyCard() {
         <button type="button" className="w-full active:scale-95">
           <img
             src="/apple-wallet-button.svg"
-            alt="Apple Wallet"
-            className="h-12 w-full object-contain"
             alt="Apple Wallet"
             className="h-12 w-full object-contain"
           />
@@ -177,11 +152,7 @@ export function LoyaltyCard() {
         onClose={() => setIsQRExpanded(false)}
         title="Código de Fidelidad"
         description="Muéstralo en caja para acumular puntos"
-        description="Muéstralo en caja para acumular puntos"
       >
-        <div className="flex flex-col items-center py-4">
-          <div className="bg-white p-4 rounded-2xl shadow-xl mb-4">
-            <QRCode size={200} value={data.data.phone} />
         <div className="flex flex-col items-center py-4">
           <div className="bg-white p-4 rounded-2xl shadow-xl mb-4">
             <QRCode size={200} value={data.data.phone} />
