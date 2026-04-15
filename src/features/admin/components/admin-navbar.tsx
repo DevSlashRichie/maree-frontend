@@ -112,8 +112,23 @@ export function AdminNavbar() {
                   leaveFrom="opacity-100 translate-y-0 scale-100"
                   leaveTo="opacity-0 translate-y-1 scale-95"
                 >
-                  <PopoverPanel className="absolute left-0 mt-2 w-48 z-50 origin-top-left">
+                  <PopoverPanel className="absolute left-0 mt-2 w-56 z-50 origin-top-left">
                     <div className="rounded-2xl shadow-xl border border-secondary/20 bg-white overflow-hidden">
+                      <div className="flex items-center gap-3 px-4 py-3 border-b border-secondary/10 bg-secondary/5">
+                        <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+                          <span className="material-symbols-outlined text-[18px] text-secondary">
+                            shield_person
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider font-bold text-secondary/50">
+                            Rol
+                          </p>
+                          <p className="text-sm font-medium text-text-main capitalize">
+                            {actor?.role?.replace(/_/g, " ")}
+                          </p>
+                        </div>
+                      </div>
                       <button
                         type="button"
                         onClick={handleLogout}
