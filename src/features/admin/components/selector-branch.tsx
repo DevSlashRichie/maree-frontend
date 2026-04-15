@@ -4,7 +4,7 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Check, ChevronDown, MapPin, Settings } from "lucide-react";
 import { Fragment } from "react";
 import { useBranchStore } from "@/hooks/use-branch-store";
@@ -18,6 +18,7 @@ export interface Branch {
 
 export function BranchSelector() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { selectedBranch, setSelectedBranch } = useBranchStore();
   const { data, isLoading } = useGetV1Branches();
 
@@ -110,7 +111,7 @@ export function BranchSelector() {
                         type="button"
                         onClick={() => {
                           setSelectedBranch(branch);
-                          if (location.pathname === "/admin/branches") {
+                          if (location.pathname.startsWith("/admin/branches")) {
                             navigate({
                               to: "/admin/branches/$branchId",
                               params: { branchId: branch.id },

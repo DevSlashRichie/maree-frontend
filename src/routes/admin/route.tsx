@@ -16,9 +16,11 @@ export const Route = createFileRoute("/admin")({
 
 function RouteComponent() {
   return (
-    <>
+    <div className="flex h-screen bg-background-light">
       <AdminNavbar />
-      <Outlet />
-    </>
+      <main className="flex-1 overflow-y-auto">
+        <Outlet />
+      </main>
+    </div>
   );
 }
