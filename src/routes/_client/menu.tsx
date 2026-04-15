@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FoodCard } from "@/components/card";
 import { Subheading } from "@/components/typography";
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/_client/menu")({
 });
 
 function RouteComponent() {
+  const navigate = useNavigate();
   const {
     data: categoriesData,
     isLoading: isLoadingCategories,
@@ -194,7 +195,13 @@ function RouteComponent() {
                           "https://images.unsplash.com/photo-1519676867240-f03562e64548?q=80&w=500"
                         }
                         onAdd={() =>
-                          console.log(`Agregado al carrito: ${item.name}`)
+                          navigate({
+                            to: "/customize-product",
+                            search: {
+                              itemId: "",
+                              variantId: item.id,
+                            },
+                          })
                         }
                       />
                     ))
