@@ -8,10 +8,7 @@ import {
   useGetV1ProductsCategories,
   useGetV1ProductsVariants,
 } from "@/lib/api";
-import type {
-  GetCategoriesDtoItem,
-  GetV1ProductsVariants200VariantsItem,
-} from "@/lib/schemas";
+import type { GetV1ProductsVariants200VariantsItem } from "@/lib/schemas";
 
 export const Route = createFileRoute("/_client/menu")({
   component: RouteComponent,
@@ -34,17 +31,6 @@ function RouteComponent() {
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   const categories = useMemo(() => {
-    const flattenPublicCategories = (
-      items: GetCategoriesDtoItem[],
-    ): GetCategoriesDtoItem[] => {
-      return items.flatMap((cat) => {
-        const children = cat.children
-          ? flattenPublicCategories(cat.children)
-          : [];
-        return cat.public ? [cat, ...children] : children;
-      });
-    };
-
     const cats =
       categoriesData &&
       categoriesData.status === 200 &&
@@ -52,23 +38,26 @@ function RouteComponent() {
         ? categoriesData.data.categories
         : [];
 
-    return flattenPublicCategories(cats);
+    return cats.filter((cat) => cat.public);
   }, [categoriesData]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: categories are required.
   useEffect(() => {
+    if (isLoadingCategories || isLoadingProducts) return;
+
     const observerOptions = {
       root: null,
-      rootMargin: "-20% 0px -70% 0px",
+      rootMargin: "-20% 0px -60% 0px",
       threshold: 0,
     };
 
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
+      for (const entry of entries) {
         if (entry.isIntersecting) {
           setActiveCategory(entry.target.id);
+          break;
         }
-      });
+      }
     };
 
     const observer = new IntersectionObserver(
@@ -76,12 +65,13 @@ function RouteComponent() {
       observerOptions,
     );
 
-    for (const section of Object.values(sectionRefs.current)) {
+    const sections = Object.values(sectionRefs.current);
+    for (const section of sections) {
       if (section) observer.observe(section);
     }
 
     return () => observer.disconnect();
-  }, [categories]);
+  }, [categories, isLoadingCategories, isLoadingProducts]);
 
   if (isLoadingCategories || isLoadingProducts) {
     return (
@@ -157,6 +147,8 @@ function RouteComponent() {
             const items = variants.filter(
               (variant) => variant.product.categoryId === category.id,
             );
+            const publicChildren =
+              category.children?.filter((child) => child.public) ?? [];
 
             return (
               <section
@@ -198,12 +190,59 @@ function RouteComponent() {
                         }
                       />
                     ))
-                  ) : (
+                  ) : publicChildren.length === 0 ? (
                     <div className="col-span-full py-10 text-center opacity-40 italic font-body">
                       Próximamente... estamos preparando algo delicioso.
                     </div>
-                  )}
+                  ) : null}
                 </div>
+
+                {publicChildren.map((child) => {
+                  const childItems = variants.filter(
+                    (variant) => variant.product.categoryId === child.id,
+                  );
+
+                  return (
+                    <div key={child.id} className="mt-24 first:mt-20">
+                      <div className="mb-12">
+                        <div className="flex flex-col gap-2 border-l-2 border-pink-soft/30 pl-6">
+                          <div className="flex items-center gap-2">
+                            <span className="h-px w-6 bg-charcoal/30" />
+                            <span className="text-[9px] font-bold tracking-[0.3em] text-charcoal uppercase">
+                              Más de {category.name}
+                            </span>
+                          </div>
+                          <h3 className="text-3xl font-display lowercase italic tracking-tight text-gray-800">
+                            {child.name}
+                          </h3>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
+                        {childItems.length > 0 ? (
+                          childItems.map((item) => (
+                            <FoodCard
+                              key={item.id}
+                              title={item.name}
+                              price={`$${(Number(item.price) || 0) / 100}`}
+                              description={item.description}
+                              image={
+                                item.image ??
+                                "https://images.unsplash.com/photo-1519676867240-f03562e64548?q=80&w=500"
+                              }
+                              onAdd={() =>
+                                console.log(`Agregado al carrito: ${item.name}`)
+                              }
+                            />
+                          ))
+                        ) : (
+                          <div className="col-span-full py-6 text-center opacity-40 italic font-body">
+                            Próximamente... estamos preparando algo delicioso.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </section>
             );
           })}

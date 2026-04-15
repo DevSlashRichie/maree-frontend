@@ -9,10 +9,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Phone,
+  QrCode,
   User as UserIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useGetV1Users } from "@/lib/api";
+import { QRScannerModal } from "@/components/ui/qr-scanner-modal";
 
 export const Route = createFileRoute("/admin/users/")({
   component: RouteComponent,
@@ -79,6 +81,7 @@ const LIMIT = 5;
 
 function RouteComponent() {
   const [page, setPage] = useState(1);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const { data, isLoading, error } = useGetV1Users(
     { page, limit: LIMIT },
     {
@@ -139,6 +142,14 @@ function RouteComponent() {
                 Gestiona los clientes
               </p>
             </div>
+            <button
+              type="button"
+              onClick={() => setIsScannerOpen(true)}
+              className="bg-secondary text-text-main px-6 py-3 rounded-2xl font-bold hover:bg-secondary/90 transition-all flex items-center gap-2 shadow-lg shadow-secondary/20 uppercase tracking-wider text-sm"
+            >
+              <QrCode className="w-5 h-5" />
+              Escanear QR
+            </button>
           </div>
 
           <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(232,213,213,0.3)] overflow-hidden">
@@ -267,6 +278,10 @@ function RouteComponent() {
           </div>
         </div>
       </div>
+      <QRScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+      />
     </div>
   );
 }
