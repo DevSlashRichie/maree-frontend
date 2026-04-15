@@ -8,9 +8,7 @@ import {
   useGetV1ProductsCategories,
   useGetV1ProductsVariants,
 } from "@/lib/api";
-import type {
-  GetV1ProductsVariants200VariantsItem,
-} from "@/lib/schemas";
+import type { GetV1ProductsVariants200VariantsItem } from "@/lib/schemas";
 
 export const Route = createFileRoute("/_client/menu")({
   component: RouteComponent,
