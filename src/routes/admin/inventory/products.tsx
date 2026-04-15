@@ -7,14 +7,12 @@ import {
 } from "@tanstack/react-table";
 import { Info, Package, Loader2, AlertCircle, Plus, Tag, Eye, EyeOff } from "lucide-react";
 import { useMemo, useState } from "react";
-// Usando tus hooks generados
 import { useGetV1ProductsVariants, useGetV1ProductsCategories } from "@/lib/api"; 
 
 export const Route = createFileRoute("/admin/inventory/products")({
   component: ProductsComponent,
 });
 
-// Definición de tipos basada en tus esquemas de API
 type Category = {
   id: string;
   name: string;
@@ -32,11 +30,10 @@ type Variant = {
     id: string;
     name: string;
     status: string;
-    categoryId: string; //
+    categoryId: string;
   };
 };
 
-// Función auxiliar para aplanar el árbol de categorías y facilitar la búsqueda por ID
 const findCategoryName = (categories: Category[], id: string): string => {
   for (const cat of categories) {
     if (cat.id === id) return cat.name;
@@ -53,10 +50,7 @@ const columnHelper = createColumnHelper<Variant>();
 function ProductsComponent() {
   const [filterStatus, setFilterStatus] = useState("all");
 
-  // 1. Hook para obtener categorías (el árbol completo)
   const { data: catResponse } = useGetV1ProductsCategories();
-  
-  // 2. Hook para obtener variantes
   const { data: apiResponse, isLoading, isError } = useGetV1ProductsVariants(undefined);
 
   const categories = useMemo(() => catResponse?.data?.categories || [], [catResponse]);
@@ -97,7 +91,7 @@ function ProductsComponent() {
       header: "Precio",
       cell: (info) => (
         <span className="font-semibold text-text-main text-sm">
-          ${parseFloat(info.getValue()).toLocaleString()}
+          ${(parseFloat(info.getValue()) / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}
         </span>
       ),
     }),
