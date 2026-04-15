@@ -14,7 +14,6 @@ import type { PostV1OrdersBody } from "@/lib/schemas";
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1519676867240-f03562e64548?w=160&h=160&fit=crop";
 
-const EMPTY_DISCOUNT_ID = "00000000-0000-0000-0000-000000000000";
 const DEFAULT_BRANCH_ID =
   import.meta.env.VITE_DEFAULT_BRANCH_ID ??
   "1c43d953-885e-4bb0-9d96-9e763be00428";
@@ -39,7 +38,6 @@ function buildItemDescription(modifiers: { delta: number }[], notes: string) {
 export function Cart() {
   const navigate = useNavigate();
   const items = useCartStore((state) => state.items);
-  const discountId = useCartStore((state) => state.discountId);
   const addOneToItem = useCartStore((state) => state.addOneToItem);
   const removeOneFromItem = useCartStore((state) => state.removeOneFromItem);
   const removeItem = useCartStore((state) => state.removeItem);
@@ -62,6 +60,8 @@ export function Cart() {
       return;
     }
 
+    console.log(items);
+
     const payload: PostV1OrdersBody = {
       items: items.map((item) => ({
         id: item.variantId,
@@ -70,7 +70,6 @@ export function Cart() {
         modifiers: item.modifiers,
       })),
       totalPriceCents: totalCents,
-      discountId: discountId || EMPTY_DISCOUNT_ID,
       branchId: DEFAULT_BRANCH_ID,
     };
 
