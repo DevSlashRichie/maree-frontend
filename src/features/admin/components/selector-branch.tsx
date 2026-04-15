@@ -4,7 +4,7 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import { useNavigate, useLocation } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Check, ChevronDown, MapPin, Plus, Settings } from "lucide-react";
 import { Fragment, useEffect, useMemo } from "react";
 import { useBranchStore } from "@/hooks/use-branch-store";
@@ -61,9 +61,10 @@ export function BranchSelector() {
             className={`
               flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm
               font-medium transition-all duration-200 outline-none cursor-pointer
-              ${open
-                ? "bg-text-main text-white border-text-main"
-                : "bg-transparent text-text-main border-text-main/30 hover:border-text-main"
+              ${
+                open
+                  ? "bg-text-main text-white border-text-main"
+                  : "bg-transparent text-text-main border-text-main/30 hover:border-text-main"
               }
             `}
           >
@@ -72,8 +73,9 @@ export function BranchSelector() {
               {selectedBranch ? selectedBranch.name : "Selecciona Sucursal"}
             </span>
             <ChevronDown
-              className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""
-                }`}
+              className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
+                open ? "rotate-180" : ""
+              }`}
             />
           </PopoverButton>
 
@@ -149,8 +151,9 @@ export function BranchSelector() {
                         `}
                       >
                         <span
-                          className={`text-sm font-semibold ${isSelected ? "text-text-main" : "text-text-main/80"
-                            }`}
+                          className={`text-sm font-semibold ${
+                            isSelected ? "text-text-main" : "text-text-main/80"
+                          }`}
                         >
                           {branch.name}
                         </span>
