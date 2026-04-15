@@ -4,7 +4,7 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Check, ChevronDown, MapPin, Plus, Settings } from "lucide-react";
 import { Fragment, useEffect, useMemo } from "react";
 import { useBranchStore } from "@/hooks/use-branch-store";
@@ -131,7 +131,7 @@ export function BranchSelector() {
                     const isSelected = selectedBranch?.id === branch.id;
 
                     return (
-                      <button 
+                      <button
                         key={branch.id}
                         type="button"
                         onClick={() => {
