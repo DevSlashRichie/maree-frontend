@@ -3,7 +3,7 @@ import z from "zod";
 import { CustomizeProduct } from "@/features/products/components/customize-product.tsx";
 import { useCartStore } from "@/hooks/use-cart-store";
 
-const DEFAULT_VARIANT_ID = "019d8960-28bf-7000-a97d-5eb41f61edf2";
+const DEFAULT_VARIANT_ID = "019d9267-fa33-7000-99dd-e10f9e87a5ee";
 
 export const Route = createFileRoute("/_client/customize-product")({
   validateSearch: z.object({

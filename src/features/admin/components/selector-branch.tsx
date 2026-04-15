@@ -19,6 +19,7 @@ export interface Branch {
 
 export function BranchSelector() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { selectedBranch, setSelectedBranch } = useBranchStore();
   const { data: branchData, isLoading: branchLoading } =
     useGetV1UsersMeBranch();
@@ -130,7 +131,7 @@ export function BranchSelector() {
                     const isSelected = selectedBranch?.id === branch.id;
 
                     return (
-                      <button
+                      <button 
                         key={branch.id}
                         type="button"
                         onClick={() => {
