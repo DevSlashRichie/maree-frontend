@@ -66,6 +66,7 @@ const columns = [
       );
     },
   }),
+  // COLUMNA DE ACCIÓN: Único lugar con Link
   columnHelper.display({
     id: "actions",
     header: "Acción",
@@ -73,7 +74,7 @@ const columns = [
       <Link 
         to="/admin/products/$productId" 
         params={{ productId: info.row.original.id }}
-        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/10 text-secondary hover:bg-secondary hover:text-white transition-all duration-200 font-semibold text-sm"
+        className="group inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary text-white hover:bg-secondary/80 transition-all duration-200 font-semibold text-sm"
       >
         <Info className="w-4 h-4" />
         Ver detalles
@@ -86,6 +87,7 @@ function ProductsComponent() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
 
+  // Lógica de filtrado
   const filteredData = useMemo(() => {
     return MOCK_PRODUCTS.filter((p) => {
       const matchStatus = filterStatus === "all" || p.status === filterStatus;
