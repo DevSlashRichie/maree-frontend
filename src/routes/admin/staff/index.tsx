@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Phone,
   Plus,
+  Trash2,
   User as UserIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -18,6 +19,7 @@ import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
 import { useBranchStore } from "@/hooks/use-branch-store";
 import {
+  deleteV1UsersStaffUserId,
   useGetV1BranchesIdStaff,
   useGetV1UsersStaff,
   usePostAuthRegister,
@@ -427,7 +429,27 @@ function RouteComponent() {
 
   const table = useReactTable({
     data: staff,
-    columns,
+    columns: [
+      ...columns,
+      columnHelper.display({
+        id: "actions",
+        header: "Acciones",
+        cell: (info) => (
+          <div className="flex justify-end pr-4">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(info.row.original.id);
+              }}
+              className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
+        ),
+      }),
+    ],
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -444,6 +466,29 @@ function RouteComponent() {
       mutateBranch();
     } else {
       mutateAll();
+    }
+  };
+
+  const handleDelete = async (userId: string) => {
+    if (
+      !window.confirm(
+        "¿Estás seguro de que deseas eliminar a este miembro del staff?",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const result = await deleteV1UsersStaffUserId(userId);
+      if (result.status === 200) {
+        toast.success("Staff eliminado correctamente");
+        handleSuccess();
+      } else {
+        toast.error("Error al eliminar staff");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Error al eliminar staff");
     }
   };
 
