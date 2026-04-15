@@ -5,9 +5,18 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Info, Package, Loader2, AlertCircle, Plus, Tag, Eye, EyeOff } from "lucide-react";
+import {
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Info,
+  Loader2,
+  Package,
+  Plus,
+  Tag,
+} from "lucide-react";
 import { useMemo, useState } from "react";
-import { useGetV1ProductsVariants } from "@/lib/api"; 
+import { useGetV1ProductsVariants } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/inventory/products")({
   component: ProductsComponent,
@@ -43,7 +52,9 @@ const columns = [
           <Package className="w-5 h-5 text-secondary" />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="font-medium text-text-main truncate">{info.getValue()}</span>
+          <span className="font-medium text-text-main truncate">
+            {info.getValue()}
+          </span>
           <span className="text-[10px] text-text-main/50 uppercase font-bold tracking-wider">
             {info.row.original.product.name}
           </span>
@@ -79,12 +90,16 @@ const columns = [
           {isActive ? (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-100">
               <Eye className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Activo</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">
+                Activo
+              </span>
             </div>
           ) : (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 text-gray-400 border border-gray-100">
               <EyeOff className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Inactivo</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">
+                Inactivo
+              </span>
             </div>
           )}
         </div>
@@ -96,8 +111,8 @@ const columns = [
     header: "Acciones",
     cell: (info) => (
       <Link
-        to="/admin/products/$productId"
-        params={{ productId: info.row.original.productId }}
+        to={"/admin/products/$productId" as any}
+        params={{ productId: info.row.original.productId } as any}
         className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-white hover:bg-secondary/90 transition-colors font-semibold text-xs"
       >
         <Info className="w-3.5 h-3.5" />
@@ -110,13 +125,21 @@ const columns = [
 function ProductsComponent() {
   const [filterStatus, setFilterStatus] = useState("all");
 
-  const { data: apiResponse, isLoading, isError } = useGetV1ProductsVariants(undefined);
+  const {
+    data: apiResponse,
+    isLoading,
+    error,
+  } = useGetV1ProductsVariants(undefined);
 
-  const variants = useMemo(() => apiResponse?.data?.variants || [], [apiResponse]);
+  const variants = useMemo(() => {
+    const rawData = apiResponse as any;
+    return rawData?.variants || rawData?.data?.variants || [];
+  }, [apiResponse]);
 
   const filteredData = useMemo(() => {
     return variants.filter((v: Variant) => {
-      const matchStatus = filterStatus === "all" || v.product.status === filterStatus;
+      const matchStatus =
+        filterStatus === "all" || v.product.status === filterStatus;
       return matchStatus;
     });
   }, [variants, filterStatus]);
@@ -131,18 +154,22 @@ function ProductsComponent() {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-secondary" />
-        <p className="text-text-main/60 font-body animate-pulse">Cargando inventario...</p>
+        <p className="text-text-main/60 font-body animate-pulse">
+          Cargando inventario...
+        </p>
       </div>
     );
   }
 
-  if (isError) {
+  if (error) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
         <div className="p-4 rounded-full bg-red-50">
           <AlertCircle className="w-8 h-8 text-red-500" />
         </div>
-        <p className="font-display font-bold text-red-500 text-lg">Error al conectar con la base de datos</p>
+        <p className="font-display font-bold text-red-500 text-lg">
+          Error al conectar con la base de datos
+        </p>
       </div>
     );
   }
@@ -158,10 +185,12 @@ function ProductsComponent() {
             Gestiona los productos y sus variantes disponibles
           </p>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
-            <span className="text-[10px] font-bold uppercase text-text-main/40 tracking-widest">Estado:</span>
+            <span className="text-[10px] font-bold uppercase text-text-main/40 tracking-widest">
+              Estado:
+            </span>
             <select
               className="bg-transparent border-none text-sm font-semibold text-text-main focus:ring-0 cursor-pointer p-0"
               value={filterStatus}
@@ -173,7 +202,6 @@ function ProductsComponent() {
             </select>
           </div>
 
-          {/* RUTA ACTUALIZADA AQUÍ */}
           <Link
             to="/admin/create-product"
             className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full hover:bg-primary/90 transition-all shadow-md shadow-primary/20 font-bold tracking-tight"
@@ -195,7 +223,10 @@ function ProductsComponent() {
                       key={header.id}
                       className="px-6 py-5 text-left text-xs font-bold uppercase tracking-widest text-text-main/50 bg-gray-50/50 border-b border-gray-100"
                     >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -209,7 +240,10 @@ function ProductsComponent() {
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </td>
                   ))}
                 </tr>
@@ -221,7 +255,9 @@ function ProductsComponent() {
         {filteredData.length === 0 && (
           <div className="p-20 text-center flex flex-col items-center gap-3">
             <Package className="w-12 h-12 text-text-main/10" />
-            <p className="text-text-main/40 font-medium">No se encontraron productos en esta sección.</p>
+            <p className="text-text-main/40 font-medium">
+              No se encontraron productos en esta sección.
+            </p>
           </div>
         )}
       </div>
