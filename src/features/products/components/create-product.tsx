@@ -52,36 +52,13 @@ type IngredientGroup = {
   items: Array<{ id: string; name: string }>;
 };
 
-function normalizeText(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .trim()
-    .toLowerCase();
-}
-
-function getBranchKey(name: string) {
-  const normalized = normalizeText(name);
-  if (normalized.startsWith("dulc")) return "dulce";
-  if (normalized.startsWith("salad")) return "salado";
-  return normalized;
-}
-
-function pathIncludesBranch(path: string[], branchName: string) {
-  const branchKey = getBranchKey(branchName);
-  return path.some((segment) => getBranchKey(segment) === branchKey);
-}
-
 function collectIngredientOptionsFromGroups(
   groups: IngredientGroup[],
-  branchName: string,
 ): IngredientOption[] {
-  const filteredGroups = groups.filter((group) =>
-    pathIncludesBranch(group.path, branchName),
-  );
   return dedupeById(
-    filteredGroups.flatMap((group) => {
-      const categoryName = group.path.at(-1) ?? branchName;
+    groups.flatMap((group) => {
+      // Grab the last item in the path as the category name, or a fallback
+      const categoryName = group.path.at(-1) ?? "Sin categoría";
       return group.items.map((item) => ({
         id: item.id,
         productName: item.name,
@@ -92,7 +69,6 @@ function collectIngredientOptionsFromGroups(
 }
 
 export function CreateProduct() {
-  const [rootCategory, setRootCategory] = useState<Category | null>(null);
   const [selectedCategoryPath, setSelectedCategoryPath] = useState<Category[]>(
     [],
   );
@@ -121,21 +97,11 @@ export function CreateProduct() {
   const { trigger: uploadImage } = usePostV1ProductsImage();
   const { trigger: createProductVariant } = usePostV1ProductsProductVariant();
 
-  const selectedBranchName = useMemo(() => {
-    const branchStep = selectedCategoryPath.find((step) => {
-      const key = getBranchKey(step.name);
-      return key === "dulce" || key === "salado";
-    });
-    if (branchStep) return branchStep.name;
-    return rootCategory?.name ?? "";
-  }, [rootCategory, selectedCategoryPath]);
-
   const ingredientOptions = useMemo(() => {
-    if (!selectedBranchName) return [];
     const groups =
       ingredientsResponse?.status === 200 ? ingredientsResponse.data : [];
-    return collectIngredientOptionsFromGroups(groups, selectedBranchName);
-  }, [ingredientsResponse, selectedBranchName]);
+    return collectIngredientOptionsFromGroups(groups);
+  }, [ingredientsResponse]);
 
   const isIngredient = selectedCategoryPath.some((step) =>
     isIngredientCategoryName(step.name),
@@ -370,7 +336,6 @@ export function CreateProduct() {
               setImageFile(null);
               setSelectedIngredients([]);
               setImagePreview(null);
-              setRootCategory(null);
               setSelectedCategoryPath([]);
             }}
             className="mt-5 w-full rounded-xl border border-pink-soft/40 py-3 text-[11px] font-bold uppercase tracking-widest text-text-main/70 hover:bg-pink-soft/10 transition-colors cursor-pointer"
@@ -415,7 +380,6 @@ export function CreateProduct() {
               <CategoryPicker
                 value={categoryId}
                 onChange={setCategoryId}
-                onRootChange={setRootCategory}
                 onPathChange={setSelectedCategoryPath}
               />
               {!categoryId && (
