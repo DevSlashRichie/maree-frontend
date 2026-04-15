@@ -45,7 +45,6 @@ export function LoyaltyCard() {
   }
 
   const current = data.data.currentBalance ?? 0;
-
   const stamps_ = Array.from({ length: TOTAL_STAMPS }, (_, i) => ({
     id: i,
     filled: i < current,
@@ -57,16 +56,20 @@ export function LoyaltyCard() {
         <div className="relative p-6 pb-4 pattern-grid-lg">
           <div className="absolute top-4 right-4 w-32 h-32 bg-secondary opacity-10 rounded-full blur-2xl" />
           <div className="absolute bottom-0 left-4 w-24 h-24 bg-accent opacity-20 rounded-full blur-xl" />
-
-          <h2 className="font-display text-3xl text-white tracking-widest uppercase">
-            MARÉE
-          </h2>
+          <div className="relative flex justify-between items-start">
+            <h2 className="font-display text-3xl text-white tracking-widest uppercase">
+              MARÉE
+            </h2>
+          </div>
         </div>
 
         <div className="px-6 py-4">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-3 justify-center items-center">
             {stamps_.map((stamp) => (
-              <div key={stamp.id} className="flex justify-center">
+              <div
+                key={stamp.id}
+                className="w-full flex justify-center items-center"
+              >
                 <div
                   className={cn(
                     "flex items-center justify-center border rounded-full w-[60px] h-[60px]",
@@ -115,7 +118,7 @@ export function LoyaltyCard() {
       </div>
 
       <div className="flex flex-col gap-3 items-center w-full max-w-[210px] mx-auto">
-        <button type="button" className="w-full active:scale-95">
+        <button type="button" className="w-full active:scale-95 transition-all">
           <img
             src="/apple-wallet-button.svg"
             alt="Apple Wallet"
@@ -123,28 +126,32 @@ export function LoyaltyCard() {
           />
         </button>
 
-        <button
-          type="button"
-          disabled={isGeneratingGoogle}
-          onClick={handleGoogleWalletClick}
-          className={cn(
-            "w-full h-12 flex items-center justify-center transition-all active:scale-95",
-            { "bg-[#1e1e1e] rounded-[8px]": isGeneratingGoogle },
-          )}
-        >
-          {isGeneratingGoogle ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-white/70" />
-              <span className="text-white/70 text-xs">Cargando...</span>
-            </div>
-          ) : (
-            <img
-              src="/google-wallet-button.svg"
-              alt="Google Wallet"
-              className="w-full h-full object-contain"
-            />
-          )}
-        </button>
+        <div className="w-full h-12 relative">
+          <button
+            type="button"
+            disabled={isGeneratingGoogle}
+            onClick={handleGoogleWalletClick}
+            className={cn(
+              "w-full h-full cursor-pointer transition-all active:scale-95 flex items-center justify-center",
+              { "bg-[#1e1e1e] rounded-[8px]": isGeneratingGoogle },
+            )}
+          >
+            {isGeneratingGoogle ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-white/70" />
+                <span className="text-white/70 text-xs font-medium">
+                  Cargando...
+                </span>
+              </div>
+            ) : (
+              <img
+                src="/google-wallet-button.svg"
+                alt="Google Wallet"
+                className="w-full h-full object-contain"
+              />
+            )}
+          </button>
+        </div>
       </div>
 
       <Modal
