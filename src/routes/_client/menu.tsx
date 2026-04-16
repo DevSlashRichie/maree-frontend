@@ -34,8 +34,8 @@ function RouteComponent() {
   const categories = useMemo(() => {
     const cats =
       categoriesData &&
-      categoriesData.status === 200 &&
-      "categories" in categoriesData.data
+        categoriesData.status === 200 &&
+        "categories" in categoriesData.data
         ? categoriesData.data.categories
         : [];
 
@@ -236,9 +236,15 @@ function RouteComponent() {
                                 item.image ??
                                 "https://images.unsplash.com/photo-1519676867240-f03562e64548?q=80&w=500"
                               }
-                              onAdd={() =>
-                                console.log(`Agregado al carrito: ${item.name}`)
-                              }
+                              onAdd={() => {
+                                navigate({
+                                  to: "/customize-product",
+                                  search: {
+                                    itemId: "",
+                                    variantId: item.id,
+                                  },
+                                });
+                              }}
                             />
                           ))
                         ) : (
