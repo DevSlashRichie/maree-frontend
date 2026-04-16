@@ -245,7 +245,7 @@ export function CreateProduct() {
               Producto creado
             </p>
             <p className="text-sm text-text-main/45">
-              Se guardó correctamente y se envió al backend.
+              El producto se ha guardado exitosamente y ya está disponible.
             </p>
           </div>
 
@@ -264,8 +264,6 @@ export function CreateProduct() {
                   </p>
                 )}
                 <div className="mt-3 text-sm text-text-main/65 space-y-1">
-                  <p className="m-0">Estado: {lastPayload.status}</p>
-                  <p className="m-0">Categoría ID: {lastPayload.categoryId}</p>
                   <p className="m-0">Precio: ${lastPayload.price}</p>
                 </div>
               </div>
