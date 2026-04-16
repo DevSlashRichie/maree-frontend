@@ -180,7 +180,11 @@ function RouteComponent() {
                     </span>
                   </div>
                   <p className="text-text-main font-medium ml-8">
-                    ${(user.totalConsumed / 100).toLocaleString("es-MX")}
+                    $
+                    {(user.totalConsumed / 100).toLocaleString("es-MX", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </p>
                 </div>
 

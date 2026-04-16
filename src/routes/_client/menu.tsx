@@ -8,6 +8,7 @@ import {
   useGetV1ProductsCategories,
   useGetV1ProductsVariants,
 } from "@/lib/api";
+import { formatPrice } from "@/lib/money";
 import type { GetV1ProductsVariants200VariantsItem } from "@/lib/schemas";
 
 export const Route = createFileRoute("/_client/menu")({
@@ -230,7 +231,7 @@ function RouteComponent() {
                             <FoodCard
                               key={item.id}
                               title={item.name}
-                              price={`$${(Number(item.price) || 0) / 100}`}
+                              price={formatPrice(item.price || 0)}
                               description={item.description}
                               image={
                                 item.image ??
