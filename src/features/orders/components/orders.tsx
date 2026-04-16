@@ -1,12 +1,19 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { OrderColumn } from "@/features/orders/components/order-card-group";
+import { useBranchStore } from "@/hooks/use-branch-store";
 import { patchV1OrdersIdStatus, useGetV1Orders } from "@/lib/api.ts";
 import type { GetV1Orders200Item } from "@/lib/schemas";
 import { OrderDetails } from "./order-details";
 
 export function Orders() {
-  const { data, isLoading, mutate } = useGetV1Orders();
+  const { selectedBranch } = useBranchStore();
+  const { data, isLoading, mutate } = useGetV1Orders({
+    params: selectedBranch?.id ? { branchId: selectedBranch.id } : undefined,
+    swr: {
+      swrKey: () => ["http://localhost:8383/v1/orders", selectedBranch?.id],
+    },
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeOrder, setActiveOrder] = useState<GetV1Orders200Item | null>(
     null,
@@ -51,7 +58,7 @@ export function Orders() {
         <div className="flex-1">
           <OrderColumn
             title="Incoming"
-            orders={orders.filter((o) => o.order.status === "pending")}
+            orders={orders.filter((o) => o.order.status === "incoming")}
             orderOnClickHandler={orderOnClickHandler}
           />
         </div>
