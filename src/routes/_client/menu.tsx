@@ -34,8 +34,8 @@ function RouteComponent() {
   const categories = useMemo(() => {
     const cats =
       categoriesData &&
-        categoriesData.status === 200 &&
-        "categories" in categoriesData.data
+      categoriesData.status === 200 &&
+      "categories" in categoriesData.data
         ? categoriesData.data.categories
         : [];
 
