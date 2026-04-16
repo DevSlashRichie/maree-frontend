@@ -8,6 +8,7 @@ import {
   useGetV1ProductsIngredients,
   useGetV1ProductsVariantId,
 } from "@/lib/api";
+import { formatCentsToDisplay } from "@/lib/money";
 import {
   findCategoryPathById,
   getVisibleIngredientOptions,
@@ -35,13 +36,6 @@ interface SelectedExtra {
 interface CustomizeOrderProps {
   variantId: string;
   itemId?: string;
-}
-
-function formatCurrencyFromCents(valueInCents: number) {
-  return (valueInCents / 100).toLocaleString("es-MX", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
@@ -348,7 +342,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                 Precio base
               </p>
               <p className="font-display text-xl text-text-main m-0 mt-1">
-                ${formatCurrencyFromCents(basePriceCents)}
+                ${formatCentsToDisplay(basePriceCents)}
               </p>
             </div>
             {variant.image && (
@@ -466,7 +460,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                       </span>
                       <span className="block text-[11px] text-text-main/35">
                         {ingredient.categoryName} · +$
-                        {formatCurrencyFromCents(ingredient.unitPriceCents)}
+                        {formatCentsToDisplay(ingredient.unitPriceCents)}
                       </span>
                     </button>
                   ))}
@@ -489,7 +483,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                       </p>
                       <p className="text-[11px] text-text-main/40 m-0 mt-0.5">
                         {extra.categoryName} · $
-                        {formatCurrencyFromCents(extra.unitPriceCents)} c/u
+                        {formatCentsToDisplay(extra.unitPriceCents)} c/u
                       </p>
                     </div>
                     <button
@@ -554,7 +548,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                 : ""}
             </p>
             <p className="text-base font-semibold text-text-main m-0 mt-0.5">
-              Total: ${formatCurrencyFromCents(totalCents)}
+              Total: ${formatCentsToDisplay(totalCents)}
             </p>
           </div>
           <button
@@ -563,7 +557,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
             className="w-full sm:w-auto bg-charcoal text-white rounded-xl px-5 sm:px-6 py-4 text-base sm:text-sm font-bold uppercase tracking-wide hover:bg-charcoal/90 active:scale-[0.99] transition-all cursor-pointer whitespace-nowrap"
           >
             {isEditing ? "Guardar cambios" : "Añadir al carrito"} · $
-            {formatCurrencyFromCents(totalCents)}
+            {formatCentsToDisplay(totalCents)}
           </button>
         </div>
       </div>

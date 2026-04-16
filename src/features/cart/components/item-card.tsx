@@ -1,4 +1,5 @@
 import { Minus, Pencil, Plus, Trash2 } from "lucide-react";
+import { formatCentsToDisplay } from "@/lib/money";
 
 interface ItemCardProps {
   id: string;
@@ -11,13 +12,6 @@ interface ItemCardProps {
   onIncrement?: () => void;
   onDecrement?: () => void;
   onCustomize?: () => void;
-}
-
-function formatCurrencyFromCents(valueInCents: number) {
-  return (valueInCents / 100).toLocaleString("es-MX", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 export function ItemCard({
@@ -56,7 +50,7 @@ export function ItemCard({
             </p>
           )}
           <p className="text-xs text-text-main/45 m-0 mt-1.5">
-            Precio unitario: ${formatCurrencyFromCents(unitPriceCents)}
+            Precio unitario: ${formatCentsToDisplay(unitPriceCents)}
           </p>
         </div>
       </div>
@@ -86,7 +80,7 @@ export function ItemCard({
         </div>
 
         <p className="font-display text-lg sm:text-xl text-text-main m-0">
-          ${formatCurrencyFromCents(lineTotalCents)}
+          ${formatCentsToDisplay(lineTotalCents)}
         </p>
       </div>
 

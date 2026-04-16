@@ -1,4 +1,5 @@
 import { Button } from "@/components/button";
+import { formatCentsToDisplay } from "@/lib/money";
 
 interface OrderCardReadyProps {
   userName: string;
@@ -23,7 +24,7 @@ export function OrderCardReady({
           </p>
         </div>
         <span className="font-display text-xl text-text-main font-semibold shrink-0">
-          ${price.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+          ${formatCentsToDisplay(price)}
         </span>
       </div>
       <div className="flex gap-3">

@@ -1,17 +1,11 @@
 import { ArrowRight } from "lucide-react";
+import { formatCentsToDisplay } from "@/lib/money";
 
 interface TotalCardProps {
   totalCents: number;
   onConfirm?: () => void;
   isSubmitting?: boolean;
   isDisabled?: boolean;
-}
-
-function formatCurrencyFromCents(valueInCents: number) {
-  return (valueInCents / 100).toLocaleString("es-MX", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 export function TotalCard({
@@ -29,7 +23,7 @@ export function TotalCard({
       <div className="flex items-center justify-between">
         <p className="text-sm text-text-main/60 m-0">Total</p>
         <p className="font-display text-xl text-text-main m-0">
-          ${formatCurrencyFromCents(totalCents)}
+          ${formatCentsToDisplay(totalCents)}
         </p>
       </div>
       <button
