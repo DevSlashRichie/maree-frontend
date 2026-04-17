@@ -47,9 +47,11 @@ test.describe("Admin Branch Detail Page", () => {
   });
 
   test("displays branch details and schedules", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "Sucursal Central", level: 1 })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Sucursal Central", level: 1 }),
+    ).toBeVisible();
     await expect(page.getByText("active", { exact: true })).toBeVisible();
-    
+
     // Verify schedules
     await expect(page.getByText("Lunes")).toBeVisible();
     await expect(page.getByText("09:00 – 18:00")).first().toBeVisible();
@@ -58,14 +60,16 @@ test.describe("Admin Branch Detail Page", () => {
   test("opens edit modal and interacts with schedules", async ({ page }) => {
     await page.getByRole("button", { name: "Editar" }).click();
 
-    await expect(page.getByRole("heading", { name: "Editar sucursal" })).toBeVisible();
-    
+    await expect(
+      page.getByRole("heading", { name: "Editar sucursal" }),
+    ).toBeVisible();
+
     // Verify pre-filled name
     await expect(page.getByLabel("Nombre")).toHaveValue("Sucursal Central");
 
     // Add a new schedule row
     await page.getByRole("button", { name: "+ Agregar" }).click();
-    
+
     // Check if a new schedule row appeared (there were 2, now 3)
     const scheduleRows = page.locator("select[id^='weekday-']");
     await expect(scheduleRows).toHaveCount(3);

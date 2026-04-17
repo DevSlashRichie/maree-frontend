@@ -95,7 +95,7 @@ test.describe("Admin User Detail Page", () => {
     const totalVisitsText = await page
       .getByTestId("user-total-visits")
       .innerText();
-    const totalVisits = parseInt(totalVisitsText.split(" ")[0]);
+    const totalVisits = parseInt(totalVisitsText.split(" ")[0], 10);
 
     const rewardCards = page.getByTestId("reward-card");
     const count = await rewardCards.count();
@@ -111,7 +111,7 @@ test.describe("Admin User Detail Page", () => {
         throw new Error(`Reward with title "${title}" not found in mock data`);
       }
 
-      const requiredVisits = parseInt(rewardData.cost);
+      const requiredVisits = parseInt(rewardData.cost, 10);
       const redeemButton = card.getByTestId("redeem-button");
 
       if (totalVisits >= requiredVisits) {

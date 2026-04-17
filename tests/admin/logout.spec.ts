@@ -18,7 +18,10 @@ test.describe("Admin Logout", () => {
   test("successfully logs out the user", async ({ page }) => {
     // 2. Open the user profile popover
     // Using a more specific locator to avoid strict mode violation with BranchSelector
-    const userButton = page.getByRole("button").filter({ has: page.locator(".lucide-chevron-down") }).filter({ hasNotText: /Selecciona Sucursal/i });
+    const userButton = page
+      .getByRole("button")
+      .filter({ has: page.locator(".lucide-chevron-down") })
+      .filter({ hasNotText: /Selecciona Sucursal/i });
     await userButton.click();
 
     // 3. Click the "Cerrar sesión" button

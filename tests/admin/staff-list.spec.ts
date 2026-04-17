@@ -48,7 +48,9 @@ test.describe("Admin Staff List Page", () => {
   });
 
   test("shows branch selector placeholder initially", async ({ page }) => {
-    await expect(page.getByText("Selecciona una sucursal para ver el staff")).toBeVisible();
+    await expect(
+      page.getByText("Selecciona una sucursal para ver el staff"),
+    ).toBeVisible();
   });
 
   test("displays staff list when branch is selected", async ({ page }) => {
@@ -56,7 +58,9 @@ test.describe("Admin Staff List Page", () => {
     await page.click("button:has-text('Selecciona Sucursal')");
     await page.getByRole("button", { name: "Sucursal Central" }).click();
 
-    await expect(page.getByText("Mostrando staff de Sucursal Central")).toBeVisible();
+    await expect(
+      page.getByText("Mostrando staff de Sucursal Central"),
+    ).toBeVisible();
     await expect(page.getByText("Juan Pérez")).toBeVisible();
     await expect(page.getByText("María García")).toBeVisible();
     await expect(page.getByText("+56911111111")).toBeVisible();
@@ -72,7 +76,9 @@ test.describe("Admin Staff List Page", () => {
     await page.getByRole("button", { name: "Nuevo Staff" }).click();
 
     // Target the modal heading specifically (level 3)
-    await expect(page.getByRole("heading", { name: "Nuevo Staff", level: 3 })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Nuevo Staff", level: 3 }),
+    ).toBeVisible();
 
     // Fill form
     await page.getByLabel("Nombre").fill("Carlos");
@@ -104,12 +110,18 @@ test.describe("Admin Staff List Page", () => {
     });
 
     // Click delete button for Juan Pérez (staff-1)
-    await page.locator("tr").filter({ hasText: "Juan Pérez" }).locator("button.text-red-500").click();
+    await page
+      .locator("tr")
+      .filter({ hasText: "Juan Pérez" })
+      .locator("button.text-red-500")
+      .click();
 
     await expect(page.getByText("Staff eliminado correctamente")).toBeVisible();
   });
 
-  test("navigates to staff detail page when clicking a row", async ({ page }) => {
+  test("navigates to staff detail page when clicking a row", async ({
+    page,
+  }) => {
     // Select branch
     await page.click("button:has-text('Selecciona Sucursal')");
     await page.getByRole("button", { name: "Sucursal Central" }).click();

@@ -96,7 +96,7 @@ test.describe("Admin Rewards Page", () => {
     });
 
     const deleteButtons = page.locator("button").filter({
-      has: page.locator("[data-test=\"delete-button\"]"),
+      has: page.locator('[data-test="delete-button"]'),
     });
     const count = await deleteButtons.count();
 

@@ -30,9 +30,11 @@ test.describe("Admin Branches List Page", () => {
   });
 
   test("displays branch list correctly", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "Sucursales", level: 1 })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Sucursales", level: 1 }),
+    ).toBeVisible();
     await expect(page.getByText("2 sucursales registradas")).toBeVisible();
-    
+
     await expect(page.getByText("Sucursal Central")).toBeVisible();
     await expect(page.getByText("Sucursal Norte")).toBeVisible();
   });
@@ -45,7 +47,7 @@ test.describe("Admin Branches List Page", () => {
         body: JSON.stringify([]),
       });
     });
-    
+
     await page.goto("/admin/branches");
     await expect(page.getByText("No hay sucursales registradas")).toBeVisible();
   });
@@ -54,12 +56,14 @@ test.describe("Admin Branches List Page", () => {
     await page.getByRole("button", { name: "Nueva sucursal" }).click();
 
     // Target modal heading (level 2 or 3 usually)
-    await expect(page.getByRole("heading", { name: "Nueva Sucursal" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Nueva Sucursal" }),
+    ).toBeVisible();
 
     // Fill form (based on CreateBranchForm structure)
     // Note: Adjusting labels based on standard form patterns if specific labels weren't in index.tsx
     await page.getByLabel(/Nombre/i).fill("Sucursal Oriente");
-    
+
     await expect(page.getByLabel(/Nombre/i)).toHaveValue("Sucursal Oriente");
   });
 

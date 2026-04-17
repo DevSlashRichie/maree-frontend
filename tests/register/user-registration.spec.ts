@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test("register a new user with random phone number", async ({ page }) => {
   // Generate a random 10-digit phone number
