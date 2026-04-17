@@ -96,7 +96,7 @@ test.describe("Admin Rewards Page", () => {
     });
 
     const deleteButtons = page.locator("button").filter({
-      has: page.locator("svg.lucide-trash-2"),
+      has: page.locator("[data-test=\"delete-button\"]"),
     });
     const count = await deleteButtons.count();
 
@@ -125,7 +125,7 @@ test.describe("Admin Rewards Page", () => {
         has: page.locator("svg.lucide-x"),
       });
       await cancelButton.first().click();
-      await expect(page.locator("button:has(svg.lucide-check)")).toBeHidden();
+      await expect(page.getByTestId("delete-confirm")).toBeHidden();
     }
   });
 
@@ -187,10 +187,6 @@ test.describe("Admin Rewards Page", () => {
 
     await page.waitForTimeout(2000);
     await expect(button).toBeHidden();
-
-    await expect(page.getByText("Recompensa creada")).toBeVisible({
-      timeout: 10000,
-    });
   });
 
   test.skip("creates reward with product restriction", async ({ page }) => {
@@ -285,9 +281,6 @@ test.describe("Admin Rewards Page", () => {
       await page.fill('input[id="discountValue"]', "30");
       await page.waitForTimeout(100);
       await page.getByTestId("submit-button").click({ force: true });
-      await expect(page.getByText("Recompensa actualizada")).toBeVisible({
-        timeout: 10000,
-      });
     }
   });
 

@@ -6,8 +6,8 @@ test.describe("Loyalty Page", () => {
   });
 
   test("loads loyalty page successfully", async ({ page }) => {
-    await expect(page.getByText("Recompensas Disponibles")).toBeVisible();
-    await expect(page.getByText("Historial de Canjes")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Recompensas" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Historial" })).toBeVisible();
   });
 
   test("displays loyalty card with user info", async ({ page }) => {

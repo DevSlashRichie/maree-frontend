@@ -28,11 +28,14 @@ export default defineConfig({
     },
     {
       name: "client",
+      dependencies: ["setup"],
       testDir: "./tests/client",
-      use: { ...devices["Desktop Chrome"] },
+      testMatch: /^(?!.*admin-setup).*\.spec\.ts$/,
+      use: { ...devices["Desktop Chrome"], storageState: ".auth/admin.json" },
     },
     {
-      name: "chromium",
+      name: "register",
+      testDir: "./tests/register",
       use: { ...devices["Desktop Chrome"] },
     },
   ],

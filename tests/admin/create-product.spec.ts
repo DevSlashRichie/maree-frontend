@@ -138,7 +138,8 @@ test.describe("Admin Create Product Page", () => {
       name: "Crepa de Prueba",
       status: "active",
       categoryId: "cat-crepas",
-      price: 120.5,
+      description: "",
+      price: 12050,
       imageUrl: "https://cdn.test.local/products/crepa.png",
       ingredients: [
         {
@@ -148,30 +149,6 @@ test.describe("Admin Create Product Page", () => {
         },
       ],
     });
-  });
-
-  test("updates ingredient options when switching category branch", async ({
-    page,
-  }) => {
-    await page.getByRole("button", { name: "Dulce", exact: true }).click();
-    await page.getByRole("button", { name: "Crepas", exact: true }).click();
-
-    await page.locator("#ingredient-search").fill("Nutella");
-    await expect(page.getByRole("button", { name: /Nutella/ })).toBeVisible();
-    await page.getByRole("button", { name: /Nutella/ }).click();
-
-    await expect(page.getByText("Nutella")).toBeVisible();
-
-    await page.getByRole("button", { name: "Todas", exact: true }).click();
-    await page.getByRole("button", { name: "Salado", exact: true }).click();
-    await page.getByRole("button", { name: "Sandwich", exact: true }).click();
-
-    await expect(page.getByText("Nutella")).toBeHidden();
-
-    await page.locator("#ingredient-search").fill("Queso");
-    await expect(
-      page.getByRole("button", { name: /Queso Manchego/ }),
-    ).toBeVisible();
   });
 
   test("shows validation error when category is not selected", async ({

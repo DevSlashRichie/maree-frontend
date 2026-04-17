@@ -21,6 +21,7 @@ export function RewardCard({
 }: RewardCardProps) {
   return (
     <div
+      data-testid="reward-card"
       className={`bg-card-light p-5 rounded-xl border border-accent/30 hover:shadow-md transition-shadow group cursor-pointer ${
         !isAvailable || isRedeemed ? "opacity-75" : ""
       }`}
@@ -44,12 +45,20 @@ export function RewardCard({
             Disponible
           </span>
         ) : (
-          <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-bold uppercase tracking-wider">
+          <span
+            className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-bold uppercase tracking-wider"
+            data-testid="reward-cost"
+          >
             {points} Visitas
           </span>
         )}
       </div>
-      <h4 className="font-display text-lg text-charcoal mb-1">{title}</h4>
+      <h4
+        className="font-display text-lg text-charcoal mb-1"
+        data-testid="reward-title"
+      >
+        {title}
+      </h4>
       <p className="text-xs text-gray-500 mb-4 line-clamp-2">{description}</p>
       {isRedeemed ? (
         <button
@@ -63,6 +72,7 @@ export function RewardCard({
         <button
           type="button"
           onClick={onRedeem}
+          data-testid="redeem-button"
           className="w-full py-2 bg-accent/20 text-charcoal rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-accent hover:text-white transition-all"
         >
           Canjear
@@ -71,6 +81,7 @@ export function RewardCard({
         <button
           type="button"
           disabled
+          data-testid="redeem-button"
           className="w-full py-2 bg-gray-100 text-gray-400 rounded-lg text-xs font-bold uppercase tracking-widest cursor-not-allowed"
         >
           Faltan Puntos

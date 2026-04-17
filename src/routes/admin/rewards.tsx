@@ -788,6 +788,7 @@ function RouteComponent() {
                           <button
                             type="button"
                             onClick={() => handleDelete(reward.id)}
+                            data-test="delete-confirm"
                             className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                           >
                             <Check className="w-4 h-4" />
@@ -795,6 +796,7 @@ function RouteComponent() {
                           <button
                             type="button"
                             onClick={() => setDeleteConfirm(null)}
+                            data-test="delete-confirm-cancel"
                             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                           >
                             <X className="w-4 h-4 text-gray-500" />
@@ -805,6 +807,7 @@ function RouteComponent() {
                           type="button"
                           onClick={() => setDeleteConfirm(reward.id)}
                           className="p-2 hover:bg-red-50 rounded-full transition-colors group"
+                          data-test="delete-button"
                         >
                           <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-500" />
                         </button>
