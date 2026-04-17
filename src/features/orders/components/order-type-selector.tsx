@@ -1,17 +1,29 @@
 import { useState } from "react";
-import { Utensils, ShoppingBag, ArrowRight } from "lucide-react";
+import { Utensils, ShoppingBag, ArrowRight, MapPin } from "lucide-react";
 
 export default function OrderTypeSelector() {
   const [orderType, setOrderType] = useState<"mesa" | "recoger">("mesa");
+  
+  // This could later come from a prop or a global state
+  const branchName = "Sucursal Querétaro";
 
   return (
-    <div className="w-full max-w-md mx-auto bg-card-light rounded-[2.5rem] shadow-xl p-6 sm:p-10 flex flex-col items-center">
+    <div className="w-full max-w-md mx-auto bg-card-light rounded-[2.5rem] shadow-xl p-6 sm:p-10 flex flex-col items-center relative">
+      
+      {/* Branch Location Badge */}
+      <div className="flex items-center gap-1.5 bg-secondary/50 px-4 py-1.5 rounded-full mb-6 border border-primary/5">
+        <MapPin className="w-3.5 h-3.5 text-accent" />
+        <span className="text-[10px] font-bold uppercase tracking-wider text-charcoal/70">
+          {branchName}
+        </span>
+      </div>
+
       <h2 className="font-display text-2xl sm:text-3xl text-text-main text-center mb-8 leading-tight">
         ¿Cómo recibirás tu pedido?
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mb-10">
-        {/* Opción Para Mesa */}
+        {/* Dine-in Option */}
         <button
           onClick={() => setOrderType("mesa")}
           className={`relative p-5 sm:p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
@@ -36,7 +48,7 @@ export default function OrderTypeSelector() {
           </div>
         </button>
 
-        {/* Opción Para Recoger */}
+        {/* Pickup Option */}
         <button
           onClick={() => setOrderType("recoger")}
           className={`relative p-5 sm:p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
@@ -62,9 +74,9 @@ export default function OrderTypeSelector() {
         </button>
       </div>
 
-      {/* Botón de Acción */}
+      {/* Action Button */}
       <button className="w-full bg-primary text-white py-4.5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-charcoal transition-colors shadow-lg active:scale-[0.98]">
-        <span className="tracking-wide">ORDENAR AHORA</span>
+        <span className="tracking-wide uppercase text-sm">Ordenar ahora</span>
         <ArrowRight className="w-5 h-5" />
       </button>
     </div>
