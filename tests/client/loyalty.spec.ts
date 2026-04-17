@@ -101,7 +101,7 @@ test.describe("Loyalty Page", () => {
         .getByTestId("reward-card")
         .filter({ hasText: reward.name });
       const button = card.getByTestId("redeem-button");
-      const cost = parseInt(reward.cost);
+      const cost = parseInt(reward.cost, 10);
 
       if (balance >= cost) {
         await expect(button).toBeEnabled();
