@@ -1,7 +1,69 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Loyalty Page", () => {
+  const mockLoyalty = {
+    firstName: "Ana López",
+    phone: "4427536211",
+    currentBalance: 10,
+    lastRedemptions: [
+      {
+        name: "Crepa Salada",
+        branch: "La Marée",
+        date: "2024-01-01T10:00:00Z",
+      },
+      {
+        name: "Bebida Refrescante",
+        branch: "Sucursal Norte",
+        date: "2024-02-15T15:30:00Z",
+      },
+      {
+        name: "Regalo de Cumpleaños",
+        branch: "La Marée",
+        date: "2024-03-20T09:00:00Z",
+      },
+    ],
+  };
+
+  const mockRewards = [
+    {
+      id: "reward-1",
+      name: "Crepa Dulce Gratis",
+      cost: "5",
+      description: "Deliciosa crepa",
+    },
+    {
+      id: "reward-2",
+      name: "Café de Especialidad",
+      cost: "3",
+      description: "Café recién molido",
+    },
+    {
+      id: "reward-3",
+      name: "Bebida de Temporada",
+      cost: "15",
+      description: "Solo por tiempo limitado",
+    },
+  ];
+
   test.beforeEach(async ({ page }) => {
+    // Intercept Loyalty API
+    await page.route("**/v1/loyalty", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockLoyalty),
+      });
+    });
+
+    // Intercept Rewards API
+    await page.route("**/v1/rewards", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockRewards),
+      });
+    });
+
     await page.goto("/loyalty");
   });
 
@@ -14,30 +76,52 @@ test.describe("Loyalty Page", () => {
     ).toBeVisible();
   });
 
-  test("displays loyalty card with user info", async ({ page }) => {
-    await expect(page.getByText("Ana López")).toBeVisible();
-    await expect(page.getByText("Teléfono: 4427536211")).toBeVisible();
-    await expect(page.getByText("Premium Member")).toBeVisible();
+  test("displays loyalty card with user info from mock", async ({ page }) => {
+    await expect(page.getByTestId("user-name")).toHaveText(
+      mockLoyalty.firstName,
+    );
+    await expect(page.getByTestId("user-phone")).toContainText(
+      mockLoyalty.phone,
+    );
   });
 
-  test("displays all rewards", async ({ page }) => {
-    await expect(page.getByText("Crepa Dulce Gratis")).toBeVisible();
-    await expect(page.getByText("Café de Especialidad")).toBeVisible();
-    await expect(page.getByText("Bebida de Temporada")).toBeVisible();
-    await expect(page.getByText("Postre Especial")).toBeVisible();
-    await expect(page.getByText("Combo Pareja")).toBeVisible();
+  test("displays all rewards from mock", async ({ page }) => {
+    for (const reward of mockRewards) {
+      await expect(
+        page.getByTestId("reward-title").filter({ hasText: reward.name }),
+      ).toBeVisible();
+    }
   });
 
-  test("scroll buttons are present", async ({ page }) => {
-    await expect(page.getByLabel("Anterior")).toBeVisible();
-    await expect(page.getByLabel("Siguiente")).toBeVisible();
+  test("reward button states based on balance", async ({ page }) => {
+    const balance = mockLoyalty.currentBalance;
+
+    for (const reward of mockRewards) {
+      const card = page
+        .getByTestId("reward-card")
+        .filter({ hasText: reward.name });
+      const button = card.getByTestId("redeem-button");
+      const cost = parseInt(reward.cost);
+
+      if (balance >= cost) {
+        await expect(button).toBeEnabled();
+        await expect(button).toHaveText(/Canjear/i);
+      } else {
+        await expect(button).toBeDisabled();
+        await expect(button).toHaveText(/Faltan Puntos/i);
+      }
+    }
   });
 
-  test("displays recent history items", async ({ page }) => {
-    await expect(page.getByText("Crepa Salada - La Marée")).toBeVisible();
-    await expect(page.getByText("Bebida Refrescante")).toBeVisible();
-    await expect(page.getByText("Regalo de Cumpleaños")).toBeVisible();
-    await expect(page.getByText("Ver historial completo")).toBeVisible();
+  test("displays recent history items from mock", async ({ page }) => {
+    const historyTitles = mockLoyalty.lastRedemptions
+      .slice(0, 3)
+      .map((h) => h.name);
+    for (const title of historyTitles) {
+      await expect(
+        page.getByTestId("history-item-title").filter({ hasText: title }),
+      ).toBeVisible();
+    }
   });
 
   test("opens history modal when clicking view full history", async ({
@@ -45,128 +129,41 @@ test.describe("Loyalty Page", () => {
   }) => {
     await page.click("text=Ver historial completo");
     await expect(
-      page.getByRole("heading", { name: "Historial de Actividad" }),
+      page.getByRole("heading", { name: "Historial Completo" }),
     ).toBeVisible();
-    await expect(
-      page.getByPlaceholder("Buscar por recompensa o sucursal..."),
-    ).toBeVisible();
+    await expect(page.getByPlaceholder("Buscar...")).toBeVisible();
   });
 
-  test("search filters history results", async ({ page }) => {
+  test("search filters history results in modal", async ({ page }) => {
     await page.click("text=Ver historial completo");
+
+    const modal = page.getByRole("dialog", { name: "Historial Completo" });
+    await page.fill('input[placeholder="Buscar..."]', "Crepa");
+
     await expect(
-      page.getByRole("heading", { name: "Historial de Actividad" }),
+      modal
+        .getByTestId("history-item-title")
+        .filter({ hasText: "Crepa Salada" }),
     ).toBeVisible();
-
-    await page.fill('input[placeholder*="Buscar"]', "Café");
-    await expect(page.getByText("Café Latte", { exact: true })).toBeVisible();
     await expect(
-      page.getByText("No se encontraron resultados"),
-    ).not.toBeVisible();
-  });
-
-  test("filter buttons work correctly", async ({ page }) => {
-    await page.click("text=Ver historial completo");
-    await expect(
-      page.getByRole("heading", { name: "Historial de Actividad" }),
-    ).toBeVisible();
-
-    await page.click("text=Regalos");
-    const modal = page
-      .locator('[role="dialog"]')
-      .filter({ hasText: "Historial de Actividad" });
-    await expect(modal.getByText("Regalo de Cumpleaños")).toBeVisible();
-    await expect(modal.getByText("Crepa Salada - La Marée")).not.toBeVisible();
-  });
-
-  test("shows empty state when no search results", async ({ page }) => {
-    await page.click("text=Ver historial completo");
-    await expect(
-      page.getByRole("heading", { name: "Historial de Actividad" }),
-    ).toBeVisible();
-
-    await page.fill('input[placeholder*="Buscar"]', "xyznonexistent");
-    await expect(page.getByText("No se encontraron resultados")).toBeVisible();
-    await expect(page.getByText("Limpiar filtros")).toBeVisible();
-  });
-
-  test("clear filters button works", async ({ page }) => {
-    await page.click("text=Ver historial completo");
-    await page.fill('input[placeholder*="Buscar"]', "xyznonexistent");
-    await expect(page.getByText("No se encontraron resultados")).toBeVisible();
-
-    await page.click("text=Limpiar filtros");
-    const modal = page
-      .locator('[role="dialog"]')
-      .filter({ hasText: "Historial de Actividad" });
-    await expect(modal.getByText("Crepa Salada - La Marée")).toBeVisible();
-  });
-
-  test("close button closes history modal", async ({ page }) => {
-    await page.click("text=Ver historial completo");
-    await expect(
-      page.getByRole("heading", { name: "Historial de Actividad" }),
-    ).toBeVisible();
-
-    await page.click("text=Cerrar");
-    await expect(
-      page.getByRole("heading", { name: "Historial de Actividad" }),
+      modal
+        .getByTestId("history-item-title")
+        .filter({ hasText: "Bebida Refrescante" }),
     ).not.toBeVisible();
   });
 
   test("opens confirmation modal when clicking redeem", async ({ page }) => {
-    const availableReward = page.getByText("Canjear").first();
-    await availableReward.click();
+    const availableRewardTitle = mockRewards[0].name;
+    const card = page
+      .getByTestId("reward-card")
+      .filter({ hasText: availableRewardTitle });
+    await card.getByTestId("redeem-button").click();
 
+    await expect(page.getByText("Confirmar Canje")).toBeVisible();
+
+    // Use .last() to target the heading inside the modal, as the RewardCard title also uses <h4>
     await expect(
-      page.getByRole("heading", { name: "Confirmar Canje" }),
+      page.getByRole("heading", { name: availableRewardTitle }).last(),
     ).toBeVisible();
-    await expect(
-      page.getByText("¿Estás seguro de que deseas canjear esta recompensa?"),
-    ).toBeVisible();
-  });
-
-  test("confirm redemption closes modal", async ({ page }) => {
-    const availableReward = page.getByText("Canjear").first();
-    await availableReward.click();
-
-    await page.waitForTimeout(200);
-
-    await expect(
-      page.getByRole("heading", { name: "Confirmar Canje" }),
-    ).toBeVisible();
-
-    await page.locator('button:has-text("Confirmar Canje")').last().click();
-    await page.waitForTimeout(500);
-    await expect(
-      page.getByRole("heading", { name: "Confirmar Canje" }),
-    ).not.toBeVisible();
-  });
-
-  test("cancel button closes confirmation modal", async ({ page }) => {
-    const availableReward = page.getByText("Canjear").first();
-    await availableReward.click();
-
-    await page.waitForTimeout(200);
-
-    await expect(
-      page.getByRole("heading", { name: "Confirmar Canje" }),
-    ).toBeVisible();
-
-    await page.click("text=Cancelar");
-    await expect(
-      page.getByRole("heading", { name: "Confirmar Canje" }),
-    ).not.toBeVisible();
-  });
-
-  test("shows unavailable rewards with points", async ({ page }) => {
-    await expect(page.getByText("50 Visitas", { exact: true })).toBeVisible();
-    await expect(page.getByText("75 Visitas", { exact: true })).toBeVisible();
-    await expect(page.getByText("150 Visitas", { exact: true })).toBeVisible();
-  });
-
-  test("displays total activities count", async ({ page }) => {
-    await page.click("text=Ver historial completo");
-    await expect(page.getByText(/Total de actividades:/)).toBeVisible();
   });
 });

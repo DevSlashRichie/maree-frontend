@@ -54,7 +54,7 @@ test.describe("Admin Branch Detail Page", () => {
 
     // Verify schedules
     await expect(page.getByText("Lunes")).toBeVisible();
-    await expect(page.getByText("09:00 – 18:00")).first().toBeVisible();
+    await expect(page.getByText("09:00 – 18:00").first()).toBeVisible();
   });
 
   test("opens edit modal and interacts with schedules", async ({ page }) => {
