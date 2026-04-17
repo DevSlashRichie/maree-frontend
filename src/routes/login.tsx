@@ -5,7 +5,7 @@ import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Heading, Paragraph } from "@/components/typography";
 import { useAuthStore } from "@/hooks/use-auth-store";
-import { getV1UsersMe, postAuthLogin } from "@/lib/api";
+import { getV1UsersMe, postAuthLogin, postAuthRegister } from "@/lib/api";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: ({ search }) => {
@@ -25,13 +25,42 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [step, setStep] = useState<"phone" | "code">("phone");
+  const [mode, setMode] = useState<"login" | "register">("login");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
   const { next: redirectTo } = Route.useSearch();
   const { setAuth } = useAuthStore();
+
+  const handleRegister = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const r = await postAuthRegister({
+        firstName,
+        lastName,
+        phone,
+      });
+
+      if (r.status === 201) {
+        // After successful registration, proceed to login flow (which will send the code)
+        setMode("login");
+        await handleLogin();
+        return;
+      }
+
+      setError(r.data.message || "Error al registrarse");
+    } catch (error) {
+      console.error("Registration failed", error);
+      setError("Error de conexión con el servidor");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     setError(null);
@@ -94,7 +123,10 @@ function LoginPage() {
       }
 
       // Handle expected backend errors
-      if (r.status === 400 || r.status === 403) {
+      if (r.status === 403) {
+        // User might not exist, prompt to register
+        setMode("register");
+      } else if (r.status === 400) {
         setError(r.data.message || "Error al iniciar sesión");
       } else {
         setError("Ocurrió un error inesperado");
@@ -111,11 +143,15 @@ function LoginPage() {
     <div className="min-h-screen texture-bg flex justify-center px-4 py-12 mt-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Heading className="text-2xl">Bienvenido</Heading>
+          <Heading className="text-2xl">
+            {mode === "login" ? "Bienvenido" : "Crea tu cuenta"}
+          </Heading>
           <Paragraph className="mt-2">
-            {step === "phone"
-              ? "Introduce tu número de teléfono para continuar."
-              : `Hemos enviado un código a ${phone}.`}
+            {mode === "register"
+              ? "Completa tus datos para registrarte."
+              : step === "phone"
+                ? "Introduce tu número de teléfono para continuar."
+                : `Hemos enviado un código a ${phone}.`}
           </Paragraph>
         </div>
 
@@ -124,13 +160,40 @@ function LoginPage() {
             className="flex flex-col gap-6"
             onSubmit={(e) => {
               e.preventDefault();
-              handleLogin();
+              if (mode === "register") {
+                handleRegister();
+              } else {
+                handleLogin();
+              }
             }}
           >
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
                 {error}
               </div>
+            )}
+
+            {mode === "register" && (
+              <>
+                <Input
+                  label="Nombre"
+                  type="text"
+                  placeholder="Juan"
+                  name="firstName"
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+                <Input
+                  label="Apellido"
+                  type="text"
+                  placeholder="Pérez"
+                  name="lastName"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+              </>
             )}
 
             {step === "phone" ? (
@@ -141,6 +204,7 @@ function LoginPage() {
                 name="phone"
                 required
                 value={phone}
+                readOnly={mode === "register"}
                 onChange={(e) => {
                   setPhone(e.target.value);
                 }}
@@ -164,22 +228,27 @@ function LoginPage() {
               <Button type="submit" className="w-full mt-2" disabled={loading}>
                 {loading
                   ? "Cargando..."
-                  : step === "phone"
-                    ? "Continuar"
-                    : "Verificar código"}
+                  : mode === "register"
+                    ? "Registrarse"
+                    : step === "phone"
+                      ? "Continuar"
+                      : "Verificar código"}
               </Button>
 
-              {step === "code" && (
+              {(step === "code" || mode === "register") && (
                 <button
                   type="button"
                   className="text-sm text-text-main/60 hover:text-text-main transition-colors py-2"
                   onClick={() => {
                     setStep("phone");
+                    setMode("login");
                     setError(null);
                     setCode("");
                   }}
                 >
-                  Cambiar número de teléfono
+                  {mode === "register"
+                    ? "Cancelar"
+                    : "Cambiar número de teléfono"}
                 </button>
               )}
             </div>
