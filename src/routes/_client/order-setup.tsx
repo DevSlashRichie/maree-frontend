@@ -7,8 +7,11 @@ export const Route = createFileRoute("/_client/order-setup")({
 
 function OrderSetupPage() {
   return (
-    <div >
-      <OrderTypeSelector />
+    <div className="min-h-screen flex flex-col p-6">
+        <div className="flex-1 flex items-center justify-center">
+            <OrderTypeSelector />
+        </div>
     </div>
+
   );
 }
