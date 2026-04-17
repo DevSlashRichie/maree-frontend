@@ -5,6 +5,7 @@ import {
   usePostV1ProductsImage,
   usePostV1ProductsProductVariant,
 } from "@/lib/api";
+import { convertToCents, formatCentsToDisplay, formatPrice } from "@/lib/money";
 import type { SelectedIngredient } from "../data/mock";
 import { type Category, CategoryPicker } from "./category-picker";
 import { IngredientRow } from "./ingredient-row";
@@ -180,7 +181,7 @@ export function CreateProduct() {
       setFormError("Selecciona una categoría final antes de guardar.");
       return;
     }
-    const parsedPrice = Number(price);
+    const parsedPrice = parseFloat(price);
     if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
       setFormError("Ingresa un precio válido mayor que 0.");
       return;
@@ -207,7 +208,7 @@ export function CreateProduct() {
         description,
         status: isActive ? "active" : "inactive",
         categoryId,
-        price: parsedPrice,
+        price: convertToCents(parsedPrice),
         imageUrl,
         ingredients: selectedIngredients.map(
           ({ id, quantity, isRemovable }) => ({
@@ -245,7 +246,7 @@ export function CreateProduct() {
               Producto creado
             </p>
             <p className="text-sm text-text-main/45">
-              Se guardó correctamente y se envió al backend.
+              El producto se ha guardado exitosamente y ya está disponible.
             </p>
           </div>
 
@@ -264,9 +265,9 @@ export function CreateProduct() {
                   </p>
                 )}
                 <div className="mt-3 text-sm text-text-main/65 space-y-1">
-                  <p className="m-0">Estado: {lastPayload.status}</p>
-                  <p className="m-0">Categoría ID: {lastPayload.categoryId}</p>
-                  <p className="m-0">Precio: ${lastPayload.price}</p>
+                  <p className="m-0">
+                    Precio: {formatPrice(lastPayload.price)}
+                  </p>
                 </div>
               </div>
 
@@ -473,11 +474,16 @@ export function CreateProduct() {
                 </span>
                 <input
                   id="variant-price"
-                  type="number"
-                  min="0"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Allow only digits and one decimal point
+                    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                      setPrice(value);
+                    }
+                  }}
                   placeholder="0.00"
                   required
                   className="w-full bg-background-light border border-pink-soft/30 rounded-xl pl-8 pr-4 py-3 text-sm text-text-main placeholder:text-text-main/25 focus:outline-none focus:border-pink-soft/60 transition-colors"
@@ -642,7 +648,7 @@ export function CreateProduct() {
               <div className="flex items-center justify-between">
                 <span>Precio</span>
                 <span className="font-medium text-text-main">
-                  {price || "0"}
+                  {price ? formatCentsToDisplay(convertToCents(price)) : "0.00"}
                 </span>
               </div>
             </div>

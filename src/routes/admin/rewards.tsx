@@ -26,15 +26,12 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
 import { Tooltip } from "@/components/ui/tooltip";
-import { useBranchStore } from "@/hooks/use-branch-store";
 import {
   deleteV1RewardsRewardId,
   patchV1RewardsRewardId,
-  useGetV1BranchesIdRewards,
   useGetV1Rewards,
   usePostV1Rewards,
 } from "@/lib/api";
-import type { BranchDiscount } from "@/lib/schemas";
 import type { RewardSchema } from "@/lib/schemas/rewardSchema";
 
 export const Route = createFileRoute("/admin/rewards")({
@@ -89,62 +86,35 @@ function getIconComponent(iconName: string) {
 }
 
 function RouteComponent() {
-  const { selectedBranch } = useBranchStore();
-
   const {
     data: rewardsData,
     isLoading: isLoadingRewards,
     error: rewardsError,
     mutate,
-  } = useGetV1Rewards({
-    fetch: { credentials: "include" },
-    swr: { enabled: !selectedBranch },
-  });
-
-  const { data: branchRewardsData, isLoading: isLoadingBranchRewards } =
-    useGetV1BranchesIdRewards(selectedBranch?.id ?? "", {
-      swr: { enabled: !!selectedBranch },
-    });
+  } = useGetV1Rewards();
 
   const { trigger: createReward, isMutating: isCreatingReward } =
     usePostV1Rewards();
 
-  const rewards: Reward[] = selectedBranch
-    ? (branchRewardsData?.status === 200 ? branchRewardsData.data : []).map(
-        (r: BranchDiscount) => ({
-          id: r.id,
-          title: r.name.replace("REWARD-", ""),
-          description: "",
-          icon: "utensils-crossed",
-          isAvailable: r.state === "active",
-          points: null,
-          discountType: r.type as "percentage" | "fixed",
-          discountValue: r.value,
-          applicableProducts: r.appliesTo.length > 0 ? r.appliesTo : null,
-          status: r.state,
-          cost: "",
-          discountId: r.id,
-          image: null,
-          createdAt: r.createdAt,
-        }),
-      )
-    : (rewardsData?.data ?? []).map((r: RewardSchema) => ({
-        id: r.id,
-        title: r.name.replace("REWARD-", ""),
-        description: r.description,
-        icon: "utensils-crossed",
-        isAvailable: r.status === "active",
-        points: parseInt(r.cost, 10) || null,
-        discountType: r.discount.type as "percentage" | "fixed",
-        discountValue: parseInt(r.discount.value, 10),
-        applicableProducts:
-          r.discount.appliesTo.length > 0 ? r.discount.appliesTo : null,
-        status: r.status,
-        cost: r.cost,
-        discountId: r.discountId,
-        image: r.image,
-        createdAt: r.createdAt,
-      }));
+  const rewards: Reward[] = (rewardsData?.data ?? []).map(
+    (r: RewardSchema) => ({
+      id: r.id,
+      title: r.name.replace("REWARD-", ""),
+      description: r.description,
+      icon: "utensils-crossed",
+      isAvailable: r.status === "active",
+      points: parseInt(r.cost, 10) || null,
+      discountType: r.discount.type as "percentage" | "fixed",
+      discountValue: parseInt(r.discount.value, 10),
+      applicableProducts:
+        r.discount.appliesTo.length > 0 ? r.discount.appliesTo : null,
+      status: r.status,
+      cost: r.cost,
+      discountId: r.discountId,
+      image: r.image,
+      createdAt: r.createdAt,
+    }),
+  );
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<Reward | null>(null);
@@ -204,7 +174,6 @@ function RouteComponent() {
               value: value.discountValue,
               appliesTo: productName ? [productName] : [],
             },
-            branchId: selectedBranch?.id,
           });
 
           if (result.status === 201) {
@@ -299,7 +268,7 @@ function RouteComponent() {
     }
   };
 
-  if (isLoadingRewards || isLoadingBranchRewards) {
+  if (isLoadingRewards) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
         <div className="text-text-main">Cargando recompensas...</div>
@@ -327,14 +296,6 @@ function RouteComponent() {
               <p className="font-body text-text-main/60">
                 Gestiona las recompensas del programa de lealtad
               </p>
-              {selectedBranch && (
-                <p className="font-body text-sm text-text-main/50 mt-1">
-                  Mostrando recompensas de{" "}
-                  <span className="font-semibold text-text-main">
-                    {selectedBranch.name}
-                  </span>
-                </p>
-              )}
             </div>
             {!isFormOpen && (
               <button
@@ -827,6 +788,7 @@ function RouteComponent() {
                           <button
                             type="button"
                             onClick={() => handleDelete(reward.id)}
+                            data-test="delete-confirm"
                             className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                           >
                             <Check className="w-4 h-4" />
@@ -834,6 +796,7 @@ function RouteComponent() {
                           <button
                             type="button"
                             onClick={() => setDeleteConfirm(null)}
+                            data-test="delete-confirm-cancel"
                             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                           >
                             <X className="w-4 h-4 text-gray-500" />
@@ -844,6 +807,7 @@ function RouteComponent() {
                           type="button"
                           onClick={() => setDeleteConfirm(reward.id)}
                           className="p-2 hover:bg-red-50 rounded-full transition-colors group"
+                          data-test="delete-button"
                         >
                           <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-500" />
                         </button>

@@ -1,5 +1,6 @@
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
+import { formatCentsToDisplay } from "@/lib/money";
 
 interface OrderCardCompleteProps {
   userName: string;
@@ -24,7 +25,7 @@ export function OrderCardComplete({
           </p>
         </div>
         <span className="font-display text-xl text-text-main font-semibold shrink-0">
-          ${price.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+          ${formatCentsToDisplay(price)}
         </span>
       </div>
 

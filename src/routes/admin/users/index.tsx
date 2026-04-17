@@ -15,6 +15,7 @@ import {
 import { useMemo, useState } from "react";
 import { QRScannerModal } from "@/components/ui/qr-scanner-modal";
 import { useGetV1Users } from "@/lib/api";
+import { formatCentsToDisplay } from "@/lib/money";
 
 export const Route = createFileRoute("/admin/users/")({
   component: RouteComponent,
@@ -64,7 +65,7 @@ const columns = [
       const value = info.getValue();
       return (
         <span className="font-medium text-text-main">
-          ${(value / 100).toLocaleString("es-MX")}
+          ${formatCentsToDisplay(value)}
         </span>
       );
     },

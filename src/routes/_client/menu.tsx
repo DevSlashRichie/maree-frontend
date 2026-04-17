@@ -8,6 +8,7 @@ import {
   useGetV1ProductsCategories,
   useGetV1ProductsVariants,
 } from "@/lib/api";
+import { formatPrice } from "@/lib/money";
 import type { GetV1ProductsVariants200VariantsItem } from "@/lib/schemas";
 
 export const Route = createFileRoute("/_client/menu")({
@@ -230,15 +231,21 @@ function RouteComponent() {
                             <FoodCard
                               key={item.id}
                               title={item.name}
-                              price={`$${(Number(item.price) || 0) / 100}`}
+                              price={formatPrice(item.price || 0)}
                               description={item.description}
                               image={
                                 item.image ??
                                 "https://images.unsplash.com/photo-1519676867240-f03562e64548?q=80&w=500"
                               }
-                              onAdd={() =>
-                                console.log(`Agregado al carrito: ${item.name}`)
-                              }
+                              onAdd={() => {
+                                navigate({
+                                  to: "/customize-product",
+                                  search: {
+                                    itemId: "",
+                                    variantId: item.id,
+                                  },
+                                });
+                              }}
                             />
                           ))
                         ) : (
