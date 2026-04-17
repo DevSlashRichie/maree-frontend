@@ -9,7 +9,6 @@ import { OrderDetails } from "./order-details";
 export function Orders() {
   const { selectedBranch } = useBranchStore();
   const { data, isLoading, mutate } = useGetV1Orders({
-    params: selectedBranch?.id ? { branchId: selectedBranch.id } : undefined,
     swr: {
       swrKey: () => ["http://localhost:8383/v1/orders", selectedBranch?.id],
     },
@@ -50,7 +49,9 @@ export function Orders() {
   if (!data) return <div>Error</div>;
   if (data.status !== 200) return <div>Error: {data?.data.message}</div>;
 
-  const orders = data.data;
+  const orders = selectedBranch?.id
+    ? data.data.filter((o) => o.order.branchId === selectedBranch.id)
+    : data.data;
 
   return (
     <>
