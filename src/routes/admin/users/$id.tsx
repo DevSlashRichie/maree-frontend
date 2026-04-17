@@ -196,7 +196,10 @@ function RouteComponent() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between ml-8">
-                    <p className="text-text-main font-medium">
+                    <p
+                      className="text-text-main font-medium"
+                      data-testid="user-total-visits"
+                    >
                       {user.totalVisits} visitas
                     </p>
                     <button

@@ -18,7 +18,10 @@ export function HistoryItem({
     status.toLowerCase() === "canjeado";
 
   return (
-    <li className="p-4 hover:bg-background-light dark:hover:bg-background-dark/50 transition-colors flex items-center justify-between">
+    <li
+      className="p-4 hover:bg-background-light dark:hover:bg-background-dark/50 transition-colors flex items-center justify-between"
+      data-testid="history-item"
+    >
       <div className="flex items-center gap-4">
         <div
           className={`h-10 w-10 rounded-full flex items-center justify-center ${
@@ -34,10 +37,18 @@ export function HistoryItem({
           )}
         </div>
         <div>
-          <p className="font-bold text-sm text-charcoal dark:text-gray-200">
+          <p
+            className="font-bold text-sm text-charcoal dark:text-gray-200"
+            data-testid="history-item-title"
+          >
             {title}
           </p>
-          <p className="text-xs text-gray-500">{location}</p>
+          <p
+            className="text-xs text-gray-500"
+            data-testid="history-item-location"
+          >
+            {location}
+          </p>
         </div>
       </div>
       <div className="text-right">

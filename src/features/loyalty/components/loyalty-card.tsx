@@ -99,10 +99,16 @@ export function LoyaltyCard() {
             <p className="text-white/50 text-[10px] uppercase tracking-widest">
               Titular
             </p>
-            <p className="text-white font-display text-lg tracking-wide">
+            <p
+              className="text-white font-display text-lg tracking-wide"
+              data-testid="user-name"
+            >
               {data.data.firstName}
             </p>
-            <p className="text-white/50 text-xs font-mono">
+            <p
+              className="text-white/50 text-xs font-mono"
+              data-testid="user-phone"
+            >
               Tel: {data.data.phone}
             </p>
           </div>
