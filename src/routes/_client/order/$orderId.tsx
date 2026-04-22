@@ -124,38 +124,38 @@ function RouteComponent() {
             </div>
             <div className="divide-y divide-pink-soft/10">
               {order.items && order.items.length > 0 ? (
-                order.items.map((item: any, index: number) => (
-                  <div key={index} className="p-6 flex justify-between gap-4">
+                order.items.map((item) => (
+                  <div key={item.id} className="p-6 flex justify-between gap-4">
                     <div className="flex gap-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-pink-soft/5 rounded-2xl flex items-center justify-center text-charcoal font-bold border border-pink-soft/10">
                         {item.quantity}x
                       </div>
                       <div>
                         <p className="font-bold text-charcoal">
-                          {item.variant?.name || "Producto"}
+                          {item.productVariantsTable?.name || "Producto"}
                         </p>
                         {item.modifiers && item.modifiers.length > 0 && (
                           <div className="mt-1 flex flex-wrap gap-1">
-                            {item.modifiers.map((mod: any, mIdx: number) => (
+                            {item.modifiers.map((mod) => (
                               <span
-                                key={mIdx}
+                                key={mod.id}
                                 className="text-[10px] bg-charcoal/5 text-charcoal/60 px-2 py-0.5 rounded-full"
                               >
-                                + {mod.modifier?.name}
+                                + {mod.productVariantsTable?.name}
                               </span>
                             ))}
                           </div>
                         )}
-                        {item.note && (
+                        {item.notes && (
                           <p className="mt-2 text-xs italic text-gray-500">
-                            "{item.note}"
+                            "{item.notes}"
                           </p>
                         )}
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-mono text-sm font-bold text-charcoal">
-                        {formatPrice(item.total || 0)}
+                        {formatPrice(item.pricingSnapshot || 0)}
                       </p>
                     </div>
                   </div>
