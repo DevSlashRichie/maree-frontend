@@ -375,8 +375,6 @@ function DiscountFormModal({
   );
 }
 
-const _LIMIT = 10;
-
 function RouteComponent() {
   const [_page, _setPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
