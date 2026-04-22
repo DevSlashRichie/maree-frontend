@@ -9,7 +9,6 @@ import { ChevronDown, LogOut, Menu, X } from "lucide-react";
 import { Fragment, useState } from "react";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { postAuthLogout } from "@/lib/api";
-import { BranchSelector } from "../components/selector-branch";
 
 const adminNavItems = [
   { to: "/admin", label: "Dashboard", icon: "dashboard" },
@@ -25,8 +24,8 @@ const adminNavItems = [
   },
   { to: "/admin/users", label: "Usuarios", icon: "person" },
   { to: "/admin/staff", label: "Staff", icon: "group" },
+  { to: "/admin/branches", label: "Sucursales", icon: "store" },
   { to: "/admin/rewards", label: "Recompensas", icon: "card_giftcard" },
-  { to: "/admin/order", label: "Pedidos", icon: "receipt_long" },
   { to: "/admin/reports", label: "Reportes", icon: "bar_chart" },
 ];
 
@@ -76,7 +75,6 @@ export function AdminNavbar() {
         </div>
 
         <div className="px-4 pb-2 space-y-3">
-          <BranchSelector />
           <Popover className="relative">
             {({ open }) => (
               <>
@@ -156,9 +154,10 @@ export function AdminNavbar() {
             <Link
               key={item.to}
               to={item.to}
+              style={isActive(item.to) ? { backgroundColor: "#C4919A" } : {}}
               className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
                 isActive(item.to)
-                  ? "bg-secondary text-white"
+                  ? "text-white"
                   : "text-text-main/60 hover:bg-secondary/10 hover:text-text-main"
               } ${isCollapsed ? "justify-center" : ""}`}
             >
