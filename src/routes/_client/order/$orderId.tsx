@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ChevronLeft, Clock, Package } from "lucide-react";
+import { Heading } from "@/components/typography";
+import { requireAuth } from "@/hooks/with-auth";
 import { useGetV1OrdersMeId } from "@/lib/api";
 import { formatPrice } from "@/lib/money";
-import { Heading } from "@/components/typography";
-import { ChevronLeft, Clock, Package } from "lucide-react";
-import { requireAuth } from "@/hooks/with-auth";
 
 export const Route = createFileRoute("/_client/order/$orderId")({
   beforeLoad: async ({ location }) => {

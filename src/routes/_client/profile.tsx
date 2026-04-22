@@ -1,10 +1,10 @@
+import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useAuthStore } from "@/hooks/use-auth-store";
-import { patchV1UsersMe, usePostAuthLogout } from "@/lib/api";
 import toast from "react-hot-toast";
+import { useAuthStore } from "@/hooks/use-auth-store";
 import { requireAuth } from "@/hooks/with-auth";
-import { useForm } from "@tanstack/react-form";
+import { patchV1UsersMe, usePostAuthLogout } from "@/lib/api";
 
 export const Route = createFileRoute("/_client/profile")({
   beforeLoad: async ({ location }) => {
@@ -98,7 +98,8 @@ function ProfileComponent() {
             <form.Field
               name="firstName"
               validators={{
-                onChange: ({ value }) => (!value ? "Campo requerido" : undefined),
+                onChange: ({ value }) =>
+                  !value ? "Campo requerido" : undefined,
               }}
             >
               {(field) => (
@@ -137,7 +138,8 @@ function ProfileComponent() {
             <form.Field
               name="lastName"
               validators={{
-                onChange: ({ value }) => (!value ? "Campo requerido" : undefined),
+                onChange: ({ value }) =>
+                  !value ? "Campo requerido" : undefined,
               }}
             >
               {(field) => (
