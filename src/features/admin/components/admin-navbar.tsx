@@ -11,7 +11,7 @@ import { useAuthStore } from "@/hooks/use-auth-store";
 import { postAuthLogout } from "@/lib/api";
 
 const adminNavItems = [
-  { to: "/admin", label: "Dashboard", icon: "dashboard" },
+  { to: "/admin", label: "Dashboard", icon: "bar_chart" },
   {
     to: "/admin/inventory/categories",
     label: "Inventario",
@@ -26,7 +26,6 @@ const adminNavItems = [
   { to: "/admin/staff", label: "Staff", icon: "group" },
   { to: "/admin/branches", label: "Sucursales", icon: "store" },
   { to: "/admin/rewards", label: "Recompensas", icon: "card_giftcard" },
-  { to: "/admin/reports", label: "Reportes", icon: "bar_chart" },
 ];
 
 export function AdminNavbar() {
@@ -61,7 +60,7 @@ export function AdminNavbar() {
           }`}
         >
           {!isCollapsed && (
-            <Link to="/admin" className="flex items-center gap-2">
+            <Link to="/admin/reports" className="flex items-center gap-2">
               <img src="/logo.png" alt="Maree" className="h-8" />
             </Link>
           )}
