@@ -25,6 +25,7 @@ import {
   usePostAuthRegister,
 } from "@/lib/api";
 import type { Actor } from "@/lib/schemas";
+import { BranchSelector } from "../../../features/admin/components/selector-branch";
 
 export const Route = createFileRoute("/admin/staff/")({
   component: RouteComponent,
@@ -505,23 +506,11 @@ function RouteComponent() {
     );
   }
 
-  if (!selectedBranch) {
-    return (
-      <div className="min-h-screen bg-background-light flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-text-main/60">
-            Selecciona una sucursal para ver el staff
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background-light">
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between items-start mb-8">
             <div>
               <h1 className="font-display text-4xl text-text-main font-bold mb-2 uppercase tracking-wide">
                 Staff
@@ -535,144 +524,155 @@ function RouteComponent() {
                 </p>
               ) : (
                 <p className="font-body text-text-main/60">
-                  Gestiona los miembros del equipo
+                  Selecciona una sucursal para ver el staff
                 </p>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setIsFormOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              <span className="text-sm font-medium">Nuevo Staff</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <BranchSelector />
+              <button
+                type="button"
+                onClick={() => setIsFormOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-sm font-medium">Nuevo Staff</span>
+              </button>
+            </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(232,213,213,0.3)] overflow-hidden">
-            {isLoading && staff.length === 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr>
-                      {["Nombre", "Teléfono", "Rol", "Fecha de creación"].map(
-                        (h) => (
-                          <th
-                            key={h}
-                            className="px-6 py-4 text-left text-sm font-semibold text-text-main/70 bg-gray-50 border-b border-gray-100"
-                          >
-                            {h}
-                          </th>
-                        ),
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[...Array(LIMIT)].map((_, i) => (
-                      <tr
-                        // biome-ignore lint/suspicious/noArrayIndexKey: skeleton rows
-                        key={`skeleton-${i}`}
-                        className="border-b border-gray-100 last:border-0"
-                      >
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
-                            <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="h-6 w-20 bg-gray-200 rounded animate-pulse" />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <>
+          {!selectedBranch ? (
+            <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(232,213,213,0.3)] flex items-center justify-center py-24">
+              <p className="text-text-main/60">
+                Selecciona una sucursal para ver el staff
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(232,213,213,0.3)] overflow-hidden">
+              {isLoading && staff.length === 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <tr key={headerGroup.id}>
-                          {headerGroup.headers.map((header) => (
+                      <tr>
+                        {["Nombre", "Teléfono", "Rol", "Fecha de creación"].map(
+                          (h) => (
                             <th
-                              key={header.id}
+                              key={h}
                               className="px-6 py-4 text-left text-sm font-semibold text-text-main/70 bg-gray-50 border-b border-gray-100"
                             >
-                              {header.isPlaceholder
-                                ? null
-                                : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext(),
-                                  )}
+                              {h}
                             </th>
-                          ))}
-                        </tr>
-                      ))}
+                          ),
+                        )}
+                      </tr>
                     </thead>
                     <tbody>
-                      {table.getRowModel().rows.map((row) => (
+                      {[...Array(LIMIT)].map((_, i) => (
                         <tr
-                          key={row.id}
-                          className="cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+                          // biome-ignore lint/suspicious/noArrayIndexKey: skeleton rows
+                          key={`skeleton-${i}`}
+                          className="border-b border-gray-100 last:border-0"
                         >
-                          {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id} className="px-6 py-4">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  window.location.href = `/admin/staff/${row.original.id}`;
-                                }}
-                                className="block w-full text-left"
-                              >
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext(),
-                                )}
-                              </button>
-                            </td>
-                          ))}
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
+                              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="h-6 w-20 bg-gray-200 rounded animate-pulse" />
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                          <tr key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => (
+                              <th
+                                key={header.id}
+                                className="px-6 py-4 text-left text-sm font-semibold text-text-main/70 bg-gray-50 border-b border-gray-100"
+                              >
+                                {header.isPlaceholder
+                                  ? null
+                                  : flexRender(
+                                      header.column.columnDef.header,
+                                      header.getContext(),
+                                    )}
+                              </th>
+                            ))}
+                          </tr>
+                        ))}
+                      </thead>
+                      <tbody>
+                        {table.getRowModel().rows.map((row) => (
+                          <tr
+                            key={row.id}
+                            className="cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+                          >
+                            {row.getVisibleCells().map((cell) => (
+                              <td key={cell.id} className="px-6 py-4">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    window.location.href = `/admin/staff/${row.original.id}`;
+                                  }}
+                                  className="block w-full text-left"
+                                >
+                                  {flexRender(
+                                    cell.column.columnDef.cell,
+                                    cell.getContext(),
+                                  )}
+                                </button>
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-sm text-text-main/60">
-                    Mostrando {start}-{end} de {total}
-                  </span>
-                  {!selectedBranch && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handlePrevPage}
-                        disabled={page === 1 || isLoading}
-                        className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ChevronLeft className="w-5 h-5 text-text-main" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleNextPage}
-                        disabled={page >= totalPages || isLoading}
-                        className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ChevronRight className="w-5 h-5 text-text-main" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+                  <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+                    <span className="text-sm text-text-main/60">
+                      Mostrando {start}-{end} de {total}
+                    </span>
+                    {!selectedBranch && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handlePrevPage}
+                          disabled={page === 1 || isLoading}
+                          className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <ChevronLeft className="w-5 h-5 text-text-main" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleNextPage}
+                          disabled={page >= totalPages || isLoading}
+                          className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <ChevronRight className="w-5 h-5 text-text-main" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
