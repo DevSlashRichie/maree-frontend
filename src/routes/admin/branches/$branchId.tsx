@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
+import { useBranchStore } from "@/hooks/use-branch-store";
 import { useGetV1BranchesId, usePatchV1BranchesId } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/branches/$branchId")({
@@ -171,8 +172,8 @@ function EditBranchModal({
             }
             className="px-4 py-2.5 rounded-xl border border-secondary/20 text-sm font-semibold text-text-main outline-none focus:border-secondary"
           >
-            <option value="open">Abierto</option>
-            <option value="close">Cerrado</option>
+            <option value="open">Open</option>
+            <option value="close">Close</option>
           </select>
         </div>
 
@@ -184,7 +185,7 @@ function EditBranchModal({
             <button
               type="button"
               onClick={addSchedule}
-              className="text-xs font-bold bg-#C4919A"
+              className="text-xs font-bold text-secondary"
             >
               + Agregar
             </button>
@@ -268,6 +269,7 @@ function RouteComponent() {
   const { branchId } = Route.useParams();
   const navigate = useNavigate();
   const { data, isLoading, mutate } = useGetV1BranchesId(branchId);
+  const { setSelectedBranch } = useBranchStore();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   if (isLoading) {
@@ -323,12 +325,14 @@ function RouteComponent() {
 
         <button
           type="button"
-          onClick={() =>
-            navigate({
-              to: "/admin/staff",
-              search: { branchId },
-            })
-          }
+          onClick={() => {
+            setSelectedBranch({
+              id: branch.id,
+              name: branch.name,
+              state: branch.state,
+            });
+            navigate({ to: "/admin/staff" });
+          }}
           className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#2F3437] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#2F3437]/90 transition-colors"
         >
           <Users className="w-3.5 h-3.5" />
@@ -358,7 +362,7 @@ function RouteComponent() {
                   : "bg-gray-100 text-gray-500"
               }`}
             >
-              {isActive ? "Abierto" : "Cerrado"}
+              {isActive ? "Activa" : "Inactiva"}
             </span>
           </div>
 
@@ -368,11 +372,13 @@ function RouteComponent() {
             className="w-full mt-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#2F3437] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#2F3437]/90 transition-colors"
           >
             <Pencil className="w-3 h-3" />
-            Editar
+            Editar información
           </button>
         </div>
 
+        {/* Right card — details */}
         <div className="flex-1 bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
+          {/* Created at row */}
           <div className="flex items-start gap-4 px-6 py-5 border-b border-black/[0.06]">
             <Calendar className="w-4 h-4 text-text-main/30 mt-0.5 shrink-0" />
             <div>

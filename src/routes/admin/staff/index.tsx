@@ -212,7 +212,7 @@ function StaffFormModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Nuevo Staff"
+      title={`Nuevo Staff - Sucursal: ${selectedBranch?.name ?? ""}`}
       description="Completa los datos del nuevo miembro del equipo"
       maxWidth="md"
     >
