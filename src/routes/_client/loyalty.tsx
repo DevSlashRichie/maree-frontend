@@ -8,7 +8,7 @@ import { Modal } from "@/components/ui/modal";
 import { LoyaltyCard } from "@/features/loyalty/components/loyalty-card";
 import { RewardCard } from "@/features/loyalty/components/reward-card";
 import { requireAuth } from "@/hooks/with-auth";
-import { useGetV1Branches, useGetV1Loyalty, useGetV1Rewards, useGetV1RewardsHistory } from "@/lib/api";
+import { useGetV1Branches, useGetV1Loyalty, useGetV1RewardsHistory } from "@/lib/api";
 
 export const Route = createFileRoute("/_client/loyalty")({
   beforeLoad: async ({ location }) => {
@@ -33,7 +33,6 @@ type RewardItem = {
 
 function RouteComponent() {
   const { data, isLoading } = useGetV1Loyalty();
-  const { data: rewardsData, isLoading: rewardsLoading } = useGetV1Rewards();
 
   const [selectedReward, setSelectedReward] = useState<RewardItem | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -55,8 +54,9 @@ function RouteComponent() {
   }, [data]);
 
   const rewards = useMemo<RewardItem[]>(() => {
-    const balance = data?.status === 200 ? Number(data.data.currentBalance) : 0;
-    return (rewardsData?.data ?? []).map((r) => ({
+    if (data?.status !== 200) return [];
+    const balance = Number(data.data.currentBalance);
+    return (data.data.availableRewards ?? []).map((r) => ({
       id: r.id,
       title: r.name,
       description: r.description,
@@ -64,23 +64,25 @@ function RouteComponent() {
       isAvailable: balance >= Number(r.cost),
       points: Number(r.cost),
     }));
-  }, [rewardsData, data]);
+  }, [data]);
 
   const fullHistory = useMemo(() => {
     if (fullHistoryData?.status !== 200) return [];
     return (fullHistoryData.data ?? []).map((item) => ({
       ...item,
-      rewardName: rewardsData?.data?.find((r) => r.id === item.rewardId)?.name ?? item.rewardId,
-      branchName: branchesData?.status === 200
-        ? (branchesData.data.find((b) => b.id === item.branchId)?.name ?? item.branchId)
-        : item.branchId,
+      rewardName: apiHistory.find((r) => r.name)?.name ?? item.rewardId,
+      branchName:
+        branchesData?.status === 200
+          ? (branchesData.data.find((b) => b.id === item.branchId)?.name ?? item.branchId)
+          : item.branchId,
     }));
-  }, [fullHistoryData, rewardsData, branchesData]);
+  }, [fullHistoryData, apiHistory, branchesData]);
 
   const filteredFullHistory = useMemo(() => {
-    return fullHistory.filter((item) =>
-      item.rewardName.toLowerCase().includes(historySearch.toLowerCase()) ||
-      item.branchName.toLowerCase().includes(historySearch.toLowerCase())
+    return fullHistory.filter(
+      (item) =>
+        item.rewardName.toLowerCase().includes(historySearch.toLowerCase()) ||
+        item.branchName.toLowerCase().includes(historySearch.toLowerCase()),
     );
   }, [fullHistory, historySearch]);
 
@@ -120,7 +122,7 @@ function RouteComponent() {
     }
   };
 
-  if (isLoading || rewardsLoading) {
+  if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center font-display text-accent">
         Cargando...
