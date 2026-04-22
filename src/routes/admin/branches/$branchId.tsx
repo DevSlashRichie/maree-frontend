@@ -6,10 +6,12 @@ import {
   Globe,
   MapPin,
   Pencil,
+  Users,
 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
+import { useBranchStore } from "@/hooks/use-branch-store";
 import { useGetV1BranchesId, usePatchV1BranchesId } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/branches/$branchId")({
@@ -199,7 +201,6 @@ function EditBranchModal({
               className="flex items-center gap-2 p-2 rounded-xl border border-secondary/10"
             >
               <select
-                id={`weekday-${s.id}`}
                 value={s.weekday}
                 onChange={(e) =>
                   updateSchedule(s.id, "weekday", Number(e.target.value))
@@ -214,7 +215,6 @@ function EditBranchModal({
               </select>
 
               <input
-                id={`from-${s.id}`}
                 type="time"
                 value={s.fromTime}
                 onChange={(e) =>
@@ -224,7 +224,6 @@ function EditBranchModal({
               />
 
               <input
-                id={`to-${s.id}`}
                 type="time"
                 value={s.toTime}
                 onChange={(e) => updateSchedule(s.id, "toTime", e.target.value)}
@@ -270,14 +269,13 @@ function RouteComponent() {
   const { branchId } = Route.useParams();
   const navigate = useNavigate();
   const { data, isLoading, mutate } = useGetV1BranchesId(branchId);
+  const { setSelectedBranch } = useBranchStore();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-text-main/40 text-sm font-body">
-          Cargando sucursal...
-        </p>
+        <p className="text-text-main/40 text-sm">Cargando sucursal...</p>
       </div>
     );
   }
@@ -285,7 +283,7 @@ function RouteComponent() {
   if (!data || data.status !== 200) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-accent text-sm font-body">{data?.data.message}</p>
+        <p className="text-accent text-sm">{data?.data.message}</p>
       </div>
     );
   }
@@ -303,115 +301,154 @@ function RouteComponent() {
     {} as Record<number, typeof schedules>,
   );
 
+  // Derive initials from branch name
+  const initials = branch.name
+    .split(" ")
+    .slice(0, 2)
+    .map((w: string) => w[0]?.toUpperCase() ?? "")
+    .join("");
+
+  const isActive = branch.state === "active";
+
   return (
-    <div className="p-8 max-w-3xl mx-auto">
-      <button
-        type="button"
-        onClick={() => navigate({ to: "/admin/branches" })}
-        className="flex items-center gap-2 px-5 py-2 rounded-full 
-            bg-[#2F3437] text-white
-            text-xs font-bold uppercase mb-15"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Volver a sucursales
-      </button>
+    <div className="min-h-screen bg-[#F0EDE8] p-8">
+      {/* Top nav row */}
+      <div className="flex items-center justify-between mb-8 max-w-4xl mx-auto">
+        <button
+          type="button"
+          onClick={() => navigate({ to: "/admin/branches" })}
+          className="flex items-center gap-2 text-sm text-text-main/60 hover:text-text-main transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Volver al listado
+        </button>
 
-      <div
-        className="bg-white rounded-t-[50%] rounded-b-3xl shadow-[0_4px_20px_rgba(232,213,213,0.3)]
-          border border-pink-powder p-4 relative mt-12 mb-6"
-      >
-        <div className="relative h-32 -mt-16 arched-img shadow-inner border-4 border-white z-10 bg-secondary/20 flex items-center justify-center">
-          <MapPin className="w-10 h-10 text-secondary/60" />
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedBranch({
+              id: branch.id,
+              name: branch.name,
+              state: branch.state,
+            });
+            navigate({ to: "/admin/staff" });
+          }}
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#2F3437] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#2F3437]/90 transition-colors"
+        >
+          <Users className="w-3.5 h-3.5" />
+          Ver staff
+        </button>
+      </div>
 
-        <div className="pt-6 pb-2 text-center bg-white rounded-b-3xl">
-          <h1 className="font-display text-2xl text-text-main font-bold uppercase tracking-wide mb-1">
-            {branch.name}
-          </h1>
-          <span className="block font-body text-sm text-accent font-bold tracking-widest uppercase mb-2">
-            {branch.state}
-          </span>
-          <p className="font-body text-[11px] text-text-main/30">
-            Creada el{" "}
-            {new Date(branch.createdAt).toLocaleDateString("es-MX", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
+      {/* Two-column layout */}
+      <div className="max-w-4xl mx-auto flex gap-4 items-start">
+        {/* Left card — identity */}
+        <div className="w-64 shrink-0 bg-white rounded-2xl border border-black/[0.06] p-6 flex flex-col items-center gap-3">
+          {/* Avatar */}
+          <div className="w-20 h-20 rounded-full bg-[#E8E4DF] flex items-center justify-center">
+            <span className="text-2xl font-bold text-text-main/60 tracking-tight">
+              {initials || <MapPin className="w-8 h-8 text-text-main/40" />}
+            </span>
+          </div>
+
+          <div className="text-center">
+            <h1 className="text-base font-bold text-text-main leading-tight">
+              {branch.name}
+            </h1>
+            <span
+              className={`inline-block mt-1.5 px-3 py-0.5 rounded-full text-xs font-medium ${
+                isActive
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-100 text-gray-500"
+              }`}
+            >
+              {isActive ? "Activa" : "Inactiva"}
+            </span>
+          </div>
+
           <button
             type="button"
             onClick={() => setIsEditOpen(true)}
-            className="mt-3 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#2F3437] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#2F3437]/90 transition-colors"
+            className="w-full mt-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#2F3437] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#2F3437]/90 transition-colors"
           >
             <Pencil className="w-3 h-3" />
-            Editar
+            Editar información
           </button>
         </div>
-      </div>
 
-      <div
-        className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(232,213,213,0.3)]
-          border border-pink-powder p-6"
-      >
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display text-base font-bold text-text-main uppercase tracking-wide">
-            Horarios
-          </h2>
-          <span
-            className="font-body text-[10px] font-bold uppercase tracking-widest
-            border border-pink-powder text-accent px-3 py-1 rounded-full"
-          >
-            {schedules.length} horario{schedules.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-
-        {schedules.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-28 border-2 border-dashed border-pink-powder rounded-2xl">
-            <Clock className="w-6 h-6 text-text-main/20 mb-2" />
-            <p className="font-body text-text-main/40 text-sm">
-              Sin horarios registrados
-            </p>
+        {/* Right card — details */}
+        <div className="flex-1 bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
+          {/* Created at row */}
+          <div className="flex items-start gap-4 px-6 py-5 border-b border-black/[0.06]">
+            <Calendar className="w-4 h-4 text-text-main/30 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-xs text-text-main/40 mb-0.5">
+                Fecha de creación
+              </p>
+              <p className="text-sm font-medium text-text-main">
+                {new Date(branch.createdAt).toLocaleDateString("es-MX", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+            </div>
           </div>
-        ) : (
-          <div className="space-y-2">
-            {Object.entries(schedulesByDay)
-              .sort(([a], [b]) => Number(a) - Number(b))
-              .map(([day, daySchedules]) => (
-                <div
-                  key={day}
-                  className="flex items-start gap-4 px-4 py-3 rounded-2xl bg-secondary/5
-                    border border-pink-powder/50"
-                >
-                  <div className="flex items-center gap-2 w-28 shrink-0 pt-0.5">
-                    <Calendar className="w-3.5 h-3.5 text-accent shrink-0" />
-                    <span className="font-body text-sm font-bold text-text-main">
-                      {WEEKDAYS[Number(day)]}
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-1.5 flex-1">
-                    {daySchedules.map((schedule) => (
-                      <div
-                        key={schedule.id}
-                        className="flex items-center gap-3"
-                      >
-                        <Clock className="w-3.5 h-3.5 shrink-0 text-text-main/30" />
-                        <span className="font-body text-sm text-text-main/70">
-                          {schedule.fromTime} – {schedule.toTime}
-                        </span>
-                        <div className="flex items-center gap-1 ml-auto">
-                          <Globe className="w-3 h-3 text-text-main/30" />
-                          <span className="font-body text-xs text-text-main/30">
-                            {schedule.timezone}
-                          </span>
-                        </div>
+
+          {/* Schedules section */}
+          <div className="px-6 py-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-text-main/30" />
+                <p className="text-xs text-text-main/40">Horarios</p>
+              </div>
+              <span className="text-xs text-text-main/40 font-medium">
+                {schedules.length} horario{schedules.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+
+            {schedules.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-20 rounded-xl border border-dashed border-black/10">
+                <p className="text-sm text-text-main/30">
+                  Sin horarios registrados
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {Object.entries(schedulesByDay)
+                  .sort(([a], [b]) => Number(a) - Number(b))
+                  .map(([day, daySchedules]) => (
+                    <div
+                      key={day}
+                      className="flex items-start gap-4 px-4 py-3 rounded-xl bg-[#F7F5F2] border border-black/[0.04]"
+                    >
+                      <span className="w-24 shrink-0 text-sm font-semibold text-text-main">
+                        {WEEKDAYS[Number(day)]}
+                      </span>
+                      <div className="flex flex-col gap-1 flex-1">
+                        {daySchedules.map((schedule) => (
+                          <div
+                            key={schedule.id}
+                            className="flex items-center gap-3"
+                          >
+                            <span className="text-sm text-text-main/70">
+                              {schedule.fromTime} – {schedule.toTime}
+                            </span>
+                            <div className="flex items-center gap-1 ml-auto">
+                              <Globe className="w-3 h-3 text-text-main/25" />
+                              <span className="text-xs text-text-main/30">
+                                {schedule.timezone}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       <EditBranchModal
