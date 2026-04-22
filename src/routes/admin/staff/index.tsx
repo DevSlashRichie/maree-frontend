@@ -524,7 +524,7 @@ function RouteComponent() {
                 </p>
               ) : (
                 <p className="font-body text-text-main/60">
-                  Selecciona una sucursal para ver el staff
+                  Selecciona una sucursal para ver staff
                 </p>
               )}
             </div>
@@ -544,7 +544,7 @@ function RouteComponent() {
           {!selectedBranch ? (
             <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(232,213,213,0.3)] flex items-center justify-center py-24">
               <p className="text-text-main/60">
-                Selecciona una sucursal para ver el staff
+                Selecciona una sucursal para ver y crear staff
               </p>
             </div>
           ) : (
