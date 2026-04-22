@@ -25,6 +25,7 @@ const adminNavItems = [
   { to: "/admin/users", label: "Usuarios", icon: "person" },
   { to: "/admin/staff", label: "Staff", icon: "group" },
   { to: "/admin/branches", label: "Sucursales", icon: "store" },
+  { to: "/admin/discounts", label: "Descuentos", icon: "sell" },
   { to: "/admin/rewards", label: "Recompensas", icon: "card_giftcard" },
   { to: "/admin/reports", label: "Reportes", icon: "bar_chart" },
 ];

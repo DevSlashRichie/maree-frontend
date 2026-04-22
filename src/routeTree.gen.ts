@@ -26,11 +26,13 @@ import { Route as ClientCartRouteImport } from './routes/_client/cart'
 import { Route as AdminInventoryRouteRouteImport } from './routes/admin/inventory/route'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminStaffIndexRouteImport } from './routes/admin/staff/index'
+import { Route as AdminDiscountsIndexRouteImport } from './routes/admin/discounts/index'
 import { Route as AdminBranchesIndexRouteImport } from './routes/admin/branches/index'
 import { Route as AdminUsersIdRouteImport } from './routes/admin/users/$id'
 import { Route as AdminStaffIdRouteImport } from './routes/admin/staff/$id'
 import { Route as AdminInventoryProductsRouteImport } from './routes/admin/inventory/products'
 import { Route as AdminInventoryCategoriesRouteImport } from './routes/admin/inventory/categories'
+import { Route as AdminDiscountsIdRouteImport } from './routes/admin/discounts/$id'
 import { Route as AdminBranchesBranchIdRouteImport } from './routes/admin/branches/$branchId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -118,6 +120,11 @@ const AdminStaffIndexRoute = AdminStaffIndexRouteImport.update({
   path: '/staff/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminDiscountsIndexRoute = AdminDiscountsIndexRouteImport.update({
+  id: '/discounts/',
+  path: '/discounts/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminBranchesIndexRoute = AdminBranchesIndexRouteImport.update({
   id: '/branches/',
   path: '/branches/',
@@ -144,6 +151,11 @@ const AdminInventoryCategoriesRoute =
     path: '/categories',
     getParentRoute: () => AdminInventoryRouteRoute,
   } as any)
+const AdminDiscountsIdRoute = AdminDiscountsIdRouteImport.update({
+  id: '/discounts/$id',
+  path: '/discounts/$id',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminBranchesBranchIdRoute = AdminBranchesBranchIdRouteImport.update({
   id: '/branches/$branchId',
   path: '/branches/$branchId',
@@ -167,11 +179,13 @@ export interface FileRoutesByFullPath {
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
+  '/admin/discounts/$id': typeof AdminDiscountsIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
   '/admin/branches/': typeof AdminBranchesIndexRoute
+  '/admin/discounts/': typeof AdminDiscountsIndexRoute
   '/admin/staff/': typeof AdminStaffIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
 }
@@ -191,11 +205,13 @@ export interface FileRoutesByTo {
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin': typeof AdminIndexRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
+  '/admin/discounts/$id': typeof AdminDiscountsIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
   '/admin/branches': typeof AdminBranchesIndexRoute
+  '/admin/discounts': typeof AdminDiscountsIndexRoute
   '/admin/staff': typeof AdminStaffIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
 }
@@ -217,11 +233,13 @@ export interface FileRoutesById {
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
+  '/admin/discounts/$id': typeof AdminDiscountsIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
   '/admin/branches/': typeof AdminBranchesIndexRoute
+  '/admin/discounts/': typeof AdminDiscountsIndexRoute
   '/admin/staff/': typeof AdminStaffIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
 }
@@ -244,11 +262,13 @@ export interface FileRouteTypes {
     | '/admin/rewards'
     | '/admin/'
     | '/admin/branches/$branchId'
+    | '/admin/discounts/$id'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
     | '/admin/users/$id'
     | '/admin/branches/'
+    | '/admin/discounts/'
     | '/admin/staff/'
     | '/admin/users/'
   fileRoutesByTo: FileRoutesByTo
@@ -268,11 +288,13 @@ export interface FileRouteTypes {
     | '/admin/rewards'
     | '/admin'
     | '/admin/branches/$branchId'
+    | '/admin/discounts/$id'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
     | '/admin/users/$id'
     | '/admin/branches'
+    | '/admin/discounts'
     | '/admin/staff'
     | '/admin/users'
   id:
@@ -293,11 +315,13 @@ export interface FileRouteTypes {
     | '/admin/rewards'
     | '/admin/'
     | '/admin/branches/$branchId'
+    | '/admin/discounts/$id'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
     | '/admin/users/$id'
     | '/admin/branches/'
+    | '/admin/discounts/'
     | '/admin/staff/'
     | '/admin/users/'
   fileRoutesById: FileRoutesById
@@ -435,6 +459,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStaffIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/discounts/': {
+      id: '/admin/discounts/'
+      path: '/discounts'
+      fullPath: '/admin/discounts/'
+      preLoaderRoute: typeof AdminDiscountsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/branches/': {
       id: '/admin/branches/'
       path: '/branches'
@@ -470,6 +501,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInventoryCategoriesRouteImport
       parentRoute: typeof AdminInventoryRouteRoute
     }
+    '/admin/discounts/$id': {
+      id: '/admin/discounts/$id'
+      path: '/discounts/$id'
+      fullPath: '/admin/discounts/$id'
+      preLoaderRoute: typeof AdminDiscountsIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/branches/$branchId': {
       id: '/admin/branches/$branchId'
       path: '/branches/$branchId'
@@ -501,9 +539,11 @@ interface AdminRouteRouteChildren {
   AdminRewardsRoute: typeof AdminRewardsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminBranchesBranchIdRoute: typeof AdminBranchesBranchIdRoute
+  AdminDiscountsIdRoute: typeof AdminDiscountsIdRoute
   AdminStaffIdRoute: typeof AdminStaffIdRoute
   AdminUsersIdRoute: typeof AdminUsersIdRoute
   AdminBranchesIndexRoute: typeof AdminBranchesIndexRoute
+  AdminDiscountsIndexRoute: typeof AdminDiscountsIndexRoute
   AdminStaffIndexRoute: typeof AdminStaffIndexRoute
   AdminUsersIndexRoute: typeof AdminUsersIndexRoute
 }
@@ -516,9 +556,11 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminRewardsRoute: AdminRewardsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminBranchesBranchIdRoute: AdminBranchesBranchIdRoute,
+  AdminDiscountsIdRoute: AdminDiscountsIdRoute,
   AdminStaffIdRoute: AdminStaffIdRoute,
   AdminUsersIdRoute: AdminUsersIdRoute,
   AdminBranchesIndexRoute: AdminBranchesIndexRoute,
+  AdminDiscountsIndexRoute: AdminDiscountsIndexRoute,
   AdminStaffIndexRoute: AdminStaffIndexRoute,
   AdminUsersIndexRoute: AdminUsersIndexRoute,
 }
