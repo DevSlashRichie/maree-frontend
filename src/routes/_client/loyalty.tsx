@@ -8,7 +8,11 @@ import { Modal } from "@/components/ui/modal";
 import { LoyaltyCard } from "@/features/loyalty/components/loyalty-card";
 import { RewardCard } from "@/features/loyalty/components/reward-card";
 import { requireAuth } from "@/hooks/with-auth";
-import { useGetV1Branches, useGetV1Loyalty, useGetV1RewardsHistory } from "@/lib/api";
+import {
+  useGetV1Branches,
+  useGetV1Loyalty,
+  useGetV1RewardsHistory,
+} from "@/lib/api";
 
 export const Route = createFileRoute("/_client/loyalty")({
   beforeLoad: async ({ location }) => {
@@ -73,7 +77,8 @@ function RouteComponent() {
       rewardName: apiHistory.find((r) => r.name)?.name ?? item.rewardId,
       branchName:
         branchesData?.status === 200
-          ? (branchesData.data.find((b) => b.id === item.branchId)?.name ?? item.branchId)
+          ? (branchesData.data.find((b) => b.id === item.branchId)?.name ??
+            item.branchId)
           : item.branchId,
     }));
   }, [fullHistoryData, apiHistory, branchesData]);
