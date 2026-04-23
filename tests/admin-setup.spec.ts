@@ -26,6 +26,10 @@ setup("authenticate as admin", async ({ page }) => {
     })(),
   ]);
 
+  // Handle the code input step
+  await page.getByLabel(/Código/i).fill("123456");
+  await page.getByRole("button", { name: /Verificar|Continuar/i }).click();
+
   // Wait for navigation after login
   await page.waitForFunction(() =>
     window.location.pathname.startsWith("/admin"),
