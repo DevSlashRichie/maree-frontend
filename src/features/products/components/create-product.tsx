@@ -536,8 +536,8 @@ export function CreateProduct() {
 
             <div className="flex flex-col gap-2">
               <label
-                  htmlFor="ingredient-search"
-                  className="text-sm font-medium text-text-main"
+                htmlFor="ingredient-search"
+                className="text-sm font-medium text-text-main"
               >
                 Categorias aplicables
               </label>
@@ -546,79 +546,75 @@ export function CreateProduct() {
               </p>
 
               {selectedIngredients.length > 0 && (
-                  <div className="bg-background-light rounded-xl border border-pink-soft/20 px-3">
-                    {selectedIngredients.map((ing) => (
-                        <IngredientRow
-                            key={ing.id}
-                            ingredient={ing}
-                            onQuantityChange={updateQuantity}
-                            onRemovableToggle={toggleRemovable}
-                            onRemove={removeIngredient}
-                        />
-                    ))}
-                  </div>
+                <div className="bg-background-light rounded-xl border border-pink-soft/20 px-3">
+                  {selectedIngredients.map((ing) => (
+                    <IngredientRow
+                      key={ing.id}
+                      ingredient={ing}
+                      onQuantityChange={updateQuantity}
+                      onRemovableToggle={toggleRemovable}
+                      onRemove={removeIngredient}
+                    />
+                  ))}
+                </div>
               )}
 
               {ingredientsLoading ? (
-                  <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
-                    Cargando ingredientes...
-                  </div>
+                <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
+                  Cargando ingredientes...
+                </div>
               ) : ingredientOptions.length === 0 ? (
-                  <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
-                    No se encontraron ingredientes en la base de datos.
-                  </div>
+                <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
+                  No se encontraron ingredientes en la base de datos.
+                </div>
               ) : (
-                  <div className="relative">
-                    <div className="flex items-center gap-2 w-full bg-background-light border border-pink-soft/30 rounded-xl px-4 py-3">
-                      <Plus className="w-3.5 h-3.5 text-text-main/30 shrink-0" />
-                      <input
-                          id="ingredient-search"
-                          type="text"
-                          value={ingredientSearch}
-                          onChange={(e) => {
-                            setIngredientSearch(e.target.value);
-                            setShowIngredientDropdown(true);
-                          }}
-                          onFocus={() => setShowIngredientDropdown(true)}
-                          onBlur={() =>
-                              setTimeout(
-                                  () => setShowIngredientDropdown(false),
-                                  150,
-                              )
-                          }
-                          placeholder="Agregar ingrediente..."
-                          className="flex-1 bg-transparent text-sm text-text-main placeholder:text-text-main/25 focus:outline-none"
-                      />
-                    </div>
-
-                    {showIngredientDropdown &&
-                        filteredIngredients.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 mt-1 bg-card-light border border-pink-soft/30 rounded-xl overflow-hidden z-10">
-                              {filteredIngredients.map((ing) => (
-                                  <button
-                                      key={ing.id}
-                                      type="button"
-                                      onMouseDown={() => addIngredient(ing)}
-                                      className="w-full text-left px-4 py-2.5 text-sm text-text-main hover:bg-pink-soft/10 transition-colors cursor-pointer"
-                                  >
-                              <span className="block font-medium text-text-main">
-                                {ing.productName}
-                              </span>
-                                    <span className="block text-[11px] text-text-main/35">
-                                {ing.categoryName}
-                              </span>
-                                  </button>
-                              ))}
-                            </div>
-                        )}
+                <div className="relative">
+                  <div className="flex items-center gap-2 w-full bg-background-light border border-pink-soft/30 rounded-xl px-4 py-3">
+                    <Plus className="w-3.5 h-3.5 text-text-main/30 shrink-0" />
+                    <input
+                      id="ingredient-search"
+                      type="text"
+                      value={ingredientSearch}
+                      onChange={(e) => {
+                        setIngredientSearch(e.target.value);
+                        setShowIngredientDropdown(true);
+                      }}
+                      onFocus={() => setShowIngredientDropdown(true)}
+                      onBlur={() =>
+                        setTimeout(() => setShowIngredientDropdown(false), 150)
+                      }
+                      placeholder="Agregar ingrediente..."
+                      className="flex-1 bg-transparent text-sm text-text-main placeholder:text-text-main/25 focus:outline-none"
+                    />
                   </div>
+
+                  {showIngredientDropdown && filteredIngredients.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-card-light border border-pink-soft/30 rounded-xl overflow-hidden z-10">
+                      {filteredIngredients.map((ing) => (
+                        <button
+                          key={ing.id}
+                          type="button"
+                          onMouseDown={() => addIngredient(ing)}
+                          className="w-full text-left px-4 py-2.5 text-sm text-text-main hover:bg-pink-soft/10 transition-colors cursor-pointer"
+                        >
+                          <span className="block font-medium text-text-main">
+                            {ing.productName}
+                          </span>
+                          <span className="block text-[11px] text-text-main/35">
+                            {ing.categoryName}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
             <div className="flex flex-col gap-2">
               <label
-                  htmlFor="ingredient-search"
-                  className="text-sm font-medium text-text-main"
+                htmlFor="ingredient-search"
+                className="text-sm font-medium text-text-main"
               >
                 Productos aplicables
               </label>
@@ -627,72 +623,68 @@ export function CreateProduct() {
               </p>
 
               {selectedIngredients.length > 0 && (
-                  <div className="bg-background-light rounded-xl border border-pink-soft/20 px-3">
-                    {selectedIngredients.map((ing) => (
-                        <IngredientRow
-                            key={ing.id}
-                            ingredient={ing}
-                            onQuantityChange={updateQuantity}
-                            onRemovableToggle={toggleRemovable}
-                            onRemove={removeIngredient}
-                        />
-                    ))}
-                  </div>
+                <div className="bg-background-light rounded-xl border border-pink-soft/20 px-3">
+                  {selectedIngredients.map((ing) => (
+                    <IngredientRow
+                      key={ing.id}
+                      ingredient={ing}
+                      onQuantityChange={updateQuantity}
+                      onRemovableToggle={toggleRemovable}
+                      onRemove={removeIngredient}
+                    />
+                  ))}
+                </div>
               )}
 
               {ingredientsLoading ? (
-                  <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
-                    Cargando ingredientes...
-                  </div>
+                <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
+                  Cargando ingredientes...
+                </div>
               ) : ingredientOptions.length === 0 ? (
-                  <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
-                    No se encontraron ingredientes en la base de datos.
-                  </div>
+                <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
+                  No se encontraron ingredientes en la base de datos.
+                </div>
               ) : (
-                  <div className="relative">
-                    <div className="flex items-center gap-2 w-full bg-background-light border border-pink-soft/30 rounded-xl px-4 py-3">
-                      <Plus className="w-3.5 h-3.5 text-text-main/30 shrink-0" />
-                      <input
-                          id="ingredient-search"
-                          type="text"
-                          value={ingredientSearch}
-                          onChange={(e) => {
-                            setIngredientSearch(e.target.value);
-                            setShowIngredientDropdown(true);
-                          }}
-                          onFocus={() => setShowIngredientDropdown(true)}
-                          onBlur={() =>
-                              setTimeout(
-                                  () => setShowIngredientDropdown(false),
-                                  150,
-                              )
-                          }
-                          placeholder="Agregar ingrediente..."
-                          className="flex-1 bg-transparent text-sm text-text-main placeholder:text-text-main/25 focus:outline-none"
-                      />
-                    </div>
-
-                    {showIngredientDropdown &&
-                        filteredIngredients.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 mt-1 bg-card-light border border-pink-soft/30 rounded-xl overflow-hidden z-10">
-                              {filteredIngredients.map((ing) => (
-                                  <button
-                                      key={ing.id}
-                                      type="button"
-                                      onMouseDown={() => addIngredient(ing)}
-                                      className="w-full text-left px-4 py-2.5 text-sm text-text-main hover:bg-pink-soft/10 transition-colors cursor-pointer"
-                                  >
-                              <span className="block font-medium text-text-main">
-                                {ing.productName}
-                              </span>
-                                    <span className="block text-[11px] text-text-main/35">
-                                {ing.categoryName}
-                              </span>
-                                  </button>
-                              ))}
-                            </div>
-                        )}
+                <div className="relative">
+                  <div className="flex items-center gap-2 w-full bg-background-light border border-pink-soft/30 rounded-xl px-4 py-3">
+                    <Plus className="w-3.5 h-3.5 text-text-main/30 shrink-0" />
+                    <input
+                      id="ingredient-search"
+                      type="text"
+                      value={ingredientSearch}
+                      onChange={(e) => {
+                        setIngredientSearch(e.target.value);
+                        setShowIngredientDropdown(true);
+                      }}
+                      onFocus={() => setShowIngredientDropdown(true)}
+                      onBlur={() =>
+                        setTimeout(() => setShowIngredientDropdown(false), 150)
+                      }
+                      placeholder="Agregar ingrediente..."
+                      className="flex-1 bg-transparent text-sm text-text-main placeholder:text-text-main/25 focus:outline-none"
+                    />
                   </div>
+
+                  {showIngredientDropdown && filteredIngredients.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-card-light border border-pink-soft/30 rounded-xl overflow-hidden z-10">
+                      {filteredIngredients.map((ing) => (
+                        <button
+                          key={ing.id}
+                          type="button"
+                          onMouseDown={() => addIngredient(ing)}
+                          className="w-full text-left px-4 py-2.5 text-sm text-text-main hover:bg-pink-soft/10 transition-colors cursor-pointer"
+                        >
+                          <span className="block font-medium text-text-main">
+                            {ing.productName}
+                          </span>
+                          <span className="block text-[11px] text-text-main/35">
+                            {ing.categoryName}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
