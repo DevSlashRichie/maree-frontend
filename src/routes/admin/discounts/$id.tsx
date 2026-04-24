@@ -134,7 +134,9 @@ function DiscountEditModal({
                 <select
                   id={field.name}
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value as any)}
+                  onChange={(e) =>
+                    field.handleChange(e.target.value as "percentage" | "fixed")
+                  }
                   className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary/30 outline-none"
                 >
                   {DISCOUNT_TYPES.map((t) => (
@@ -203,7 +205,9 @@ function DiscountEditModal({
                 <select
                   id={field.name}
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value as any)}
+                  onChange={(e) =>
+                    field.handleChange(e.target.value as "active" | "inactive")
+                  }
                   className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary/30 outline-none"
                 >
                   {DISCOUNT_STATES.map((s) => (

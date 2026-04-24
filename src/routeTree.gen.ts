@@ -35,6 +35,7 @@ import { Route as AdminUsersIdRouteImport } from './routes/admin/users/$id'
 import { Route as AdminStaffIdRouteImport } from './routes/admin/staff/$id'
 import { Route as AdminInventoryProductsRouteImport } from './routes/admin/inventory/products'
 import { Route as AdminInventoryCategoriesRouteImport } from './routes/admin/inventory/categories'
+import { Route as AdminInventoryProductIdRouteImport } from './routes/admin/inventory/$productId'
 import { Route as AdminDiscountsIdRouteImport } from './routes/admin/discounts/$id'
 import { Route as AdminBranchesBranchIdRouteImport } from './routes/admin/branches/$branchId'
 import { Route as ClientOrderOrderIdRouteImport } from './routes/_client/order/$orderId'
@@ -170,6 +171,11 @@ const AdminInventoryCategoriesRoute =
     path: '/categories',
     getParentRoute: () => AdminInventoryRouteRoute,
   } as any)
+const AdminInventoryProductIdRoute = AdminInventoryProductIdRouteImport.update({
+  id: '/$productId',
+  path: '/$productId',
+  getParentRoute: () => AdminInventoryRouteRoute,
+} as any)
 const AdminDiscountsIdRoute = AdminDiscountsIdRouteImport.update({
   id: '/discounts/$id',
   path: '/discounts/$id',
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/order/$orderId': typeof ClientOrderOrderIdRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/discounts/$id': typeof AdminDiscountsIdRoute
+  '/admin/inventory/$productId': typeof AdminInventoryProductIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/order/$orderId': typeof ClientOrderOrderIdRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/discounts/$id': typeof AdminDiscountsIdRoute
+  '/admin/inventory/$productId': typeof AdminInventoryProductIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
@@ -269,6 +277,7 @@ export interface FileRoutesById {
   '/_client/order/$orderId': typeof ClientOrderOrderIdRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/discounts/$id': typeof AdminDiscountsIdRoute
+  '/admin/inventory/$productId': typeof AdminInventoryProductIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
@@ -302,6 +311,7 @@ export interface FileRouteTypes {
     | '/order/$orderId'
     | '/admin/branches/$branchId'
     | '/admin/discounts/$id'
+    | '/admin/inventory/$productId'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
@@ -332,6 +342,7 @@ export interface FileRouteTypes {
     | '/order/$orderId'
     | '/admin/branches/$branchId'
     | '/admin/discounts/$id'
+    | '/admin/inventory/$productId'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
@@ -363,6 +374,7 @@ export interface FileRouteTypes {
     | '/_client/order/$orderId'
     | '/admin/branches/$branchId'
     | '/admin/discounts/$id'
+    | '/admin/inventory/$productId'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
@@ -574,6 +586,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInventoryCategoriesRouteImport
       parentRoute: typeof AdminInventoryRouteRoute
     }
+    '/admin/inventory/$productId': {
+      id: '/admin/inventory/$productId'
+      path: '/$productId'
+      fullPath: '/admin/inventory/$productId'
+      preLoaderRoute: typeof AdminInventoryProductIdRouteImport
+      parentRoute: typeof AdminInventoryRouteRoute
+    }
     '/admin/discounts/$id': {
       id: '/admin/discounts/$id'
       path: '/discounts/$id'
@@ -599,11 +618,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminInventoryRouteRouteChildren {
+  AdminInventoryProductIdRoute: typeof AdminInventoryProductIdRoute
   AdminInventoryCategoriesRoute: typeof AdminInventoryCategoriesRoute
   AdminInventoryProductsRoute: typeof AdminInventoryProductsRoute
 }
 
 const AdminInventoryRouteRouteChildren: AdminInventoryRouteRouteChildren = {
+  AdminInventoryProductIdRoute: AdminInventoryProductIdRoute,
   AdminInventoryCategoriesRoute: AdminInventoryCategoriesRoute,
   AdminInventoryProductsRoute: AdminInventoryProductsRoute,
 }
