@@ -33,21 +33,21 @@ export const Route = createFileRoute("/admin/staff/")({
 
 const ROLES = [
   { value: "administrator", label: "Administrador" },
-  { value: "supervisor", label: "Gerente" },
+  { value: "manager", label: "Gerente" },
   { value: "waiter", label: "Mesero" },
   { value: "cashier", label: "Cajero" },
 ];
 
 const roleColors: Record<string, string> = {
   administrator: "bg-purple-100 text-purple-700",
-  supervisor: "bg-blue-100 text-blue-700",
+  manager: "bg-blue-100 text-blue-700",
   waiter: "bg-green-100 text-green-700",
   cashier: "bg-yellow-100 text-yellow-700",
 };
 
 const roleLabels: Record<string, string> = {
   administrator: "Administrador",
-  supervisor: "Gerente",
+  manager: "Gerente",
   waiter: "Mesero",
   cashier: "Cajero",
 };
