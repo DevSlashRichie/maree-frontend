@@ -5,17 +5,16 @@ import type { Category } from "@/features/products/components/category-picker";
 import { useCartStore } from "@/hooks/use-cart-store";
 import {
   useGetV1ProductsCategories,
-  useGetV1ProductsIngredients,
   useGetV1ProductsVariantId,
+  useGetV1ProductsVariantsAllowed,
 } from "@/lib/api";
 import { formatCentsToDisplay } from "@/lib/money";
 import {
   findCategoryPathById,
-  getVisibleIngredientOptions,
-  type IngredientOption,
   normalizeCategories,
   normalizeText,
 } from "./customize-product-utils.tsx";
+import type { GetV1ProductsVariantsAllowed200Item } from "@/lib/schemas/getV1ProductsVariantsAllowed200Item.ts";
 
 interface Component {
   id: string;
@@ -54,7 +53,9 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   const { data: categoriesResponse, isLoading: categoriesLoading } =
     useGetV1ProductsCategories();
   const { data: ingredientsResponse, isLoading: ingredientsLoading } =
-    useGetV1ProductsIngredients();
+    useGetV1ProductsVariantsAllowed({
+      variantId,
+    });
 
   const [removedComponents, setRemovedComponents] = useState<Set<string>>(
     new Set(),
@@ -77,14 +78,14 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     hasValidVariant
       ? variantResponse?.data
       : {
-          id: "",
-          name: "",
-          image: null,
-          price: "0",
-          categoryId: "",
-          path: [],
-          components: [],
-        }
+        id: "",
+        name: "",
+        image: null,
+        price: "0",
+        categoryId: "",
+        path: [],
+        components: [],
+      }
   ) as {
     id: string;
     name: string;
@@ -97,8 +98,8 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
 
   const categories = hasValidCategories
     ? normalizeCategories(
-        categoriesResponse?.data as Category[] | { categories?: Category[] },
-      )
+      categoriesResponse?.data as Category[] | { categories?: Category[] },
+    )
     : [];
   const categoryPath = findCategoryPathById(categories, variant.categoryId);
   const categoryPathNames = categoryPath.map((node) => node.name);
@@ -113,11 +114,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
 
   const ingredientGroups =
     ingredientsResponse?.status === 200 ? ingredientsResponse.data : [];
-  const ingredientOptions = getVisibleIngredientOptions(
-    ingredientGroups,
-    [],
-    "",
-  );
+  const ingredientOptions = ingredientGroups;
 
   const filteredIngredients = ingredientOptions.filter((ingredient) => {
     const query = normalizeText(ingredientSearch);
@@ -126,7 +123,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     );
     if (alreadyAdded) return false;
     if (!query) return true;
-    return normalizeText(ingredient.productName).includes(query);
+    return normalizeText(ingredient.name).includes(query);
   });
 
   const activeComponents = variant.components.filter(
@@ -151,7 +148,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     });
   };
 
-  const addExtra = (ingredient: IngredientOption) => {
+  const addExtra = (ingredient: GetV1ProductsVariantsAllowed200Item) => {
     setAddedExtras((prev) => {
       const existing = prev.find((extra) => extra.productId === ingredient.id);
       if (existing) {
@@ -166,9 +163,9 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
         ...prev,
         {
           productId: ingredient.id,
-          productName: ingredient.productName,
-          categoryName: ingredient.categoryName,
-          unitPriceCents: ingredient.unitPriceCents,
+          productName: ingredient.name,
+          categoryName: "category",
+          unitPriceCents: Number(ingredient.price),
           quantity: 1,
         },
       ];
@@ -227,9 +224,9 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
           );
           return {
             productId: modifier.id,
-            productName: option?.productName ?? "Ingrediente extra",
-            categoryName: option?.categoryName ?? "Ingrediente",
-            unitPriceCents: option?.unitPriceCents ?? 0,
+            productName: option?.name ?? "Ingrediente extra",
+            categoryName: "Ingrediente",
+            unitPriceCents: option ? Number(option.price) : 0,
             quantity: modifier.delta,
           };
         });
@@ -368,20 +365,18 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
               return (
                 <article
                   key={component.id}
-                  className={`rounded-2xl border px-3 py-3 transition-colors ${
-                    isRemoved
+                  className={`rounded-2xl border px-3 py-3 transition-colors ${isRemoved
                       ? "border-red-200/70 bg-red-50/45"
                       : "border-pink-soft/30 bg-background-light"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p
-                        className={`text-sm m-0 ${
-                          isRemoved
+                        className={`text-sm m-0 ${isRemoved
                             ? "line-through text-text-main/35"
                             : "text-text-main"
-                        }`}
+                          }`}
                       >
                         {component.productName}
                       </p>
@@ -393,11 +388,10 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                       <button
                         type="button"
                         onClick={() => toggleComponent(component)}
-                        className={`rounded-xl px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-all cursor-pointer ${
-                          isRemoved
+                        className={`rounded-xl px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-all cursor-pointer ${isRemoved
                             ? "border border-pink-soft/40 text-text-main/60 bg-background-light"
                             : "border border-red-200 text-red-500 bg-red-50 hover:bg-red-100"
-                        }`}
+                          }`}
                       >
                         {isRemoved ? "Reactivar" : "Quitar"}
                       </button>
@@ -456,11 +450,11 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                       className="w-full text-left px-3 py-2.5 border-b border-pink-soft/10 last:border-b-0 hover:bg-pink-soft/10 transition-colors cursor-pointer"
                     >
                       <span className="block text-sm text-text-main">
-                        {ingredient.productName}
+                        {ingredient.name}
                       </span>
                       <span className="block text-[11px] text-text-main/35">
-                        {ingredient.categoryName} · +$
-                        {formatCentsToDisplay(ingredient.unitPriceCents)}
+                        Categoria · +$
+                        {formatCentsToDisplay(ingredient.price)}
                       </span>
                     </button>
                   ))}
