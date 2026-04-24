@@ -2,28 +2,16 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { OrderColumn } from "@/features/orders/components/order-card-group";
 import { useBranchStore } from "@/hooks/use-branch-store";
-import {
-  patchV1OrdersIdStatus,
-  useGetV1Orders,
-  useGetV1OrdersId,
-} from "@/lib/api.ts";
+import { patchV1OrdersIdStatus, useGetV1Orders } from "@/lib/api.ts";
 import type { GetV1Orders200Item } from "@/lib/schemas";
 import { OrderDetails } from "./order-details";
 
 export function Orders() {
   const { selectedBranch } = useBranchStore();
-  const { data, isLoading, mutate } = useGetV1Orders({
-    swr: {
-      swrKey: () => ["http://localhost:8383/v1/orders", selectedBranch?.id],
-    },
-  });
+  const { data, isLoading, mutate } = useGetV1Orders();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeOrderSummary, setActiveOrderSummary] =
-    useState<GetV1Orders200Item | null>(null);
-
-  const { data: orderDetails, isLoading: isLoadingDetails } = useGetV1OrdersId(
-    activeOrderSummary?.order.id ?? "",
-    { swr: { enabled: !!activeOrderSummary?.order.id } },
+  const [activeOrder, setActiveOrder] = useState<GetV1Orders200Item | null>(
+    null,
   );
 
   const handleStatusChange = async (
@@ -49,7 +37,7 @@ export function Orders() {
       data?.status === 200
         ? (data.data.find((o) => o.order.id === orderId) ?? null)
         : null;
-    setActiveOrderSummary(order);
+    setActiveOrder(order);
     setIsModalOpen(true);
   };
 
@@ -92,17 +80,13 @@ export function Orders() {
         onClose={() => setIsModalOpen(false)}
         title="Orden de usuario"
       >
-        {activeOrderSummary && (
+        {activeOrder && (
           <OrderDetails
-            order={activeOrderSummary}
-            orderDetails={
-              orderDetails?.status === 200 ? orderDetails.data : null
-            }
-            isLoadingDetails={isLoadingDetails}
-            onForward={() => handleForward(activeOrderSummary.order.id)}
+            order={activeOrder}
+            onForward={() => handleForward(activeOrder.order.id)}
             onBackward={
-              activeOrderSummary.order.status !== "pending"
-                ? () => handleBackward(activeOrderSummary.order.id)
+              activeOrder.order.status !== "pending"
+                ? () => handleBackward(activeOrder.order.id)
                 : undefined
             }
           />
