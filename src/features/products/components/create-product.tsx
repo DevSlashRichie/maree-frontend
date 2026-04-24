@@ -1,11 +1,10 @@
-import { ArrowLeft, CheckCircle2, ImagePlus, Plus } from "lucide-react";
+import { ArrowLeft, ImagePlus, Plus } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   useGetV1ProductsIngredients,
   usePostV1ProductsImage,
   usePostV1ProductsProductVariant,
-} from "@/lib/api";
-import { convertToCents, formatCentsToDisplay } from "@/lib/money";
+} from "@/lib/api"; // ORVAL generated hooks
 import type { SelectedIngredient } from "../data/mock";
 import { type Category, CategoryPicker } from "./category-picker";
 import { IngredientRow } from "./ingredient-row";
@@ -86,9 +85,11 @@ export function ProductForm({ initialData }: ProductFormProps) {
     initialData ? initialData.status === "active" : true,
   );
   const [categoryId, setCategoryId] = useState(initialData?.categoryId ?? "");
-  const [price, setPrice] = useState(
-    initialData ? (Number(initialData.price) / 100).toString() : "",
+  // Price is stored in cents internally
+  const [priceCents, setPriceCents] = useState(
+    initialData ? Number(initialData.price) : 0,
   );
+
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialData?.image ?? null,
   );
@@ -112,8 +113,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
   const [ingredientSearch, setIngredientSearch] = useState("");
   const [showIngredientDropdown, setShowIngredientDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [_submitted, setSubmitted] = useState(false);
+  const [_formError, setFormError] = useState<string | null>(null);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const { data: ingredientsResponse, isLoading: ingredientsLoading } =
@@ -131,7 +132,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
     isIngredientCategoryName(step.name),
   );
 
-  const ingredientIdSet = useMemo(
+  const _ingredientIdSet = useMemo(
     () => new Set(ingredientOptions.map((i) => i.id)),
     [ingredientOptions],
   );
@@ -174,6 +175,14 @@ export function ProductForm({ initialData }: ProductFormProps) {
     setShowIngredientDropdown(false);
   };
 
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow digits
+    if (/^\d*$/.test(value)) {
+      setPriceCents(value ? parseInt(value, 10) : 0);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isEditing) {
@@ -199,7 +208,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
         description,
         status: isActive ? "active" : "inactive",
         categoryId,
-        price: convertToCents(parseFloat(price)),
+        price: priceCents * 100, // Convert to cents for API
         imageUrl: finalImageUrl,
         ingredients: selectedIngredients.map((i) => ({
           id: i.id,
@@ -314,11 +323,9 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 <input
                   id="price"
                   type="text"
-                  value={price}
-                  onChange={(e) =>
-                    /^\d*\.?\d*$/.test(e.target.value) &&
-                    setPrice(e.target.value)
-                  }
+                  value={priceCents}
+                  onChange={handlePriceChange}
+                  placeholder="80"
                   required
                   className="w-full bg-background-light border border-pink-soft/30 rounded-xl pl-8 pr-4 py-3 text-sm focus:outline-none"
                 />
@@ -458,9 +465,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
               <div className="flex justify-between border-t border-pink-soft/10 pt-3 text-base">
                 <span className="font-medium text-text-main">Total</span>
                 <span className="font-bold text-text-main">
-                  {price
-                    ? formatCentsToDisplay(convertToCents(parseFloat(price)))
-                    : "$0.00"}
+                  {priceCents || "0"}
                 </span>
               </div>
             </div>
@@ -472,7 +477,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
               {isSubmitting
                 ? "Procesando..."
                 : isEditing
-                  ? "Actualizar (Pronto)"
+                  ? "Actualizar"
                   : "Crear Producto"}
             </button>
           </div>
