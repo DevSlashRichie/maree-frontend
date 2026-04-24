@@ -1,15 +1,14 @@
+import { ArrowRight, MapPin, ShoppingBag, Utensils } from "lucide-react";
 import { useState } from "react";
-import { Utensils, ShoppingBag, ArrowRight, MapPin } from "lucide-react";
 
 export default function OrderTypeSelector() {
   const [orderType, setOrderType] = useState<"mesa" | "recoger">("mesa");
-  
+
   // This could later come from a prop or a global state
   const branchName = "Sucursal Querétaro";
 
   return (
     <div className="w-full max-w-md mx-auto bg-card-light rounded-[2.5rem] shadow-xl p-6 sm:p-10 flex flex-col items-center relative">
-      
       {/* Branch Location Badge */}
       <div className="flex items-center gap-1.5 bg-secondary/50 px-4 py-1.5 rounded-full mb-6 border border-primary/5">
         <MapPin className="w-3.5 h-3.5 text-accent" />
