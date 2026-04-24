@@ -270,4 +270,3 @@ function ProductsComponent() {
     </div>
   );
 }
-
