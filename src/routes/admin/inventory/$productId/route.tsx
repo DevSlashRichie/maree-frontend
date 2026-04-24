@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ProductForm } from "@/features/products/components/create-product";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin/inventory/$productId")({
   loader: async ({ params }) => {
@@ -33,15 +32,5 @@ export const Route = createFileRoute("/admin/inventory/$productId")({
       ),
     };
   },
-  component: EditProductPage,
+  component: () => <Outlet />,
 });
-
-function EditProductPage() {
-  const data = Route.useLoaderData();
-
-  return (
-    <div className="py-6">
-      <ProductForm initialData={data} />
-    </div>
-  );
-}

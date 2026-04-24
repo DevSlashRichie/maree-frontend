@@ -28,7 +28,7 @@ type Variant = {
   id: string;
   name: string;
   description: string | null;
-  price: string | number; // Cambiado para permitir operaciones
+  price: string | number; 
   image: string | null;
   productId: string;
   createdAt: string;
@@ -54,9 +54,8 @@ const columns = [
           <Package className="w-5 h-5 text-secondary" />
         </div>
         <div className="flex flex-col min-w-0">
-          {/* Nombre con Link y efecto Hover */}
           <Link
-            to="/admin/inventory/$productId"
+            to="/admin/inventory/$productId/detail"
             params={{ productId: info.row.original.id }}
             className="font-medium text-text-main truncate hover:text-secondary hover:underline transition-all cursor-pointer"
           >
@@ -80,7 +79,6 @@ const columns = [
   columnHelper.accessor("price", {
     header: "Precio",
     cell: (info) => {
-      // Convertimos a número y dividimos entre 100
       const priceInUnits = Number(info.getValue()) / 100;
       return (
         <span className="font-semibold text-text-main text-sm">

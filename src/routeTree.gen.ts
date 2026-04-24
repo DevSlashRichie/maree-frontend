@@ -35,10 +35,12 @@ import { Route as AdminUsersIdRouteImport } from './routes/admin/users/$id'
 import { Route as AdminStaffIdRouteImport } from './routes/admin/staff/$id'
 import { Route as AdminInventoryProductsRouteImport } from './routes/admin/inventory/products'
 import { Route as AdminInventoryCategoriesRouteImport } from './routes/admin/inventory/categories'
-import { Route as AdminInventoryProductIdRouteImport } from './routes/admin/inventory/$productId'
 import { Route as AdminDiscountsIdRouteImport } from './routes/admin/discounts/$id'
 import { Route as AdminBranchesBranchIdRouteImport } from './routes/admin/branches/$branchId'
 import { Route as ClientOrderOrderIdRouteImport } from './routes/_client/order/$orderId'
+import { Route as AdminInventoryProductIdRouteRouteImport } from './routes/admin/inventory/$productId/route'
+import { Route as AdminInventoryProductIdIndexRouteImport } from './routes/admin/inventory/$productId/index'
+import { Route as AdminInventoryProductIdDetailRouteImport } from './routes/admin/inventory/$productId/detail'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -171,11 +173,6 @@ const AdminInventoryCategoriesRoute =
     path: '/categories',
     getParentRoute: () => AdminInventoryRouteRoute,
   } as any)
-const AdminInventoryProductIdRoute = AdminInventoryProductIdRouteImport.update({
-  id: '/$productId',
-  path: '/$productId',
-  getParentRoute: () => AdminInventoryRouteRoute,
-} as any)
 const AdminDiscountsIdRoute = AdminDiscountsIdRouteImport.update({
   id: '/discounts/$id',
   path: '/discounts/$id',
@@ -191,6 +188,24 @@ const ClientOrderOrderIdRoute = ClientOrderOrderIdRouteImport.update({
   path: '/order/$orderId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInventoryProductIdRouteRoute =
+  AdminInventoryProductIdRouteRouteImport.update({
+    id: '/$productId',
+    path: '/$productId',
+    getParentRoute: () => AdminInventoryRouteRoute,
+  } as any)
+const AdminInventoryProductIdIndexRoute =
+  AdminInventoryProductIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminInventoryProductIdRouteRoute,
+  } as any)
+const AdminInventoryProductIdDetailRoute =
+  AdminInventoryProductIdDetailRouteImport.update({
+    id: '/detail',
+    path: '/detail',
+    getParentRoute: () => AdminInventoryProductIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -210,10 +225,10 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/inventory/$productId': typeof AdminInventoryProductIdRouteRouteWithChildren
   '/order/$orderId': typeof ClientOrderOrderIdRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/discounts/$id': typeof AdminDiscountsIdRoute
-  '/admin/inventory/$productId': typeof AdminInventoryProductIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
@@ -223,6 +238,8 @@ export interface FileRoutesByFullPath {
   '/admin/discounts/': typeof AdminDiscountsIndexRoute
   '/admin/staff/': typeof AdminStaffIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/admin/inventory/$productId/detail': typeof AdminInventoryProductIdDetailRoute
+  '/admin/inventory/$productId/': typeof AdminInventoryProductIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -244,7 +261,6 @@ export interface FileRoutesByTo {
   '/order/$orderId': typeof ClientOrderOrderIdRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/discounts/$id': typeof AdminDiscountsIdRoute
-  '/admin/inventory/$productId': typeof AdminInventoryProductIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
@@ -254,6 +270,8 @@ export interface FileRoutesByTo {
   '/admin/discounts': typeof AdminDiscountsIndexRoute
   '/admin/staff': typeof AdminStaffIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
+  '/admin/inventory/$productId/detail': typeof AdminInventoryProductIdDetailRoute
+  '/admin/inventory/$productId': typeof AdminInventoryProductIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -274,10 +292,10 @@ export interface FileRoutesById {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/inventory/$productId': typeof AdminInventoryProductIdRouteRouteWithChildren
   '/_client/order/$orderId': typeof ClientOrderOrderIdRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/discounts/$id': typeof AdminDiscountsIdRoute
-  '/admin/inventory/$productId': typeof AdminInventoryProductIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
@@ -287,6 +305,8 @@ export interface FileRoutesById {
   '/admin/discounts/': typeof AdminDiscountsIndexRoute
   '/admin/staff/': typeof AdminStaffIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/admin/inventory/$productId/detail': typeof AdminInventoryProductIdDetailRoute
+  '/admin/inventory/$productId/': typeof AdminInventoryProductIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -308,10 +328,10 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/rewards'
     | '/admin/'
+    | '/admin/inventory/$productId'
     | '/order/$orderId'
     | '/admin/branches/$branchId'
     | '/admin/discounts/$id'
-    | '/admin/inventory/$productId'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
@@ -321,6 +341,8 @@ export interface FileRouteTypes {
     | '/admin/discounts/'
     | '/admin/staff/'
     | '/admin/users/'
+    | '/admin/inventory/$productId/detail'
+    | '/admin/inventory/$productId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -342,7 +364,6 @@ export interface FileRouteTypes {
     | '/order/$orderId'
     | '/admin/branches/$branchId'
     | '/admin/discounts/$id'
-    | '/admin/inventory/$productId'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
@@ -352,6 +373,8 @@ export interface FileRouteTypes {
     | '/admin/discounts'
     | '/admin/staff'
     | '/admin/users'
+    | '/admin/inventory/$productId/detail'
+    | '/admin/inventory/$productId'
   id:
     | '__root__'
     | '/'
@@ -371,10 +394,10 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/rewards'
     | '/admin/'
+    | '/admin/inventory/$productId'
     | '/_client/order/$orderId'
     | '/admin/branches/$branchId'
     | '/admin/discounts/$id'
-    | '/admin/inventory/$productId'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
@@ -384,6 +407,8 @@ export interface FileRouteTypes {
     | '/admin/discounts/'
     | '/admin/staff/'
     | '/admin/users/'
+    | '/admin/inventory/$productId/detail'
+    | '/admin/inventory/$productId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -586,13 +611,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInventoryCategoriesRouteImport
       parentRoute: typeof AdminInventoryRouteRoute
     }
-    '/admin/inventory/$productId': {
-      id: '/admin/inventory/$productId'
-      path: '/$productId'
-      fullPath: '/admin/inventory/$productId'
-      preLoaderRoute: typeof AdminInventoryProductIdRouteImport
-      parentRoute: typeof AdminInventoryRouteRoute
-    }
     '/admin/discounts/$id': {
       id: '/admin/discounts/$id'
       path: '/discounts/$id'
@@ -614,17 +632,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientOrderOrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/inventory/$productId': {
+      id: '/admin/inventory/$productId'
+      path: '/$productId'
+      fullPath: '/admin/inventory/$productId'
+      preLoaderRoute: typeof AdminInventoryProductIdRouteRouteImport
+      parentRoute: typeof AdminInventoryRouteRoute
+    }
+    '/admin/inventory/$productId/': {
+      id: '/admin/inventory/$productId/'
+      path: '/'
+      fullPath: '/admin/inventory/$productId/'
+      preLoaderRoute: typeof AdminInventoryProductIdIndexRouteImport
+      parentRoute: typeof AdminInventoryProductIdRouteRoute
+    }
+    '/admin/inventory/$productId/detail': {
+      id: '/admin/inventory/$productId/detail'
+      path: '/detail'
+      fullPath: '/admin/inventory/$productId/detail'
+      preLoaderRoute: typeof AdminInventoryProductIdDetailRouteImport
+      parentRoute: typeof AdminInventoryProductIdRouteRoute
+    }
   }
 }
 
+interface AdminInventoryProductIdRouteRouteChildren {
+  AdminInventoryProductIdDetailRoute: typeof AdminInventoryProductIdDetailRoute
+  AdminInventoryProductIdIndexRoute: typeof AdminInventoryProductIdIndexRoute
+}
+
+const AdminInventoryProductIdRouteRouteChildren: AdminInventoryProductIdRouteRouteChildren =
+  {
+    AdminInventoryProductIdDetailRoute: AdminInventoryProductIdDetailRoute,
+    AdminInventoryProductIdIndexRoute: AdminInventoryProductIdIndexRoute,
+  }
+
+const AdminInventoryProductIdRouteRouteWithChildren =
+  AdminInventoryProductIdRouteRoute._addFileChildren(
+    AdminInventoryProductIdRouteRouteChildren,
+  )
+
 interface AdminInventoryRouteRouteChildren {
-  AdminInventoryProductIdRoute: typeof AdminInventoryProductIdRoute
+  AdminInventoryProductIdRouteRoute: typeof AdminInventoryProductIdRouteRouteWithChildren
   AdminInventoryCategoriesRoute: typeof AdminInventoryCategoriesRoute
   AdminInventoryProductsRoute: typeof AdminInventoryProductsRoute
 }
 
 const AdminInventoryRouteRouteChildren: AdminInventoryRouteRouteChildren = {
-  AdminInventoryProductIdRoute: AdminInventoryProductIdRoute,
+  AdminInventoryProductIdRouteRoute:
+    AdminInventoryProductIdRouteRouteWithChildren,
   AdminInventoryCategoriesRoute: AdminInventoryCategoriesRoute,
   AdminInventoryProductsRoute: AdminInventoryProductsRoute,
 }
