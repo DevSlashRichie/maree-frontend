@@ -145,11 +145,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
     isIngredientCategoryName(step.name),
   );
 
-  const _ingredientIdSet = useMemo(
-    () => new Set(ingredientOptions.map((i) => i.id)),
-    [ingredientOptions],
-  );
-
   useEffect(() => {
     if (isIngredient) {
       setSelectedIngredients([]);
@@ -214,7 +209,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
       const body = {
         name,
         description,
-        status: isActive ? "active" : "inactive",
+        status: (isActive ? "active" : "inactive") as "active" | "inactive",
         categoryId,
         price: priceCents * 100,
         imageUrl: finalImageUrl,
