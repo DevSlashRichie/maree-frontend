@@ -117,6 +117,7 @@ const columns = [
           <Pencil className="w-4 h-4" />
         </Link>
         <button
+          type="button"
           onClick={() => console.log("Delete", info.row.original.id)}
           className="p-2 hover:bg-red-50 rounded-lg transition-colors text-text-main/40 hover:text-red-500"
         >
