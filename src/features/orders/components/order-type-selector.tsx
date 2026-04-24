@@ -1,14 +1,27 @@
+<<<<<<< HEAD
 import { ArrowRight, MapPin, ShoppingBag, Utensils } from "lucide-react";
 import { useState } from "react";
 
 export default function OrderTypeSelector() {
   const [orderType, setOrderType] = useState<"mesa" | "recoger">("mesa");
 
+=======
+import { useState } from "react";
+import { Utensils, ShoppingBag, ArrowRight, MapPin } from "lucide-react";
+
+export default function OrderTypeSelector() {
+  const [orderType, setOrderType] = useState<"mesa" | "recoger">("mesa");
+  
+>>>>>>> 4b1cd659f6180ef292d250b4f3982a7d60060aec
   // This could later come from a prop or a global state
   const branchName = "Sucursal Querétaro";
 
   return (
     <div className="w-full max-w-md mx-auto bg-card-light rounded-[2.5rem] shadow-xl p-6 sm:p-10 flex flex-col items-center relative">
+<<<<<<< HEAD
+=======
+      
+>>>>>>> 4b1cd659f6180ef292d250b4f3982a7d60060aec
       {/* Branch Location Badge */}
       <div className="flex items-center gap-1.5 bg-secondary/50 px-4 py-1.5 rounded-full mb-6 border border-primary/5">
         <MapPin className="w-3.5 h-3.5 text-accent" />
@@ -24,7 +37,10 @@ export default function OrderTypeSelector() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mb-10">
         {/* Dine-in Option */}
         <button
+<<<<<<< HEAD
           type="button"
+=======
+>>>>>>> 4b1cd659f6180ef292d250b4f3982a7d60060aec
           onClick={() => setOrderType("mesa")}
           className={`relative p-5 sm:p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
             orderType === "mesa"
@@ -50,7 +66,10 @@ export default function OrderTypeSelector() {
 
         {/* Pickup Option */}
         <button
+<<<<<<< HEAD
           type="button"
+=======
+>>>>>>> 4b1cd659f6180ef292d250b4f3982a7d60060aec
           onClick={() => setOrderType("recoger")}
           className={`relative p-5 sm:p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
             orderType === "recoger"
@@ -76,13 +95,21 @@ export default function OrderTypeSelector() {
       </div>
 
       {/* Action Button */}
+<<<<<<< HEAD
       <button
         type="button"
         className="w-full bg-primary text-white py-4.5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-charcoal transition-colors shadow-lg active:scale-[0.98]"
       >
+=======
+      <button className="w-full bg-primary text-white py-4.5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-charcoal transition-colors shadow-lg active:scale-[0.98]">
+>>>>>>> 4b1cd659f6180ef292d250b4f3982a7d60060aec
         <span className="tracking-wide uppercase text-sm">Ordenar ahora</span>
         <ArrowRight className="w-5 h-5" />
       </button>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 4b1cd659f6180ef292d250b4f3982a7d60060aec
