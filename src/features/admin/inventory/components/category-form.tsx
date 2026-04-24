@@ -57,9 +57,9 @@ export function CategoryForm({
     },
   });
 
-  const aux = (input: any) => {
-    return input.flatMap((node: any) => [node, ...aux(node.children ?? [])]);
-  };
+  type CategoryNode = { id: string; children?: CategoryNode[] };
+  const aux = (input: CategoryNode[]): CategoryNode[] =>
+    input.flatMap((node) => [node, ...aux(node.children ?? [])]);
 
   // Filter out the current category from being its own parent
   const availableParents = aux(categories).filter(

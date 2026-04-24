@@ -24,6 +24,7 @@ export default function OrderTypeSelector() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mb-10">
         {/* Dine-in Option */}
         <button
+          type="button"
           onClick={() => setOrderType("mesa")}
           className={`relative p-5 sm:p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
             orderType === "mesa"
@@ -49,6 +50,7 @@ export default function OrderTypeSelector() {
 
         {/* Pickup Option */}
         <button
+          type="button"
           onClick={() => setOrderType("recoger")}
           className={`relative p-5 sm:p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
             orderType === "recoger"
@@ -74,7 +76,10 @@ export default function OrderTypeSelector() {
       </div>
 
       {/* Action Button */}
-      <button className="w-full bg-primary text-white py-4.5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-charcoal transition-colors shadow-lg active:scale-[0.98]">
+      <button
+        type="button"
+        className="w-full bg-primary text-white py-4.5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-charcoal transition-colors shadow-lg active:scale-[0.98]"
+      >
         <span className="tracking-wide uppercase text-sm">Ordenar ahora</span>
         <ArrowRight className="w-5 h-5" />
       </button>

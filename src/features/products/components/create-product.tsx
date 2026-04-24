@@ -125,11 +125,10 @@ export function ProductForm({ initialData }: ProductFormProps) {
   const [showIngredientDropdown, setShowIngredientDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [_formError, setFormError] = useState<string | null>(null);
 
   const fileRef = useRef<HTMLInputElement>(null);
-  const { data: ingredientsResponse, isLoading: ingredientsLoading } =
-    useGetV1ProductsIngredients();
+  const { data: ingredientsResponse } = useGetV1ProductsIngredients();
   const { trigger: uploadImage } = usePostV1ProductsImage();
   const { trigger: createProduct } = usePostV1ProductsProductVariant();
   const { trigger: updateProduct } = usePutV1ProductsProductVariantId(
@@ -288,9 +287,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
         >
           <div className="bg-card-light rounded-3xl border border-pink-soft/40 p-6 flex flex-col gap-6 shadow-sm">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-text-main">
-                Categoría
-              </label>
+              <p className="text-sm font-medium text-text-main">Categoría</p>
               <CategoryPicker
                 value={categoryId}
                 onChange={setCategoryId}
@@ -373,10 +370,14 @@ export function ProductForm({ initialData }: ProductFormProps) {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-text-main">
+              <label
+                htmlFor="product-image"
+                className="text-sm font-medium text-text-main"
+              >
                 Imagen
               </label>
               <input
+                id="product-image"
                 ref={fileRef}
                 type="file"
                 accept="image/*"
@@ -407,9 +408,9 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
             {categoryId && !isIngredient && (
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-text-main">
+                <p className="text-sm font-medium text-text-main">
                   Ingredientes
-                </label>
+                </p>
                 {selectedIngredients.length > 0 && (
                   <div className="bg-background-light rounded-xl border border-pink-soft/20 px-3">
                     {selectedIngredients.map((ing) => (
@@ -899,10 +900,14 @@ export function CreateProduct() {
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-text-main">
+              <label
+                htmlFor="create-product-image"
+                className="text-sm font-medium text-text-main"
+              >
                 Imagen
               </label>
               <input
+                id="create-product-image"
                 ref={fileRef}
                 type="file"
                 accept="image/*"
@@ -937,9 +942,9 @@ export function CreateProduct() {
             </div>
             {categoryId && !isIngredient && (
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-text-main">
+                <p className="text-sm font-medium text-text-main">
                   Ingredientes
-                </label>
+                </p>
                 {selectedIngredients.length > 0 && (
                   <div className="bg-background-light rounded-xl border border-pink-soft/20 px-3">
                     {selectedIngredients.map((ing) => (
