@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useGetV1ProductsVariants } from "@/lib/api";
+import { formatPrice } from "@/lib/money";
 
 export const Route = createFileRoute("/admin/inventory/products")({
   component: ProductsComponent,
@@ -75,7 +76,7 @@ const columns = [
     header: "Precio",
     cell: (info) => (
       <span className="font-semibold text-text-main text-sm">
-        ${parseFloat(info.getValue()).toLocaleString()}
+        {formatPrice(info.getValue())}
       </span>
     ),
   }),
@@ -111,7 +112,7 @@ const columns = [
       <div className="flex items-center gap-2">
         <Link
           to={"/admin/inventory/$productId" as any}
-          params={{ productId: info.row.original.productId } as any}
+          params={{ productId: info.row.original.id } as any}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-text-main/40 hover:text-secondary"
         >
           <Pencil className="w-4 h-4" />

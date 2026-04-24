@@ -11,7 +11,27 @@ export const Route = createFileRoute("/admin/inventory/$productId")({
       throw new Error("No se pudo encontrar el producto");
     }
 
-    return response.json();
+    const variant = await response.json();
+
+    return {
+      ...variant,
+      components: variant.components.map(
+        (c: {
+          id: string;
+          productId: string;
+          productName: string;
+          quantity: number;
+          isRemovable: boolean;
+        }) => ({
+          id: c.id,
+          productId: c.productId,
+          name: c.productName,
+          productName: c.productName,
+          quantity: c.quantity,
+          isRemovable: c.isRemovable,
+        }),
+      ),
+    };
   },
   component: EditProductPage,
 });
