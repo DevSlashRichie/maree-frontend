@@ -1,22 +1,11 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
-import toast from "react-hot-toast";
 import { ItemCard } from "@/features/cart/components/item-card.tsx";
 import { TotalCard } from "@/features/cart/components/total-card.tsx";
 import { useCartStore } from "@/hooks/use-cart-store";
-import { usePostV1Orders } from "@/lib/api";
-import type { PostV1OrdersBody } from "@/lib/schemas";
 
-// remempber to edit this later
-// imagine if this goes into production later
-// imagine if mauricio reads this code and thinks
-// "what sort of mess of a project did i receive?"
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1519676867240-f03562e64548?w=160&h=160&fit=crop";
-
-const DEFAULT_BRANCH_ID =
-  import.meta.env.VITE_DEFAULT_BRANCH_ID ??
-  "1c43d953-885e-4bb0-9d96-9e763be00428";
 
 function buildItemDescription(modifiers: { delta: number }[], notes: string) {
   const removedCount = modifiers
@@ -41,52 +30,18 @@ export function Cart() {
   const addOneToItem = useCartStore((state) => state.addOneToItem);
   const removeOneFromItem = useCartStore((state) => state.removeOneFromItem);
   const removeItem = useCartStore((state) => state.removeItem);
-  const clearCart = useCartStore((state) => state.clearCart);
-  const { trigger: postOrder, isMutating: isPostingOrder } = usePostV1Orders();
 
   const totalCents = items.reduce(
     (sum, item) => sum + (item.unitPriceCents ?? 0) * item.quantity,
     0,
   );
 
-  const handleConfirmOrder = async () => {
+  const handleConfirmOrder = () => {
     if (items.length === 0) {
-      toast.error("Tu carrito esta vacio");
       return;
     }
 
-    if (items.some((item) => !item.variantId)) {
-      toast.error("Hay productos invalidos en el carrito");
-      return;
-    }
-
-    console.log(items);
-
-    const payload: PostV1OrdersBody = {
-      items: items.map((item) => ({
-        id: item.variantId,
-        quantity: item.quantity,
-        notes: item.itemNotes?.trim() || undefined,
-        modifiers: item.modifiers,
-      })),
-      totalPriceCents: totalCents,
-      branchId: DEFAULT_BRANCH_ID,
-    };
-
-    try {
-      const response = await postOrder(payload);
-
-      if (response.status === 201) {
-        clearCart();
-        toast.success("Pedido confirmado");
-        navigate({ to: "/menu" });
-        return;
-      }
-
-      toast.error("No se pudo confirmar el pedido");
-    } catch {
-      toast.error("No se pudo confirmar el pedido");
-    }
+    navigate({ to: "/order-setup" });
   };
 
   return (
@@ -161,7 +116,7 @@ export function Cart() {
         <TotalCard
           totalCents={totalCents}
           onConfirm={handleConfirmOrder}
-          isSubmitting={isPostingOrder}
+          isSubmitting={false}
           isDisabled={items.length === 0}
         />
       </div>
