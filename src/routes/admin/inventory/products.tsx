@@ -110,7 +110,7 @@ const columns = [
     cell: (info) => (
       <div className="flex items-center gap-2">
         <Link
-          to={"/admin/products/$productId" as any}
+          to={"/admin/inventory/$productId" as any}
           params={{ productId: info.row.original.productId } as any}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-text-main/40 hover:text-secondary"
         >
