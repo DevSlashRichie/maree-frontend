@@ -1,20 +1,14 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Check, Minus, Plus, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { Category } from "@/features/products/components/category-picker";
 import { useCartStore } from "@/hooks/use-cart-store";
 import {
-  useGetV1ProductsCategories,
   useGetV1ProductsVariantId,
   useGetV1ProductsVariantsAllowed,
 } from "@/lib/api";
 import { formatCentsToDisplay } from "@/lib/money";
-import {
-  findCategoryPathById,
-  normalizeCategories,
-  normalizeText,
-} from "./customize-product-utils.tsx";
 import type { GetV1ProductsVariantsAllowed200Item } from "@/lib/schemas/getV1ProductsVariantsAllowed200Item.ts";
+import { normalizeText } from "./customize-product-utils.tsx";
 
 interface Component {
   id: string;
@@ -27,7 +21,6 @@ interface Component {
 interface SelectedExtra {
   productId: string;
   productName: string;
-  categoryName: string;
   unitPriceCents: number;
   quantity: number;
 }
@@ -50,8 +43,6 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   const isEditing = Boolean(itemId && editingItem);
   const { data: variantResponse, isLoading: variantLoading } =
     useGetV1ProductsVariantId(resolvedVariantId);
-  const { data: categoriesResponse, isLoading: categoriesLoading } =
-    useGetV1ProductsCategories();
   const { data: ingredientsResponse, isLoading: ingredientsLoading } =
     useGetV1ProductsVariantsAllowed({
       variantId,
@@ -70,22 +61,19 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   const hasValidVariant = Boolean(
     variantResponse && variantResponse.status === 200,
   );
-  const hasValidCategories = Boolean(
-    categoriesResponse && categoriesResponse.status === 200,
-  );
 
   const variant = (
     hasValidVariant
       ? variantResponse?.data
       : {
-        id: "",
-        name: "",
-        image: null,
-        price: "0",
-        categoryId: "",
-        path: [],
-        components: [],
-      }
+          id: "",
+          name: "",
+          image: null,
+          price: "0",
+          categoryId: "",
+          path: [],
+          components: [],
+        }
   ) as {
     id: string;
     name: string;
@@ -95,22 +83,6 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     path?: string[];
     components: Component[];
   };
-
-  const categories = hasValidCategories
-    ? normalizeCategories(
-      categoriesResponse?.data as Category[] | { categories?: Category[] },
-    )
-    : [];
-  const categoryPath = findCategoryPathById(categories, variant.categoryId);
-  const categoryPathNames = categoryPath.map((node) => node.name);
-  const resolvedPath =
-    Array.isArray(variant.path) && variant.path.length > 0
-      ? variant.path
-      : categoryPathNames;
-
-  const currentCategoryName = categoryPath.at(-1)?.name ?? "Sin categoría";
-  const categoryLabel =
-    resolvedPath.length > 0 ? resolvedPath.join(" / ") : currentCategoryName;
 
   const ingredientGroups =
     ingredientsResponse?.status === 200 ? ingredientsResponse.data : [];
@@ -164,7 +136,6 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
         {
           productId: ingredient.id,
           productName: ingredient.name,
-          categoryName: "category",
           unitPriceCents: Number(ingredient.price),
           quantity: 1,
         },
@@ -197,6 +168,12 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     );
   };
 
+  const deleteExtra = (productId: string) => {
+    setAddedExtras((prev) =>
+      prev.filter((extra) => extra.productId !== productId),
+    );
+  };
+
   useEffect(() => {
     if (!hasValidVariant) return;
 
@@ -225,7 +202,6 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
           return {
             productId: modifier.id,
             productName: option?.name ?? "Ingrediente extra",
-            categoryName: "Ingrediente",
             unitPriceCents: option ? Number(option.price) : 0,
             quantity: modifier.delta,
           };
@@ -289,7 +265,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     setShowAddedToCartScreen(true);
   };
 
-  if (variantLoading || categoriesLoading) {
+  if (variantLoading) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
         <p className="text-sm text-text-main/40">Cargando...</p>
@@ -297,7 +273,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     );
   }
 
-  if (!hasValidVariant || !hasValidCategories) {
+  if (!hasValidVariant) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
         <p className="text-sm text-red-400">Error al cargar el producto.</p>
@@ -327,9 +303,6 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
               <h1 className="font-display text-3xl sm:text-4xl text-white font-normal m-0 mt-1">
                 {variant.name}
               </h1>
-              <p className="text-white/75 text-xs sm:text-sm mt-1 m-0">
-                {categoryLabel}
-              </p>
             </div>
           </div>
 
@@ -365,18 +338,20 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
               return (
                 <article
                   key={component.id}
-                  className={`rounded-2xl border px-3 py-3 transition-colors ${isRemoved
+                  className={`rounded-2xl border px-3 py-3 transition-colors ${
+                    isRemoved
                       ? "border-red-200/70 bg-red-50/45"
                       : "border-pink-soft/30 bg-background-light"
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p
-                        className={`text-sm m-0 ${isRemoved
+                        className={`text-sm m-0 ${
+                          isRemoved
                             ? "line-through text-text-main/35"
                             : "text-text-main"
-                          }`}
+                        }`}
                       >
                         {component.productName}
                       </p>
@@ -388,10 +363,11 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                       <button
                         type="button"
                         onClick={() => toggleComponent(component)}
-                        className={`rounded-xl px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-all cursor-pointer ${isRemoved
+                        className={`rounded-xl px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-all cursor-pointer ${
+                          isRemoved
                             ? "border border-pink-soft/40 text-text-main/60 bg-background-light"
                             : "border border-red-200 text-red-500 bg-red-50 hover:bg-red-100"
-                          }`}
+                        }`}
                       >
                         {isRemoved ? "Reactivar" : "Quitar"}
                       </button>
@@ -418,7 +394,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
             </div>
           ) : ingredientOptions.length === 0 ? (
             <div className="rounded-2xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
-              No hay ingredientes disponibles para esta categoría.
+              No hay ingredientes disponibles.
             </div>
           ) : (
             <div className="relative">
@@ -453,7 +429,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                         {ingredient.name}
                       </span>
                       <span className="block text-[11px] text-text-main/35">
-                        Categoria · +$
+                        +$
                         {formatCentsToDisplay(ingredient.price)}
                       </span>
                     </button>
@@ -476,13 +452,12 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                         {extra.productName}
                       </p>
                       <p className="text-[11px] text-text-main/40 m-0 mt-0.5">
-                        {extra.categoryName} · $
-                        {formatCentsToDisplay(extra.unitPriceCents)} c/u
+                        ${formatCentsToDisplay(extra.unitPriceCents)} c/u
                       </p>
                     </div>
                     <button
                       type="button"
-                      onClick={() => decreaseExtra(extra.productId)}
+                      onClick={() => deleteExtra(extra.productId)}
                       className="text-text-main/25 hover:text-red-400 transition-colors cursor-pointer"
                     >
                       <X className="w-4 h-4" />

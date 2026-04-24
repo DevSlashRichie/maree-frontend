@@ -1,4 +1,4 @@
-import { ArrowLeft, CheckCircle2, ImagePlus, Plus } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ImagePlus, Plus, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   useGetV1ProductsIngredients,
@@ -22,6 +22,8 @@ type CreateProductPayload = {
     quantity: number;
     isRemovable: boolean;
   }>;
+  allowedIngredients?: string[];
+  allowedCategories?: string[];
 };
 
 function isIngredientCategoryName(name: string) {
@@ -88,6 +90,11 @@ export function CreateProduct() {
   >([]);
   const [ingredientSearch, setIngredientSearch] = useState("");
   const [showIngredientDropdown, setShowIngredientDropdown] = useState(false);
+
+  const [allowedIngredients, setAllowedIngredients] = useState<string[]>([]);
+  const [allowedSearch, setAllowedSearch] = useState("");
+  const [showAllowedDropdown, setShowAllowedDropdown] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -131,6 +138,12 @@ export function CreateProduct() {
       !selectedIngredients.find((s) => s.id === i.id),
   );
 
+  const filteredAllowedOptions = ingredientOptions.filter(
+    (i) =>
+      i.productName.toLowerCase().includes(allowedSearch.toLowerCase()) &&
+      !allowedIngredients.includes(i.id),
+  );
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -153,6 +166,16 @@ export function CreateProduct() {
     ]);
     setIngredientSearch("");
     setShowIngredientDropdown(false);
+  };
+
+  const addAllowedIngredient = (id: string) => {
+    setAllowedIngredients((prev) => [...prev, id]);
+    setAllowedSearch("");
+    setShowAllowedDropdown(false);
+  };
+
+  const removeAllowedIngredient = (id: string) => {
+    setAllowedIngredients((prev) => prev.filter((i) => i !== id));
   };
 
   const updateQuantity = (id: string, quantity: number) => {
@@ -217,6 +240,7 @@ export function CreateProduct() {
             isRemovable,
           }),
         ),
+        allowedIngredients,
       };
 
       const createResponse = await createProductVariant(payload);
@@ -276,8 +300,39 @@ export function CreateProduct() {
                   Imagen
                 </p>
                 <p className="mt-2 text-sm text-text-main/65 break-all m-0">
-                  {lastPayload.imageUrl}
+                  <img src={lastPayload.imageUrl} alt="Imagen del Producto" />
                 </p>
+              </div>
+
+              <div className="md:col-span-2 rounded-2xl border border-pink-soft/25 bg-background-light p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-text-main/35 m-0">
+                    Productos aplicables enviados
+                  </p>
+                  <span className="text-xs font-semibold text-text-main/60">
+                    {lastPayload.allowedIngredients?.length ?? 0}
+                  </span>
+                </div>
+                {!lastPayload.allowedIngredients ||
+                lastPayload.allowedIngredients.length === 0 ? (
+                  <p className="mt-2 text-sm text-text-main/45 m-0">
+                    No hay productos aplicables.
+                  </p>
+                ) : (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {lastPayload.allowedIngredients.map((id) => {
+                      const option = ingredientOptions.find((o) => o.id === id);
+                      return (
+                        <span
+                          key={id}
+                          className="px-3 py-1 rounded-full bg-card-light border border-pink-soft/20 text-xs text-text-main font-medium"
+                        >
+                          {option?.productName ?? id}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <div className="md:col-span-2 rounded-2xl border border-pink-soft/25 bg-background-light p-4">
@@ -338,6 +393,8 @@ export function CreateProduct() {
               setSelectedIngredients([]);
               setImagePreview(null);
               setSelectedCategoryPath([]);
+              setAllowedIngredients([]);
+              setAllowedSearch("");
             }}
             className="mt-5 w-full rounded-xl border border-pink-soft/40 py-3 text-[11px] font-bold uppercase tracking-widest text-text-main/70 hover:bg-pink-soft/10 transition-colors cursor-pointer"
           >
@@ -534,105 +591,45 @@ export function CreateProduct() {
               </button>
             </div>
 
+            {/* Applicable Products */}
             <div className="flex flex-col gap-2">
               <label
-                htmlFor="ingredient-search"
-                className="text-sm font-medium text-text-main"
-              >
-                Categorias aplicables
-              </label>
-              <p className="text-xs text-text-main/50 leading-relaxed -mt-1">
-                Añade los ingredientes que se pueden agregar a este producto.
-              </p>
-
-              {selectedIngredients.length > 0 && (
-                <div className="bg-background-light rounded-xl border border-pink-soft/20 px-3">
-                  {selectedIngredients.map((ing) => (
-                    <IngredientRow
-                      key={ing.id}
-                      ingredient={ing}
-                      onQuantityChange={updateQuantity}
-                      onRemovableToggle={toggleRemovable}
-                      onRemove={removeIngredient}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {ingredientsLoading ? (
-                <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
-                  Cargando ingredientes...
-                </div>
-              ) : ingredientOptions.length === 0 ? (
-                <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
-                  No se encontraron ingredientes en la base de datos.
-                </div>
-              ) : (
-                <div className="relative">
-                  <div className="flex items-center gap-2 w-full bg-background-light border border-pink-soft/30 rounded-xl px-4 py-3">
-                    <Plus className="w-3.5 h-3.5 text-text-main/30 shrink-0" />
-                    <input
-                      id="ingredient-search"
-                      type="text"
-                      value={ingredientSearch}
-                      onChange={(e) => {
-                        setIngredientSearch(e.target.value);
-                        setShowIngredientDropdown(true);
-                      }}
-                      onFocus={() => setShowIngredientDropdown(true)}
-                      onBlur={() =>
-                        setTimeout(() => setShowIngredientDropdown(false), 150)
-                      }
-                      placeholder="Agregar ingrediente..."
-                      className="flex-1 bg-transparent text-sm text-text-main placeholder:text-text-main/25 focus:outline-none"
-                    />
-                  </div>
-
-                  {showIngredientDropdown && filteredIngredients.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-card-light border border-pink-soft/30 rounded-xl overflow-hidden z-10">
-                      {filteredIngredients.map((ing) => (
-                        <button
-                          key={ing.id}
-                          type="button"
-                          onMouseDown={() => addIngredient(ing)}
-                          className="w-full text-left px-4 py-2.5 text-sm text-text-main hover:bg-pink-soft/10 transition-colors cursor-pointer"
-                        >
-                          <span className="block font-medium text-text-main">
-                            {ing.productName}
-                          </span>
-                          <span className="block text-[11px] text-text-main/35">
-                            {ing.categoryName}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor="ingredient-search"
+                htmlFor="allowed-search"
                 className="text-sm font-medium text-text-main"
               >
                 Productos aplicables
               </label>
               <p className="text-xs text-text-main/50 leading-relaxed -mt-1">
-                Añade los ingredientes que se pueden agregar a este producto.
+                Añade los productos que se pueden agregar a este producto.
               </p>
 
-              {selectedIngredients.length > 0 && (
-                <div className="bg-background-light rounded-xl border border-pink-soft/20 px-3">
-                  {selectedIngredients.map((ing) => (
-                    <IngredientRow
-                      key={ing.id}
-                      ingredient={ing}
-                      onQuantityChange={updateQuantity}
-                      onRemovableToggle={toggleRemovable}
-                      onRemove={removeIngredient}
-                    />
-                  ))}
+              {allowedIngredients.length > 0 && (
+                <div className="bg-background-light rounded-xl border border-pink-soft/20 px-3 py-2 flex flex-col gap-2">
+                  {allowedIngredients.map((id) => {
+                    const option = ingredientOptions.find((o) => o.id === id);
+                    return (
+                      <div
+                        key={id}
+                        className="flex items-center justify-between py-1"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-text-main m-0 truncate">
+                            {option?.productName ?? id}
+                          </p>
+                          <p className="text-[11px] text-text-main/35 m-0 truncate">
+                            {option?.categoryName ?? "Sin categoría"}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeAllowedIngredient(id)}
+                          className="p-1.5 text-text-main/30 hover:text-red-400 transition-colors cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 
@@ -640,38 +637,34 @@ export function CreateProduct() {
                 <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
                   Cargando ingredientes...
                 </div>
-              ) : ingredientOptions.length === 0 ? (
-                <div className="rounded-xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
-                  No se encontraron ingredientes en la base de datos.
-                </div>
               ) : (
                 <div className="relative">
                   <div className="flex items-center gap-2 w-full bg-background-light border border-pink-soft/30 rounded-xl px-4 py-3">
                     <Plus className="w-3.5 h-3.5 text-text-main/30 shrink-0" />
                     <input
-                      id="ingredient-search"
+                      id="allowed-search"
                       type="text"
-                      value={ingredientSearch}
+                      value={allowedSearch}
                       onChange={(e) => {
-                        setIngredientSearch(e.target.value);
-                        setShowIngredientDropdown(true);
+                        setAllowedSearch(e.target.value);
+                        setShowAllowedDropdown(true);
                       }}
-                      onFocus={() => setShowIngredientDropdown(true)}
+                      onFocus={() => setShowAllowedDropdown(true)}
                       onBlur={() =>
-                        setTimeout(() => setShowIngredientDropdown(false), 150)
+                        setTimeout(() => setShowAllowedDropdown(false), 150)
                       }
-                      placeholder="Agregar ingrediente..."
+                      placeholder="Agregar producto..."
                       className="flex-1 bg-transparent text-sm text-text-main placeholder:text-text-main/25 focus:outline-none"
                     />
                   </div>
 
-                  {showIngredientDropdown && filteredIngredients.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-card-light border border-pink-soft/30 rounded-xl overflow-hidden z-10">
-                      {filteredIngredients.map((ing) => (
+                  {showAllowedDropdown && filteredAllowedOptions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-card-light border border-pink-soft/30 rounded-xl overflow-hidden z-10 max-h-60 overflow-y-auto shadow-lg">
+                      {filteredAllowedOptions.map((ing) => (
                         <button
                           key={ing.id}
                           type="button"
-                          onMouseDown={() => addIngredient(ing)}
+                          onMouseDown={() => addAllowedIngredient(ing.id)}
                           className="w-full text-left px-4 py-2.5 text-sm text-text-main hover:bg-pink-soft/10 transition-colors cursor-pointer"
                         >
                           <span className="block font-medium text-text-main">
@@ -797,6 +790,12 @@ export function CreateProduct() {
                 <span>Ingredientes</span>
                 <span className="font-medium text-text-main">
                   {selectedIngredients.length}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Productos Aplicables</span>
+                <span className="font-medium text-text-main">
+                  {allowedIngredients.length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
