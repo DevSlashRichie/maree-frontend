@@ -9,11 +9,12 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-  Info,
   Loader2,
   Package,
   Plus,
   Tag,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useGetV1ProductsVariants } from "@/lib/api";
@@ -54,9 +55,6 @@ const columns = [
         <div className="flex flex-col min-w-0">
           <span className="font-medium text-text-main truncate">
             {info.getValue()}
-          </span>
-          <span className="text-[10px] text-text-main/50 uppercase font-bold tracking-wider">
-            {info.row.original.product.name}
           </span>
         </div>
       </div>
@@ -110,14 +108,21 @@ const columns = [
     id: "actions",
     header: "Acciones",
     cell: (info) => (
-      <Link
-        to={"/admin/products/$productId" as any}
-        params={{ productId: info.row.original.productId } as any}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-white hover:bg-secondary/90 transition-colors font-semibold text-xs"
-      >
-        <Info className="w-3.5 h-3.5" />
-        <span>Detalles</span>
-      </Link>
+      <div className="flex items-center gap-2">
+        <Link
+          to={"/admin/products/$productId" as any}
+          params={{ productId: info.row.original.productId } as any}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-text-main/40 hover:text-secondary"
+        >
+          <Pencil className="w-4 h-4" />
+        </Link>
+        <button
+          onClick={() => console.log("Delete", info.row.original.id)}
+          className="p-2 hover:bg-red-50 rounded-lg transition-colors text-text-main/40 hover:text-red-500"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
     ),
   }),
 ];

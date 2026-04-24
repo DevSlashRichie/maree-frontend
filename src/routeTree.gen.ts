@@ -19,6 +19,7 @@ import { Route as AdminReportsRouteImport } from './routes/admin/reports'
 import { Route as AdminOrderRouteImport } from './routes/admin/order'
 import { Route as AdminCreateProductRouteImport } from './routes/admin/create-product'
 import { Route as ClientReviewRouteImport } from './routes/_client/review'
+import { Route as ClientOrderSetupRouteImport } from './routes/_client/order-setup'
 import { Route as ClientMenuRouteImport } from './routes/_client/menu'
 import { Route as ClientLoyaltyRouteImport } from './routes/_client/loyalty'
 import { Route as ClientCustomizeProductRouteImport } from './routes/_client/customize-product'
@@ -83,6 +84,11 @@ const AdminCreateProductRoute = AdminCreateProductRouteImport.update({
 const ClientReviewRoute = ClientReviewRouteImport.update({
   id: '/_client/review',
   path: '/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientOrderSetupRoute = ClientOrderSetupRouteImport.update({
+  id: '/_client/order-setup',
+  path: '/order-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClientMenuRoute = ClientMenuRouteImport.update({
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/customize-product': typeof ClientCustomizeProductRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
+  '/order-setup': typeof ClientOrderSetupRoute
   '/review': typeof ClientReviewRoute
   '/admin/create-product': typeof AdminCreateProductRoute
   '/admin/order': typeof AdminOrderRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/customize-product': typeof ClientCustomizeProductRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
+  '/order-setup': typeof ClientOrderSetupRoute
   '/review': typeof ClientReviewRoute
   '/admin/create-product': typeof AdminCreateProductRoute
   '/admin/order': typeof AdminOrderRoute
@@ -226,6 +234,7 @@ export interface FileRoutesById {
   '/_client/customize-product': typeof ClientCustomizeProductRoute
   '/_client/loyalty': typeof ClientLoyaltyRoute
   '/_client/menu': typeof ClientMenuRoute
+  '/_client/order-setup': typeof ClientOrderSetupRoute
   '/_client/review': typeof ClientReviewRoute
   '/admin/create-product': typeof AdminCreateProductRoute
   '/admin/order': typeof AdminOrderRoute
@@ -255,6 +264,7 @@ export interface FileRouteTypes {
     | '/customize-product'
     | '/loyalty'
     | '/menu'
+    | '/order-setup'
     | '/review'
     | '/admin/create-product'
     | '/admin/order'
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/customize-product'
     | '/loyalty'
     | '/menu'
+    | '/order-setup'
     | '/review'
     | '/admin/create-product'
     | '/admin/order'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/_client/customize-product'
     | '/_client/loyalty'
     | '/_client/menu'
+    | '/_client/order-setup'
     | '/_client/review'
     | '/admin/create-product'
     | '/admin/order'
@@ -335,6 +347,7 @@ export interface RootRouteChildren {
   ClientCustomizeProductRoute: typeof ClientCustomizeProductRoute
   ClientLoyaltyRoute: typeof ClientLoyaltyRoute
   ClientMenuRoute: typeof ClientMenuRoute
+  ClientOrderSetupRoute: typeof ClientOrderSetupRoute
   ClientReviewRoute: typeof ClientReviewRoute
 }
 
@@ -408,6 +421,13 @@ declare module '@tanstack/react-router' {
       path: '/review'
       fullPath: '/review'
       preLoaderRoute: typeof ClientReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_client/order-setup': {
+      id: '/_client/order-setup'
+      path: '/order-setup'
+      fullPath: '/order-setup'
+      preLoaderRoute: typeof ClientOrderSetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_client/menu': {
@@ -578,6 +598,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClientCustomizeProductRoute: ClientCustomizeProductRoute,
   ClientLoyaltyRoute: ClientLoyaltyRoute,
   ClientMenuRoute: ClientMenuRoute,
+  ClientOrderSetupRoute: ClientOrderSetupRoute,
   ClientReviewRoute: ClientReviewRoute,
 }
 export const routeTree = rootRouteImport
