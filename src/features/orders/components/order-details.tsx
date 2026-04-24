@@ -1,14 +1,18 @@
 import { Button } from "@/components/button.tsx";
-import type { GetV1Orders200Item } from "@/lib/schemas";
+import type { GetV1Orders200Item, GetV1OrdersMeId200 } from "@/lib/schemas";
 
 interface OrderDetailsProps {
   order: GetV1Orders200Item;
+  orderDetails: GetV1OrdersMeId200 | null;
+  isLoadingDetails: boolean;
   onForward: () => void;
   onBackward?: () => void;
 }
 
 export function OrderDetails({
   order,
+  orderDetails,
+  isLoadingDetails,
   onForward,
   onBackward,
 }: OrderDetailsProps) {
@@ -17,6 +21,8 @@ export function OrderDetails({
     set: "Listo",
     ready: "Completar",
   };
+
+  const items = orderDetails?.items ?? [];
 
   return (
     <div className="bg-card-light rounded-2xl border border-pink-soft/40 px-5 py-6 flex flex-col gap-5">
@@ -34,9 +40,21 @@ export function OrderDetails({
 
       <hr className="border-pink-soft/20" />
 
-      {/* TODO: reemplazar con fetch real de items cuando esté el endpoint */}
-      <div className="flex flex-wrap gap-3 items-stretch">
-        <p className="text-sm text-text-main/50">Cargando items...</p>
+      <div className="flex flex-col gap-2">
+        {isLoadingDetails ? (
+          <p className="text-sm text-text-main/50">Cargando items...</p>
+        ) : items.length > 0 ? (
+          items.map((item) => (
+            <div key={item.id} className="flex justify-between text-sm">
+              <span className="text-text-main">
+                {item.quantity}x {item.productVariantsTable?.name ?? "Producto"}
+              </span>
+              <span className="text-text-main/70">${item.pricingSnapshot}</span>
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-text-main/50">Sin items</p>
+        )}
       </div>
 
       <hr className="border-pink-soft/20" />
