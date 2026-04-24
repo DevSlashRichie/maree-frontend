@@ -1,14 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import { ChevronLeft, ChevronRight, Gift, Search } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { Button } from "@/components/button";
 import { HistoryItem } from "@/components/ui/history-item";
 import { Modal } from "@/components/ui/modal";
 import { LoyaltyCard } from "@/features/loyalty/components/loyalty-card";
 import { RewardCard } from "@/features/loyalty/components/reward-card";
+import { useCartStore } from "@/hooks/use-cart-store";
 import { requireAuth } from "@/hooks/with-auth";
-import { useGetV1Loyalty, useGetV1Rewards } from "@/lib/api";
+import {
+  getV1ProductsVariantId,
+  useGetV1Loyalty,
+  useGetV1Rewards,
+} from "@/lib/api";
 
 export const Route = createFileRoute("/_client/loyalty")({
   beforeLoad: async ({ location }) => {
@@ -35,6 +41,9 @@ type RewardItem = {
 function RouteComponent() {
   const { data, isLoading } = useGetV1Loyalty();
   const { data: rewardsData, isLoading: rewardsLoading } = useGetV1Rewards();
+  const navigate = useNavigate();
+  const setDiscount = useCartStore((state) => state.setDiscount);
+  const addItem = useCartStore((state) => state.addItem);
 
   const [selectedReward, setSelectedReward] = useState<RewardItem | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -97,11 +106,57 @@ function RouteComponent() {
     }
   };
 
-  const confirmRedemption = () => {
-    if (selectedReward) {
-      console.log(`Confirmado: Canjeando ${selectedReward.title}`);
-      setIsConfirmModalOpen(false);
+  const confirmRedemption = async () => {
+    if (!selectedReward || !rewardsData?.data) return;
+
+    const fullReward = rewardsData.data.find((r) => r.id === selectedReward.id);
+
+    if (!fullReward || !fullReward.discount) {
+      toast.error("No se pudo cargar los detalles de la recompensa");
+      return;
     }
+
+    const discount = {
+      id: fullReward.discountId,
+      name: fullReward.discount.name,
+      type: fullReward.discount.type,
+      appliesTo: fullReward.discount.appliesTo,
+      value: BigInt(fullReward.discount.value),
+    };
+
+    const isFreeItem =
+      discount.type === "percentage" &&
+      Number(discount.value) === 100 &&
+      discount.appliesTo.length === 1;
+
+    if (isFreeItem) {
+      try {
+        const response = await getV1ProductsVariantId(discount.appliesTo[0]);
+        if (response?.status !== 200) {
+          toast.error("No se pudo cargar el producto de la recompensa");
+          return;
+        }
+        const variant = response.data;
+        addItem({
+          variantId: variant.id,
+          itemNotes: "",
+          modifiers: [],
+          displayName: variant.name,
+          displayImage: variant.image ?? undefined,
+          unitPriceCents: 0,
+        });
+      } catch {
+        toast.error("No se pudo cargar el producto de la recompensa");
+        return;
+      }
+    }
+
+    setDiscount(discount, fullReward.id);
+
+    toast.success(`¡${selectedReward.title} agregado al carrito!`);
+    setIsConfirmModalOpen(false);
+    setSelectedReward(null);
+    navigate({ to: "/cart" });
   };
 
   if (isLoading || rewardsLoading) {

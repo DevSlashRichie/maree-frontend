@@ -38,6 +38,9 @@ function buildItemDescription(modifiers: { delta: number }[], notes: string) {
 export function Cart() {
   const navigate = useNavigate();
   const items = useCartStore((state) => state.items);
+  const discountId = useCartStore((state) => state.discountId);
+  const rewardId = useCartStore((state) => state.rewardId);
+  const clearDiscount = useCartStore((state) => state.clearDiscount);
   const addOneToItem = useCartStore((state) => state.addOneToItem);
   const removeOneFromItem = useCartStore((state) => state.removeOneFromItem);
   const removeItem = useCartStore((state) => state.removeItem);
@@ -62,15 +65,18 @@ export function Cart() {
 
     console.log(items);
 
-    const payload: PostV1OrdersBody = {
+    const payload: PostV1OrdersBody & { rewardId?: string } = {
       items: items.map((item) => ({
         id: item.variantId,
         quantity: item.quantity,
         notes: item.itemNotes?.trim() || undefined,
         modifiers: item.modifiers,
+        isFree: item.isFree,
       })),
       totalPriceCents: totalCents,
       branchId: DEFAULT_BRANCH_ID,
+      ...(discountId && { discountId }),
+      ...(rewardId && { rewardId }),
     };
 
     try {
@@ -141,7 +147,9 @@ export function Cart() {
                 unitPriceCents={item.unitPriceCents ?? 0}
                 quantity={item.quantity}
                 imageUrl={item.displayImage ?? FALLBACK_IMAGE}
-                onIncrement={() => addOneToItem(item.itemId)}
+                onIncrement={
+                  item.isFree ? undefined : () => addOneToItem(item.itemId)
+                }
                 onDecrement={() => removeOneFromItem(item.itemId)}
                 onRemove={() => removeItem(item.itemId)}
                 onCustomize={() =>
@@ -163,6 +171,7 @@ export function Cart() {
           onConfirm={handleConfirmOrder}
           isSubmitting={isPostingOrder}
           isDisabled={items.length === 0}
+          onClearDiscount={clearDiscount}
         />
       </div>
     </div>

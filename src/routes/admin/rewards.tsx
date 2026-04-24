@@ -29,6 +29,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import {
   deleteV1RewardsRewardId,
   patchV1RewardsRewardId,
+  useGetV1ProductsVariants,
   useGetV1Rewards,
   usePostV1Rewards,
 } from "@/lib/api";
@@ -37,6 +38,25 @@ import type { RewardSchema } from "@/lib/schemas/rewardSchema";
 export const Route = createFileRoute("/admin/rewards")({
   component: RouteComponent,
 });
+
+type Variant = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: string;
+  image: string | null;
+  productId: string;
+  createdAt: string;
+  product: {
+    id: string;
+    image: string | null;
+    name: string;
+    status: string;
+    categoryId: string;
+    type: string;
+    createdAt: string;
+  };
+};
 
 type Reward = {
   id: string;
@@ -54,19 +74,6 @@ type Reward = {
   image: string | null;
   createdAt: string;
 };
-
-const AVAILABLE_PRODUCTS = [
-  { id: "1", name: "Cappuccino" },
-  { id: "2", name: "Latte" },
-  { id: "3", name: "Espresso" },
-  { id: "4", name: "Croissant" },
-  { id: "5", name: "Muffin" },
-  { id: "6", name: "Crepa Dulce" },
-  { id: "7", name: "Crepa Salada" },
-  { id: "8", name: "Frappé" },
-  { id: "9", name: "Té Chai" },
-  { id: "10", name: "Brownie" },
-];
 
 const AVAILABLE_ICONS = [
   {
@@ -93,8 +100,17 @@ function RouteComponent() {
     mutate,
   } = useGetV1Rewards();
 
+  const {
+    data: variantsData,
+    isLoading: isLoadingVariants,
+    error: variantsError,
+  } = useGetV1ProductsVariants();
+
   const { trigger: createReward, isMutating: isCreatingReward } =
     usePostV1Rewards();
+
+  const variants: Variant[] =
+    (variantsData?.status === 200 ? variantsData?.data?.variants : []) ?? [];
 
   const rewards: Reward[] = (rewardsData?.data ?? []).map(
     (r: RewardSchema) => ({
@@ -139,10 +155,9 @@ function RouteComponent() {
         return;
       }
 
-      const productName =
+      const applicableProductId =
         value.hasProductRestriction && value.applicableProducts
-          ? AVAILABLE_PRODUCTS.find((p) => p.id === value.applicableProducts)
-              ?.name || ""
+          ? value.applicableProducts
           : "";
 
       try {
@@ -156,7 +171,7 @@ function RouteComponent() {
           });
 
           if (result.status === 200) {
-            mutate();
+            await mutate();
             setIsFormOpen(false);
             resetForm();
             toast.success("Recompensa actualizada");
@@ -172,12 +187,12 @@ function RouteComponent() {
             discount: {
               type: value.discountType,
               value: value.discountValue,
-              appliesTo: productName ? [productName] : [],
+              appliesTo: applicableProductId ? [applicableProductId] : [],
             },
           });
 
           if (result.status === 201) {
-            mutate();
+            await mutate();
             setIsFormOpen(false);
             resetForm();
             toast.success("Recompensa creada");
@@ -255,7 +270,7 @@ function RouteComponent() {
       const result = await patchV1RewardsRewardId(id, { status: newStatus });
 
       if (result.status === 200) {
-        mutate();
+        await mutate();
         toast.success(
           newStatus === "active"
             ? "Recompensa activada"
@@ -268,18 +283,18 @@ function RouteComponent() {
     }
   };
 
-  if (isLoadingRewards) {
+  if (isLoadingRewards || isLoadingVariants) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
-        <div className="text-text-main">Cargando recompensas...</div>
+        <div className="text-text-main">Cargando...</div>
       </div>
     );
   }
 
-  if (rewardsError) {
+  if (rewardsError || variantsError) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
-        <div className="text-red-500">Error al cargar recompensas</div>
+        <div className="text-red-500">Error al cargar: Error desconocido</div>
       </div>
     );
   }
@@ -622,7 +637,7 @@ function RouteComponent() {
                                   data-testid="product-search-input"
                                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
                                   displayValue={() =>
-                                    AVAILABLE_PRODUCTS.find(
+                                    variants.find(
                                       (p) => p.id === field.state.value,
                                     )?.name || ""
                                   }
@@ -641,7 +656,7 @@ function RouteComponent() {
                                 transition
                                 anchor="bottom"
                               >
-                                {AVAILABLE_PRODUCTS.map((product) => (
+                                {variants.map((product) => (
                                   <ComboboxOption
                                     key={product.id}
                                     value={product.id}
@@ -769,7 +784,7 @@ function RouteComponent() {
                       <span className="text-xs text-gray-400">
                         {reward.applicableProducts &&
                         reward.applicableProducts.length > 0
-                          ? AVAILABLE_PRODUCTS.find(
+                          ? variants.find(
                               (p) => p.id === reward.applicableProducts?.[0],
                             )?.name
                           : "Todos los productos"}
