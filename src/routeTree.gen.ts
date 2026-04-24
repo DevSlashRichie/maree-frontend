@@ -19,6 +19,8 @@ import { Route as AdminReportsRouteImport } from './routes/admin/reports'
 import { Route as AdminOrderRouteImport } from './routes/admin/order'
 import { Route as AdminCreateProductRouteImport } from './routes/admin/create-product'
 import { Route as ClientReviewRouteImport } from './routes/_client/review'
+import { Route as ClientProfileRouteImport } from './routes/_client/profile'
+import { Route as ClientOrderSetupRouteImport } from './routes/_client/order-setup'
 import { Route as ClientMenuRouteImport } from './routes/_client/menu'
 import { Route as ClientLoyaltyRouteImport } from './routes/_client/loyalty'
 import { Route as ClientCustomizeProductRouteImport } from './routes/_client/customize-product'
@@ -28,12 +30,14 @@ import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminStaffIndexRouteImport } from './routes/admin/staff/index'
 import { Route as AdminDiscountsIndexRouteImport } from './routes/admin/discounts/index'
 import { Route as AdminBranchesIndexRouteImport } from './routes/admin/branches/index'
+import { Route as ClientOrderIndexRouteImport } from './routes/_client/order/index'
 import { Route as AdminUsersIdRouteImport } from './routes/admin/users/$id'
 import { Route as AdminStaffIdRouteImport } from './routes/admin/staff/$id'
 import { Route as AdminInventoryProductsRouteImport } from './routes/admin/inventory/products'
 import { Route as AdminInventoryCategoriesRouteImport } from './routes/admin/inventory/categories'
 import { Route as AdminDiscountsIdRouteImport } from './routes/admin/discounts/$id'
 import { Route as AdminBranchesBranchIdRouteImport } from './routes/admin/branches/$branchId'
+import { Route as ClientOrderOrderIdRouteImport } from './routes/_client/order/$orderId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -85,6 +89,16 @@ const ClientReviewRoute = ClientReviewRouteImport.update({
   path: '/review',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientProfileRoute = ClientProfileRouteImport.update({
+  id: '/_client/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientOrderSetupRoute = ClientOrderSetupRouteImport.update({
+  id: '/_client/order-setup',
+  path: '/order-setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClientMenuRoute = ClientMenuRouteImport.update({
   id: '/_client/menu',
   path: '/menu',
@@ -130,6 +144,11 @@ const AdminBranchesIndexRoute = AdminBranchesIndexRouteImport.update({
   path: '/branches/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ClientOrderIndexRoute = ClientOrderIndexRouteImport.update({
+  id: '/_client/order/',
+  path: '/order/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminUsersIdRoute = AdminUsersIdRouteImport.update({
   id: '/users/$id',
   path: '/users/$id',
@@ -161,6 +180,11 @@ const AdminBranchesBranchIdRoute = AdminBranchesBranchIdRouteImport.update({
   path: '/branches/$branchId',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ClientOrderOrderIdRoute = ClientOrderOrderIdRouteImport.update({
+  id: '/_client/order/$orderId',
+  path: '/order/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -172,18 +196,22 @@ export interface FileRoutesByFullPath {
   '/customize-product': typeof ClientCustomizeProductRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
+  '/order-setup': typeof ClientOrderSetupRoute
+  '/profile': typeof ClientProfileRoute
   '/review': typeof ClientReviewRoute
   '/admin/create-product': typeof AdminCreateProductRoute
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
+  '/order/$orderId': typeof ClientOrderOrderIdRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/discounts/$id': typeof AdminDiscountsIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
+  '/order/': typeof ClientOrderIndexRoute
   '/admin/branches/': typeof AdminBranchesIndexRoute
   '/admin/discounts/': typeof AdminDiscountsIndexRoute
   '/admin/staff/': typeof AdminStaffIndexRoute
@@ -198,18 +226,22 @@ export interface FileRoutesByTo {
   '/customize-product': typeof ClientCustomizeProductRoute
   '/loyalty': typeof ClientLoyaltyRoute
   '/menu': typeof ClientMenuRoute
+  '/order-setup': typeof ClientOrderSetupRoute
+  '/profile': typeof ClientProfileRoute
   '/review': typeof ClientReviewRoute
   '/admin/create-product': typeof AdminCreateProductRoute
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin': typeof AdminIndexRoute
+  '/order/$orderId': typeof ClientOrderOrderIdRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/discounts/$id': typeof AdminDiscountsIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
+  '/order': typeof ClientOrderIndexRoute
   '/admin/branches': typeof AdminBranchesIndexRoute
   '/admin/discounts': typeof AdminDiscountsIndexRoute
   '/admin/staff': typeof AdminStaffIndexRoute
@@ -226,18 +258,22 @@ export interface FileRoutesById {
   '/_client/customize-product': typeof ClientCustomizeProductRoute
   '/_client/loyalty': typeof ClientLoyaltyRoute
   '/_client/menu': typeof ClientMenuRoute
+  '/_client/order-setup': typeof ClientOrderSetupRoute
+  '/_client/profile': typeof ClientProfileRoute
   '/_client/review': typeof ClientReviewRoute
   '/admin/create-product': typeof AdminCreateProductRoute
   '/admin/order': typeof AdminOrderRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
+  '/_client/order/$orderId': typeof ClientOrderOrderIdRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/discounts/$id': typeof AdminDiscountsIdRoute
   '/admin/inventory/categories': typeof AdminInventoryCategoriesRoute
   '/admin/inventory/products': typeof AdminInventoryProductsRoute
   '/admin/staff/$id': typeof AdminStaffIdRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
+  '/_client/order/': typeof ClientOrderIndexRoute
   '/admin/branches/': typeof AdminBranchesIndexRoute
   '/admin/discounts/': typeof AdminDiscountsIndexRoute
   '/admin/staff/': typeof AdminStaffIndexRoute
@@ -255,18 +291,22 @@ export interface FileRouteTypes {
     | '/customize-product'
     | '/loyalty'
     | '/menu'
+    | '/order-setup'
+    | '/profile'
     | '/review'
     | '/admin/create-product'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
     | '/admin/'
+    | '/order/$orderId'
     | '/admin/branches/$branchId'
     | '/admin/discounts/$id'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
     | '/admin/users/$id'
+    | '/order/'
     | '/admin/branches/'
     | '/admin/discounts/'
     | '/admin/staff/'
@@ -281,18 +321,22 @@ export interface FileRouteTypes {
     | '/customize-product'
     | '/loyalty'
     | '/menu'
+    | '/order-setup'
+    | '/profile'
     | '/review'
     | '/admin/create-product'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
     | '/admin'
+    | '/order/$orderId'
     | '/admin/branches/$branchId'
     | '/admin/discounts/$id'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
     | '/admin/users/$id'
+    | '/order'
     | '/admin/branches'
     | '/admin/discounts'
     | '/admin/staff'
@@ -308,18 +352,22 @@ export interface FileRouteTypes {
     | '/_client/customize-product'
     | '/_client/loyalty'
     | '/_client/menu'
+    | '/_client/order-setup'
+    | '/_client/profile'
     | '/_client/review'
     | '/admin/create-product'
     | '/admin/order'
     | '/admin/reports'
     | '/admin/rewards'
     | '/admin/'
+    | '/_client/order/$orderId'
     | '/admin/branches/$branchId'
     | '/admin/discounts/$id'
     | '/admin/inventory/categories'
     | '/admin/inventory/products'
     | '/admin/staff/$id'
     | '/admin/users/$id'
+    | '/_client/order/'
     | '/admin/branches/'
     | '/admin/discounts/'
     | '/admin/staff/'
@@ -335,7 +383,11 @@ export interface RootRouteChildren {
   ClientCustomizeProductRoute: typeof ClientCustomizeProductRoute
   ClientLoyaltyRoute: typeof ClientLoyaltyRoute
   ClientMenuRoute: typeof ClientMenuRoute
+  ClientOrderSetupRoute: typeof ClientOrderSetupRoute
+  ClientProfileRoute: typeof ClientProfileRoute
   ClientReviewRoute: typeof ClientReviewRoute
+  ClientOrderOrderIdRoute: typeof ClientOrderOrderIdRoute
+  ClientOrderIndexRoute: typeof ClientOrderIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -410,6 +462,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_client/profile': {
+      id: '/_client/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ClientProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_client/order-setup': {
+      id: '/_client/order-setup'
+      path: '/order-setup'
+      fullPath: '/order-setup'
+      preLoaderRoute: typeof ClientOrderSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_client/menu': {
       id: '/_client/menu'
       path: '/menu'
@@ -473,6 +539,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBranchesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/_client/order/': {
+      id: '/_client/order/'
+      path: '/order'
+      fullPath: '/order/'
+      preLoaderRoute: typeof ClientOrderIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/users/$id': {
       id: '/admin/users/$id'
       path: '/users/$id'
@@ -514,6 +587,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/branches/$branchId'
       preLoaderRoute: typeof AdminBranchesBranchIdRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/_client/order/$orderId': {
+      id: '/_client/order/$orderId'
+      path: '/order/$orderId'
+      fullPath: '/order/$orderId'
+      preLoaderRoute: typeof ClientOrderOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -578,7 +658,11 @@ const rootRouteChildren: RootRouteChildren = {
   ClientCustomizeProductRoute: ClientCustomizeProductRoute,
   ClientLoyaltyRoute: ClientLoyaltyRoute,
   ClientMenuRoute: ClientMenuRoute,
+  ClientOrderSetupRoute: ClientOrderSetupRoute,
+  ClientProfileRoute: ClientProfileRoute,
   ClientReviewRoute: ClientReviewRoute,
+  ClientOrderOrderIdRoute: ClientOrderOrderIdRoute,
+  ClientOrderIndexRoute: ClientOrderIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
