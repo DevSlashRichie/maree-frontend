@@ -11,11 +11,11 @@ import { RewardCard } from "@/features/loyalty/components/reward-card";
 import { useCartStore } from "@/hooks/use-cart-store";
 import { requireAuth } from "@/hooks/with-auth";
 import {
+  getV1ProductsVariantId,
   useGetV1Branches,
   useGetV1Loyalty,
-  useGetV1RewardsHistory,
-  getV1ProductsVariantId,
   useGetV1Rewards,
+  useGetV1RewardsHistory,
 } from "@/lib/api";
 
 export const Route = createFileRoute("/_client/loyalty")({
