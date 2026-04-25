@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Gift, ShoppingBag } from "lucide-react";
 import toast from "react-hot-toast";
 import { ItemCard } from "@/features/cart/components/item-card.tsx";
 import { TotalCard } from "@/features/cart/components/total-card.tsx";
@@ -40,6 +40,8 @@ export function Cart() {
   const items = useCartStore((state) => state.items);
   const discountId = useCartStore((state) => state.discountId);
   const rewardId = useCartStore((state) => state.rewardId);
+  const discount = useCartStore((state) => state.discount);
+  const pendingDiscount = useCartStore((state) => state.pendingDiscount);
   const clearDiscount = useCartStore((state) => state.clearDiscount);
   const addOneToItem = useCartStore((state) => state.addOneToItem);
   const removeOneFromItem = useCartStore((state) => state.removeOneFromItem);
@@ -49,6 +51,11 @@ export function Cart() {
 
   const totalCents = items.reduce(
     (sum, item) => sum + (item.unitPriceCents ?? 0) * item.quantity,
+    0,
+  );
+
+  const discountAmountCents = items.reduce(
+    (sum, item) => sum + (item.discountAmountCents ?? 0),
     0,
   );
 
@@ -71,7 +78,8 @@ export function Cart() {
         quantity: item.quantity,
         notes: item.itemNotes?.trim() || undefined,
         modifiers: item.modifiers,
-        isFree: item.isFree,
+        isDiscounted: item.isDiscounted ?? false,
+        discountAmountCents: item.discountAmountCents ?? 0,
       })),
       totalPriceCents: totalCents,
       branchId: DEFAULT_BRANCH_ID,
@@ -115,6 +123,20 @@ export function Cart() {
           </p>
         </div>
 
+        {pendingDiscount && (
+          <div className="rounded-2xl border border-accent/40 bg-accent/10 px-5 py-4 flex items-start gap-3">
+            <Gift className="w-5 h-5 text-accent mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-display text-sm font-semibold text-accent m-0">
+                Descuento Listo
+              </p>
+              <p className="text-xs text-text-main/70 m-0 mt-1">
+                Agrega un artículo al carrito para aplicar tu descuento "{pendingDiscount.discount.name}".
+              </p>
+            </div>
+          </div>
+        )}
+
         {items.length === 0 ? (
           <div className="rounded-3xl border border-pink-soft/35 bg-card-light px-5 py-8 text-center flex flex-col items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-pink-soft/25 flex items-center justify-center text-text-main/45">
@@ -147,8 +169,10 @@ export function Cart() {
                 unitPriceCents={item.unitPriceCents ?? 0}
                 quantity={item.quantity}
                 imageUrl={item.displayImage ?? FALLBACK_IMAGE}
+                isDiscounted={item.isDiscounted}
+                discountAmountCents={item.discountAmountCents}
                 onIncrement={
-                  item.isFree ? undefined : () => addOneToItem(item.itemId)
+                  item.isDiscounted ? undefined : () => addOneToItem(item.itemId)
                 }
                 onDecrement={() => removeOneFromItem(item.itemId)}
                 onRemove={() => removeItem(item.itemId)}
@@ -168,6 +192,10 @@ export function Cart() {
 
         <TotalCard
           totalCents={totalCents}
+          discountAmountCents={discountAmountCents}
+          discountName={discount?.name}
+          discountType={discount?.type}
+          discountValue={discount?.value}
           onConfirm={handleConfirmOrder}
           isSubmitting={isPostingOrder}
           isDisabled={items.length === 0}

@@ -43,7 +43,8 @@ function RouteComponent() {
   const { data: rewardsData, isLoading: rewardsLoading } = useGetV1Rewards();
   const navigate = useNavigate();
   const setDiscount = useCartStore((state) => state.setDiscount);
-  const addItem = useCartStore((state) => state.addItem);
+  const setPendingDiscount = useCartStore((state) => state.setPendingDiscount);
+  const addDiscountedItem = useCartStore((state) => state.addDiscountedItem);
 
   const [selectedReward, setSelectedReward] = useState<RewardItem | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -124,10 +125,14 @@ function RouteComponent() {
       value: BigInt(fullReward.discount.value),
     };
 
+    // Case 1: 100% discount on a specific product → Auto-add free item
     const isFreeItem =
       discount.type === "percentage" &&
       Number(discount.value) === 100 &&
       discount.appliesTo.length === 1;
+
+    // Case 2: Empty appliesTo → Order-level discount (applies to whole order)
+    const isOrderLevelDiscount = discount.appliesTo.length === 0;
 
     if (isFreeItem) {
       try {
@@ -137,23 +142,37 @@ function RouteComponent() {
           return;
         }
         const variant = response.data;
-        addItem({
-          variantId: variant.id,
-          itemNotes: "",
-          modifiers: [],
-          displayName: variant.name,
-          displayImage: variant.image ?? undefined,
-          unitPriceCents: 0,
-        });
+        const variantPriceCents = Number(variant.price ?? 0);
+        addDiscountedItem(
+          {
+            variantId: variant.id,
+            itemNotes: "",
+            modifiers: [],
+            displayName: variant.name,
+            displayImage: variant.image ?? undefined,
+            unitPriceCents: variantPriceCents,
+          },
+          variantPriceCents // Full discount
+        );
+        setDiscount(discount, fullReward.id);
+        toast.success(`¡${selectedReward.title} agregado al carrito!`);
       } catch {
         toast.error("No se pudo cargar el producto de la recompensa");
         return;
       }
+    } else if (isOrderLevelDiscount) {
+      // Order-level discount - apply to whole order
+      setDiscount(discount, fullReward.id);
+      toast.success(`¡Descuento de ${selectedReward.title} aplicado al pedido!`);
+    } else {
+      // Case 3: Partial discount or specific product → Set as pending
+      // User will add items and first item gets the discount
+      setPendingDiscount(discount, fullReward.id);
+      toast.success(
+        `¡Descuento listo! Agrega un artículo al carrito para aplicarlo.`
+      );
     }
 
-    setDiscount(discount, fullReward.id);
-
-    toast.success(`¡${selectedReward.title} agregado al carrito!`);
     setIsConfirmModalOpen(false);
     setSelectedReward(null);
     navigate({ to: "/cart" });

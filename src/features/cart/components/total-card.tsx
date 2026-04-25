@@ -3,6 +3,7 @@ import { formatCentsToDisplay } from "@/lib/money";
 
 interface TotalCardProps {
   totalCents: number;
+  discountAmountCents?: number;
   onConfirm?: () => void;
   isSubmitting?: boolean;
   isDisabled?: boolean;
@@ -14,6 +15,7 @@ interface TotalCardProps {
 
 export function TotalCard({
   totalCents,
+  discountAmountCents,
   onConfirm,
   isSubmitting = false,
   isDisabled = false,
@@ -22,17 +24,22 @@ export function TotalCard({
   discountType,
   onClearDiscount,
 }: TotalCardProps) {
-  // Calculate discount amount
-  let discountAmount = 0;
+  let itemDiscountAmount = discountAmountCents ?? 0;
+
+  let orderDiscountAmount = 0;
   if (discountValue && discountType) {
+    const discountValueNum = Number(discountValue);
+
     if (discountType === "percentage") {
-      discountAmount = Math.floor((totalCents * Number(discountValue)) / 10000);
+      const basisPoints = discountValueNum > 100 ? discountValueNum : discountValueNum * 100;
+      orderDiscountAmount = Math.floor((totalCents * basisPoints) / 10000);
     } else {
-      discountAmount = Number(discountValue);
+      orderDiscountAmount = discountValueNum;
     }
   }
 
-  const finalTotal = Math.max(0, totalCents - discountAmount);
+  const totalDiscountAmount = itemDiscountAmount + orderDiscountAmount;
+  const finalTotal = Math.max(0, totalCents - totalDiscountAmount);
 
   return (
     <div className="bg-card-light rounded-2xl border border-pink-soft/40 px-4 sm:px-5 py-4 sm:py-5 flex flex-col gap-4">
@@ -50,7 +57,7 @@ export function TotalCard({
       </div>
 
       {/* Discount */}
-      {discountName && discountValue && (
+      {discountName && totalDiscountAmount > 0 && (
         <>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -58,7 +65,7 @@ export function TotalCard({
             </div>
             <div className="flex items-center gap-2">
               <p className="font-display text-lg text-accent m-0">
-                -${formatCentsToDisplay(discountAmount)}
+                -${formatCentsToDisplay(totalDiscountAmount)}
               </p>
               {onClearDiscount && (
                 <button

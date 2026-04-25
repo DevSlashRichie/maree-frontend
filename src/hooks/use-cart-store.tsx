@@ -14,7 +14,8 @@ export interface Item {
   displayName?: string;
   displayImage?: string;
   unitPriceCents?: number;
-  isFree?: boolean;
+  isDiscounted?: boolean;
+  discountAmountCents?: number;
 }
 
 export type AddableItem = Omit<Item, "quantity" | "itemId">;
@@ -33,6 +34,7 @@ interface CartState {
   discountId: string | null;
   discount: Discount | null;
   rewardId: string | null;
+  pendingDiscount: { discount: Discount; rewardId: string } | null;
   addItem: (item: AddableItem) => void;
   updateItemCustomization: (itemId: string, item: AddableItem) => void;
   addOneToItem: (itemId: string) => void;
@@ -40,8 +42,10 @@ interface CartState {
   removeItem: (itemId: string) => void;
   clearCart: () => void;
   setDiscount: (discount: Discount, rewardId: string) => void;
+  setPendingDiscount: (discount: Discount, rewardId: string) => void;
+  applyDiscountToItem: (itemId: string, discountAmountCents: number) => void;
   clearDiscount: () => void;
-  addFreeItem: (itemId: AddableItem) => void;
+  addDiscountedItem: (item: AddableItem, discountAmountCents: number) => void;
 }
 
 export const useCartStore = create<CartState>()((set, get) => ({
@@ -50,37 +54,62 @@ export const useCartStore = create<CartState>()((set, get) => ({
   discountId: null,
   discount: null,
   rewardId: null,
+  pendingDiscount: null,
 
-  addItem: (item) =>
-    set({
-      items: [
-        ...get().items,
-        {
-          ...item,
-          quantity: 1,
-          itemId: `${item.variantId}-${Date.now()}`,
-        },
-      ],
-    }),
+  addItem: (item) => {
+    const state = get();
+    const newItemId = `${item.variantId}-${Date.now()}`;
 
-  updateItemCustomization: (itemId, nextItem) =>
-    set({
-      items: get().items.map((item) =>
-        item.itemId === itemId
-          ? {
-              ...item,
-              ...nextItem,
-              itemId: item.itemId,
-              quantity: item.quantity,
-            }
-          : item,
-      ),
-    }),
+    // If there's a pending discount, apply it to the first item added
+    if (state.pendingDiscount) {
+      const { discount, rewardId } = state.pendingDiscount;
+
+      // Calculate discount amount
+      let discountAmountCents = 0;
+      if (discount.type === "percentage") {
+        discountAmountCents = Math.floor(
+          ((item.unitPriceCents ?? 0) * Number(discount.value)) / 10000
+        );
+      } else {
+        discountAmountCents = Number(discount.value);
+      }
+
+      set({
+        items: [
+          ...state.items,
+          {
+            ...item,
+            quantity: 1,
+            itemId: newItemId,
+            isDiscounted: true,
+            discountAmountCents,
+          },
+        ],
+        discountId: discount.id,
+        discount,
+        rewardId,
+        pendingDiscount: null,
+      });
+    } else {
+      set({
+        items: [
+          ...state.items,
+          {
+            ...item,
+            quantity: 1,
+            itemId: newItemId,
+          },
+        ],
+      });
+    }
+  },
+
+  // ...existing code...
 
   addOneToItem: (itemId) =>
     set({
       items: get().items.map((item) =>
-        item.itemId === itemId
+        item.itemId === itemId && !item.isDiscounted
           ? { ...item, quantity: item.quantity + 1 }
           : item,
       ),
@@ -89,7 +118,7 @@ export const useCartStore = create<CartState>()((set, get) => ({
   removeOneFromItem: (itemId) =>
     set({
       items: get().items.map((item) =>
-        item.itemId === itemId
+        item.itemId === itemId && !item.isDiscounted
           ? { ...item, quantity: Math.max(1, item.quantity - 1) }
           : item,
       ),
@@ -99,7 +128,7 @@ export const useCartStore = create<CartState>()((set, get) => ({
     const itemToRemove = get().items.find((item) => item.itemId === itemId);
     set((state) => ({
       items: state.items.filter((item) => item.itemId !== itemId),
-      ...(itemToRemove?.isFree && {
+      ...(itemToRemove?.isDiscounted && {
         discount: null,
         discountId: null,
         rewardId: null,
@@ -114,6 +143,7 @@ export const useCartStore = create<CartState>()((set, get) => ({
       discountId: null,
       discount: null,
       rewardId: null,
+      pendingDiscount: null,
     }),
 
   setDiscount: (discount, rewardId) =>
@@ -123,15 +153,34 @@ export const useCartStore = create<CartState>()((set, get) => ({
       rewardId,
     }),
 
+  setPendingDiscount: (discount, rewardId) =>
+    set({
+      pendingDiscount: { discount, rewardId },
+    }),
+
+  applyDiscountToItem: (itemId, discountAmountCents) =>
+    set({
+      items: get().items.map((item) =>
+        item.itemId === itemId
+          ? { ...item, isDiscounted: true, discountAmountCents }
+          : item,
+      ),
+    }),
+
   clearDiscount: () =>
     set((state) => ({
       discount: null,
       discountId: null,
       rewardId: null,
-      items: state.items.filter((item) => !item.isFree),
+      pendingDiscount: null,
+      items: state.items.map((item) =>
+        item.isDiscounted
+          ? { ...item, isDiscounted: false, discountAmountCents: undefined }
+          : item,
+      ),
     })),
 
-  addFreeItem: (item) => {
+  addDiscountedItem: (item, discountAmountCents) => {
     set((state) => ({
       items: [
         ...state.items,
@@ -139,9 +188,24 @@ export const useCartStore = create<CartState>()((set, get) => ({
           ...item,
           quantity: 1,
           itemId: `${item.variantId}-${Date.now()}`,
-          isFree: true,
+          isDiscounted: true,
+          discountAmountCents,
         },
       ],
     }));
   },
+
+  updateItemCustomization: (itemId, nextItem) =>
+    set({
+      items: get().items.map((item) =>
+        item.itemId === itemId
+          ? {
+              ...item,
+              ...nextItem,
+              itemId: item.itemId,
+              quantity: item.quantity,
+            }
+          : item,
+      ),
+    }),
 }));
