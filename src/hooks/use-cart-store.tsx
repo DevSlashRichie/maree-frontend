@@ -68,7 +68,7 @@ export const useCartStore = create<CartState>()((set, get) => ({
       let discountAmountCents = 0;
       if (discount.type === "percentage") {
         discountAmountCents = Math.floor(
-          ((item.unitPriceCents ?? 0) * Number(discount.value)) / 10000
+          ((item.unitPriceCents ?? 0) * Number(discount.value)) / 10000,
         );
       } else {
         discountAmountCents = Number(discount.value);

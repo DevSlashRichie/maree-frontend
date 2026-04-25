@@ -24,14 +24,15 @@ export function TotalCard({
   discountType,
   onClearDiscount,
 }: TotalCardProps) {
-  let itemDiscountAmount = discountAmountCents ?? 0;
+  const itemDiscountAmount = discountAmountCents ?? 0;
 
   let orderDiscountAmount = 0;
   if (discountValue && discountType) {
     const discountValueNum = Number(discountValue);
 
     if (discountType === "percentage") {
-      const basisPoints = discountValueNum > 100 ? discountValueNum : discountValueNum * 100;
+      const basisPoints =
+        discountValueNum > 100 ? discountValueNum : discountValueNum * 100;
       orderDiscountAmount = Math.floor((totalCents * basisPoints) / 10000);
     } else {
       orderDiscountAmount = discountValueNum;

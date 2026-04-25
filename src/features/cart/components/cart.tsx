@@ -131,7 +131,8 @@ export function Cart() {
                 Descuento Listo
               </p>
               <p className="text-xs text-text-main/70 m-0 mt-1">
-                Agrega un artículo al carrito para aplicar tu descuento "{pendingDiscount.discount.name}".
+                Agrega un artículo al carrito para aplicar tu descuento "
+                {pendingDiscount.discount.name}".
               </p>
             </div>
           </div>
@@ -172,7 +173,9 @@ export function Cart() {
                 isDiscounted={item.isDiscounted}
                 discountAmountCents={item.discountAmountCents}
                 onIncrement={
-                  item.isDiscounted ? undefined : () => addOneToItem(item.itemId)
+                  item.isDiscounted
+                    ? undefined
+                    : () => addOneToItem(item.itemId)
                 }
                 onDecrement={() => removeOneFromItem(item.itemId)}
                 onRemove={() => removeItem(item.itemId)}

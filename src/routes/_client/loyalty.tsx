@@ -152,7 +152,7 @@ function RouteComponent() {
             displayImage: variant.image ?? undefined,
             unitPriceCents: variantPriceCents,
           },
-          variantPriceCents // Full discount
+          variantPriceCents, // Full discount
         );
         setDiscount(discount, fullReward.id);
         toast.success(`¡${selectedReward.title} agregado al carrito!`);
@@ -163,13 +163,15 @@ function RouteComponent() {
     } else if (isOrderLevelDiscount) {
       // Order-level discount - apply to whole order
       setDiscount(discount, fullReward.id);
-      toast.success(`¡Descuento de ${selectedReward.title} aplicado al pedido!`);
+      toast.success(
+        `¡Descuento de ${selectedReward.title} aplicado al pedido!`,
+      );
     } else {
       // Case 3: Partial discount or specific product → Set as pending
       // User will add items and first item gets the discount
       setPendingDiscount(discount, fullReward.id);
       toast.success(
-        `¡Descuento listo! Agrega un artículo al carrito para aplicarlo.`
+        `¡Descuento listo! Agrega un artículo al carrito para aplicarlo.`,
       );
     }
 
