@@ -7,10 +7,6 @@ import { useCartStore } from "@/hooks/use-cart-store";
 import { usePostV1Orders } from "@/lib/api";
 import type { PostV1OrdersBody } from "@/lib/schemas";
 
-// remempber to edit this later
-// imagine if this goes into production later
-// imagine if mauricio reads this code and thinks
-// "what sort of mess of a project did i receive?"
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1519676867240-f03562e64548?w=160&h=160&fit=crop";
 
