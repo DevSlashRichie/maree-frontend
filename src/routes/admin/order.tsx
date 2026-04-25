@@ -8,8 +8,8 @@ export const Route = createFileRoute("/admin/order")({
 
 function RouteComponent() {
   return (
-    <div>
-      <div className="p-6 border-b border-secondary/20 bg-white">
+    <div className="min-h-screen bg-background-light">
+      <div className="p-6 border-b border-secondary/20">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="font-display text-4xl text-text-main font-bold mb-2 uppercase tracking-wide">
@@ -22,7 +22,9 @@ function RouteComponent() {
           <BranchSelector />
         </div>
       </div>
-      <Orders />
+      <div className="p-6">
+        <Orders />
+      </div>
     </div>
   );
 }
