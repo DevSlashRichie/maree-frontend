@@ -114,8 +114,8 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
           <option value="" disabled>
             Selecciona un estado
           </option>
-          <option value="open">Open</option>
-          <option value="close">Close</option>
+          <option value="open">Abierto</option>
+          <option value="close">Cerrado</option>
         </select>
       </div>
 
@@ -128,7 +128,7 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
           <button
             type="button"
             onClick={addSchedule}
-            className="text-xs font-bold text-secondary"
+            className="text-xs font-bold"
           >
             + Agregar
           </button>

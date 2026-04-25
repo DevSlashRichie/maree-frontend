@@ -5,6 +5,7 @@ export function Nav() {
     { to: "/menu", label: "Menú", icon: "restaurant_menu" },
     { to: "/order", label: "Order", icon: "shopping_bag" },
     { to: "/loyalty", label: "Loyalty", icon: "wallet" },
+    { to: "/profile", label: "Perfil", icon: "person" },
     {
       to: "/admin",
       label: "Admin",
