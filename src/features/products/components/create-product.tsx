@@ -96,9 +96,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
     initialData ? initialData.status === "active" : true,
   );
   const [categoryId, setCategoryId] = useState(initialData?.categoryId ?? "");
-  // Price is stored in cents internally
   const [priceCents, setPriceCents] = useState(
-    initialData ? Number(initialData.price) : 0,
+    initialData ? String(Number(initialData.price) / 100) : "",
   );
 
   const [imagePreview, setImagePreview] = useState<string | null>(
@@ -185,9 +184,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Only allow digits
-    if (/^\d*$/.test(value)) {
-      setPriceCents(value ? parseInt(value, 10) : 0);
+    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+      setPriceCents(value);
     }
   };
 
@@ -211,7 +209,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
         description,
         status: (isActive ? "active" : "inactive") as "active" | "inactive",
         categoryId,
-        price: priceCents * 100,
+        price: convertToCents(parseFloat(priceCents) || 0),
         imageUrl: finalImageUrl,
         ingredients: selectedIngredients.map((i) => ({
           id: i.id,
@@ -501,7 +499,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
               <div className="flex justify-between border-t border-pink-soft/10 pt-3 text-base">
                 <span className="font-medium text-text-main">Total</span>
                 <span className="font-bold text-text-main">
-                  {priceCents || "0"}
+                  {formatPrice(convertToCents(priceCents))}
                 </span>
               </div>
             </div>
