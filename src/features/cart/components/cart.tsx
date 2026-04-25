@@ -1,11 +1,18 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Gift, ShoppingBag } from "lucide-react";
+import toast from "react-hot-toast";
 import { ItemCard } from "@/features/cart/components/item-card.tsx";
 import { TotalCard } from "@/features/cart/components/total-card.tsx";
 import { useCartStore } from "@/hooks/use-cart-store";
+import { usePostV1Orders } from "@/lib/api";
+import type { PostV1OrdersBody } from "@/lib/schemas";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1519676867240-f03562e64548?w=160&h=160&fit=crop";
+
+const DEFAULT_BRANCH_ID =
+  import.meta.env.VITE_DEFAULT_BRANCH_ID ??
+  "1c43d953-885e-4bb0-9d96-9e763be00428";
 
 function buildItemDescription(modifiers: { delta: number }[], notes: string) {
   const removedCount = modifiers
@@ -27,21 +34,69 @@ function buildItemDescription(modifiers: { delta: number }[], notes: string) {
 export function Cart() {
   const navigate = useNavigate();
   const items = useCartStore((state) => state.items);
+  const discountId = useCartStore((state) => state.discountId);
+  const rewardId = useCartStore((state) => state.rewardId);
+  const discount = useCartStore((state) => state.discount);
+  const pendingDiscount = useCartStore((state) => state.pendingDiscount);
+  const clearDiscount = useCartStore((state) => state.clearDiscount);
   const addOneToItem = useCartStore((state) => state.addOneToItem);
   const removeOneFromItem = useCartStore((state) => state.removeOneFromItem);
   const removeItem = useCartStore((state) => state.removeItem);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const { trigger: postOrder, isMutating: isPostingOrder } = usePostV1Orders();
 
   const totalCents = items.reduce(
     (sum, item) => sum + (item.unitPriceCents ?? 0) * item.quantity,
     0,
   );
 
-  const handleConfirmOrder = () => {
+  const discountAmountCents = items.reduce(
+    (sum, item) => sum + (item.discountAmountCents ?? 0),
+    0,
+  );
+
+  const handleConfirmOrder = async () => {
     if (items.length === 0) {
+      toast.error("Tu carrito esta vacio");
       return;
     }
 
-    navigate({ to: "/order-setup" });
+    if (items.some((item) => !item.variantId)) {
+      toast.error("Hay productos invalidos en el carrito");
+      return;
+    }
+
+    console.log(items);
+
+    const payload: PostV1OrdersBody & { rewardId?: string } = {
+      items: items.map((item) => ({
+        id: item.variantId,
+        quantity: item.quantity,
+        notes: item.itemNotes?.trim() || undefined,
+        modifiers: item.modifiers,
+        isDiscounted: item.isDiscounted ?? false,
+        discountAmountCents: item.discountAmountCents ?? 0,
+      })),
+      totalPriceCents: totalCents,
+      branchId: DEFAULT_BRANCH_ID,
+      ...(discountId && { discountId }),
+      ...(rewardId && { rewardId }),
+    };
+
+    try {
+      const response = await postOrder(payload);
+
+      if (response.status === 201) {
+        clearCart();
+        toast.success("Pedido confirmado");
+        navigate({ to: "/menu" });
+        return;
+      }
+
+      toast.error("No se pudo confirmar el pedido");
+    } catch {
+      toast.error("No se pudo confirmar el pedido");
+    }
   };
 
   return (
@@ -63,6 +118,21 @@ export function Cart() {
             Revisa tu selección antes de confirmar.
           </p>
         </div>
+
+        {pendingDiscount && (
+          <div className="rounded-2xl border border-accent/40 bg-accent/10 px-5 py-4 flex items-start gap-3">
+            <Gift className="w-5 h-5 text-accent mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-display text-sm font-semibold text-accent m-0">
+                Descuento Listo
+              </p>
+              <p className="text-xs text-text-main/70 m-0 mt-1">
+                Agrega un artículo al carrito para aplicar tu descuento "
+                {pendingDiscount.discount.name}".
+              </p>
+            </div>
+          </div>
+        )}
 
         {items.length === 0 ? (
           <div className="rounded-3xl border border-pink-soft/35 bg-card-light px-5 py-8 text-center flex flex-col items-center gap-3">
@@ -96,7 +166,13 @@ export function Cart() {
                 unitPriceCents={item.unitPriceCents ?? 0}
                 quantity={item.quantity}
                 imageUrl={item.displayImage ?? FALLBACK_IMAGE}
-                onIncrement={() => addOneToItem(item.itemId)}
+                isDiscounted={item.isDiscounted}
+                discountAmountCents={item.discountAmountCents}
+                onIncrement={
+                  item.isDiscounted
+                    ? undefined
+                    : () => addOneToItem(item.itemId)
+                }
                 onDecrement={() => removeOneFromItem(item.itemId)}
                 onRemove={() => removeItem(item.itemId)}
                 onCustomize={() =>
@@ -115,9 +191,14 @@ export function Cart() {
 
         <TotalCard
           totalCents={totalCents}
+          discountAmountCents={discountAmountCents}
+          discountName={discount?.name}
+          discountType={discount?.type}
+          discountValue={discount?.value}
           onConfirm={handleConfirmOrder}
-          isSubmitting={false}
+          isSubmitting={isPostingOrder}
           isDisabled={items.length === 0}
+          onClearDiscount={clearDiscount}
         />
       </div>
     </div>

@@ -1,12 +1,5 @@
 import { createFileRoute, getRouteApi, Link } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  Eye,
-  EyeOff,
-  Package,
-  Pencil,
-  Tag,
-} from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Package, Pencil, Tag } from "lucide-react";
 import { formatPrice } from "@/lib/money";
 
 export const Route = createFileRoute("/admin/inventory/$productId/detail")({
