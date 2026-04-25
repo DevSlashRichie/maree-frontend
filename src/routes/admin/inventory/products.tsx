@@ -17,10 +17,19 @@ import {
   Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useDeleteV1ProductsVariantId, useGetV1ProductsVariants } from "@/lib/api";
+import {
+  useDeleteV1ProductsVariantId,
+  useGetV1ProductsVariants,
+} from "@/lib/api";
 import { formatPrice } from "@/lib/money";
 
-function DeleteButton({ id, onDeleted }: { id: string; onDeleted: () => void }) {
+function DeleteButton({
+  id,
+  onDeleted,
+}: {
+  id: string;
+  onDeleted: () => void;
+}) {
   const { trigger, isMutating } = useDeleteV1ProductsVariantId(id);
 
   async function handleDelete() {
@@ -53,7 +62,7 @@ type Variant = {
   id: string;
   name: string;
   description: string | null;
-  price: string | number; 
+  price: string | number;
   image: string | null;
   productId: string;
   createdAt: string;
@@ -172,7 +181,10 @@ function ProductsComponent() {
             >
               <Pencil className="w-4 h-4" />
             </Link>
-            <DeleteButton id={info.row.original.id} onDeleted={() => mutate()} />
+            <DeleteButton
+              id={info.row.original.id}
+              onDeleted={() => mutate()}
+            />
           </div>
         ),
       }),
