@@ -1,21 +1,14 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Check, Minus, Plus, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { Category } from "@/features/products/components/category-picker";
 import { useCartStore } from "@/hooks/use-cart-store";
 import {
-  useGetV1ProductsCategories,
-  useGetV1ProductsIngredients,
   useGetV1ProductsVariantId,
+  useGetV1ProductsVariantsAllowed,
 } from "@/lib/api";
 import { formatCentsToDisplay } from "@/lib/money";
-import {
-  findCategoryPathById,
-  getVisibleIngredientOptions,
-  type IngredientOption,
-  normalizeCategories,
-  normalizeText,
-} from "./customize-product-utils.tsx";
+import type { GetV1ProductsVariantsAllowed200Item } from "@/lib/schemas/getV1ProductsVariantsAllowed200Item.ts";
+import { normalizeText } from "./customize-product-utils.tsx";
 
 interface Component {
   id: string;
@@ -28,7 +21,6 @@ interface Component {
 interface SelectedExtra {
   productId: string;
   productName: string;
-  categoryName: string;
   unitPriceCents: number;
   quantity: number;
 }
@@ -51,10 +43,10 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   const isEditing = Boolean(itemId && editingItem);
   const { data: variantResponse, isLoading: variantLoading } =
     useGetV1ProductsVariantId(resolvedVariantId);
-  const { data: categoriesResponse, isLoading: categoriesLoading } =
-    useGetV1ProductsCategories();
   const { data: ingredientsResponse, isLoading: ingredientsLoading } =
-    useGetV1ProductsIngredients();
+    useGetV1ProductsVariantsAllowed({
+      variantId,
+    });
 
   const [removedComponents, setRemovedComponents] = useState<Set<string>>(
     new Set(),
@@ -68,9 +60,6 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
 
   const hasValidVariant = Boolean(
     variantResponse && variantResponse.status === 200,
-  );
-  const hasValidCategories = Boolean(
-    categoriesResponse && categoriesResponse.status === 200,
   );
 
   const variant = (
@@ -95,29 +84,9 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     components: Component[];
   };
 
-  const categories = hasValidCategories
-    ? normalizeCategories(
-        categoriesResponse?.data as Category[] | { categories?: Category[] },
-      )
-    : [];
-  const categoryPath = findCategoryPathById(categories, variant.categoryId);
-  const categoryPathNames = categoryPath.map((node) => node.name);
-  const resolvedPath =
-    Array.isArray(variant.path) && variant.path.length > 0
-      ? variant.path
-      : categoryPathNames;
-
-  const currentCategoryName = categoryPath.at(-1)?.name ?? "Sin categoría";
-  const categoryLabel =
-    resolvedPath.length > 0 ? resolvedPath.join(" / ") : currentCategoryName;
-
   const ingredientGroups =
     ingredientsResponse?.status === 200 ? ingredientsResponse.data : [];
-  const ingredientOptions = getVisibleIngredientOptions(
-    ingredientGroups,
-    [],
-    "",
-  );
+  const ingredientOptions = ingredientGroups;
 
   const filteredIngredients = ingredientOptions.filter((ingredient) => {
     const query = normalizeText(ingredientSearch);
@@ -126,7 +95,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     );
     if (alreadyAdded) return false;
     if (!query) return true;
-    return normalizeText(ingredient.productName).includes(query);
+    return normalizeText(ingredient.name).includes(query);
   });
 
   const activeComponents = variant.components.filter(
@@ -151,7 +120,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     });
   };
 
-  const addExtra = (ingredient: IngredientOption) => {
+  const addExtra = (ingredient: GetV1ProductsVariantsAllowed200Item) => {
     setAddedExtras((prev) => {
       const existing = prev.find((extra) => extra.productId === ingredient.id);
       if (existing) {
@@ -166,9 +135,8 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
         ...prev,
         {
           productId: ingredient.id,
-          productName: ingredient.productName,
-          categoryName: ingredient.categoryName,
-          unitPriceCents: ingredient.unitPriceCents,
+          productName: ingredient.name,
+          unitPriceCents: Number(ingredient.price),
           quantity: 1,
         },
       ];
@@ -200,6 +168,12 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     );
   };
 
+  const deleteExtra = (productId: string) => {
+    setAddedExtras((prev) =>
+      prev.filter((extra) => extra.productId !== productId),
+    );
+  };
+
   useEffect(() => {
     if (!hasValidVariant) return;
 
@@ -227,9 +201,8 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
           );
           return {
             productId: modifier.id,
-            productName: option?.productName ?? "Ingrediente extra",
-            categoryName: option?.categoryName ?? "Ingrediente",
-            unitPriceCents: option?.unitPriceCents ?? 0,
+            productName: option?.name ?? "Ingrediente extra",
+            unitPriceCents: option ? Number(option.price) : 0,
             quantity: modifier.delta,
           };
         });
@@ -292,7 +265,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     setShowAddedToCartScreen(true);
   };
 
-  if (variantLoading || categoriesLoading) {
+  if (variantLoading) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
         <p className="text-sm text-text-main/40">Cargando...</p>
@@ -300,7 +273,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     );
   }
 
-  if (!hasValidVariant || !hasValidCategories) {
+  if (!hasValidVariant) {
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
         <p className="text-sm text-red-400">Error al cargar el producto.</p>
@@ -330,9 +303,6 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
               <h1 className="font-display text-3xl sm:text-4xl text-white font-normal m-0 mt-1">
                 {variant.name}
               </h1>
-              <p className="text-white/75 text-xs sm:text-sm mt-1 m-0">
-                {categoryLabel}
-              </p>
             </div>
           </div>
 
@@ -424,7 +394,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
             </div>
           ) : ingredientOptions.length === 0 ? (
             <div className="rounded-2xl border border-pink-soft/20 bg-background-light px-4 py-3 text-xs text-text-main/35">
-              No hay ingredientes disponibles para esta categoría.
+              No hay ingredientes disponibles.
             </div>
           ) : (
             <div className="relative">
@@ -456,11 +426,11 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                       className="w-full text-left px-3 py-2.5 border-b border-pink-soft/10 last:border-b-0 hover:bg-pink-soft/10 transition-colors cursor-pointer"
                     >
                       <span className="block text-sm text-text-main">
-                        {ingredient.productName}
+                        {ingredient.name}
                       </span>
                       <span className="block text-[11px] text-text-main/35">
-                        {ingredient.categoryName} · +$
-                        {formatCentsToDisplay(ingredient.unitPriceCents)}
+                        +$
+                        {formatCentsToDisplay(ingredient.price)}
                       </span>
                     </button>
                   ))}
@@ -482,13 +452,12 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                         {extra.productName}
                       </p>
                       <p className="text-[11px] text-text-main/40 m-0 mt-0.5">
-                        {extra.categoryName} · $
-                        {formatCentsToDisplay(extra.unitPriceCents)} c/u
+                        ${formatCentsToDisplay(extra.unitPriceCents)} c/u
                       </p>
                     </div>
                     <button
                       type="button"
-                      onClick={() => decreaseExtra(extra.productId)}
+                      onClick={() => deleteExtra(extra.productId)}
                       className="text-text-main/25 hover:text-red-400 transition-colors cursor-pointer"
                     >
                       <X className="w-4 h-4" />

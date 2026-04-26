@@ -32,12 +32,12 @@ export function OrderDetails({
         </p>
       </div>
 
-      <hr className="border-pink-soft/20" />
-
-      {/* TODO: reemplazar con fetch real de items cuando esté el endpoint */}
-      <div className="flex flex-wrap gap-3 items-stretch">
-        <p className="text-sm text-text-main/50">Cargando items...</p>
-      </div>
+      {order.order.note && (
+        <>
+          <hr className="border-pink-soft/20" />
+          <p className="text-sm text-text-main/70">{order.order.note}</p>
+        </>
+      )}
 
       <hr className="border-pink-soft/20" />
 
