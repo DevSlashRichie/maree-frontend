@@ -30,13 +30,13 @@ function InventoryLayout() {
                   to={tab.to}
                   className={`px-4 py-2 text-sm font-medium transition-colors relative ${
                     isActive(tab.to)
-                      ? "text-secondary"
+                      ? "text-[#C4919A]"
                       : "text-text-main/60 hover:text-text-main"
                   }`}
                 >
                   {tab.name}
                   {isActive(tab.to) && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-secondary" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#C4919A]" />
                   )}
                 </Link>
               ))}

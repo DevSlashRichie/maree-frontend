@@ -81,7 +81,7 @@ function ProfileComponent() {
     <div className="texture-bg min-h-screen pb-20 pt-10 px-4">
       <div className="max-w-md mx-auto bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-pink-soft/10">
         <div className="flex flex-col items-center mb-10">
-          <h1 className="text-3xl font-display lowercase italic tracking-tight text-gray-900">
+          <h1 className="text-3xl font-display italic tracking-tight text-gray-900">
             Mi Perfil
           </h1>
         </div>
@@ -118,7 +118,7 @@ function ProfileComponent() {
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        className="w-full px-4 py-3 bg-white border border-pink-soft/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-soft/20"
+                        className="w-full px-4 py-3 bg-white border border-pink-soft/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-soft/20 text-gray-800 font-medium"
                       />
                       {field.state.meta.errors && (
                         <em className="text-xs text-red-500 pl-1">
@@ -158,7 +158,7 @@ function ProfileComponent() {
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        className="w-full px-4 py-3 bg-white border border-pink-soft/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-soft/20"
+                        className="w-full px-4 py-3 bg-white border border-pink-soft/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-soft/20 text-gray-800 font-medium"
                       />
                       {field.state.meta.errors && (
                         <em className="text-xs text-red-500 pl-1">
@@ -194,7 +194,7 @@ function ProfileComponent() {
                   {([canSubmit, isSubmitting]) => (
                     <button
                       disabled={!canSubmit || isSubmitting}
-                      className="flex-1 py-3 bg-pink-soft text-white rounded-2xl font-bold shadow-lg hover:bg-pink-soft/90 transition-colors disabled:opacity-50"
+                      className="flex-1 py-3 bg-[#C4919A] text-white rounded-2xl font-bold shadow-lg hover:bg-[#C4919A]/90 transition-colors disabled:opacity-50"
                       type="submit"
                     >
                       {isSubmitting ? "Guardando..." : "Guardar"}
@@ -218,7 +218,7 @@ function ProfileComponent() {
                 className="w-full py-3 bg-charcoal text-white rounded-2xl font-bold shadow-lg hover:bg-charcoal/90 transition-colors"
                 type="button"
               >
-                Editar Detalles
+                Editar
               </button>
             )}
 
