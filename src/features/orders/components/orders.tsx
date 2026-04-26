@@ -8,11 +8,7 @@ import { OrderDetails } from "./order-details";
 
 export function Orders() {
   const { selectedBranch } = useBranchStore();
-  const { data, isLoading, mutate } = useGetV1Orders({
-    swr: {
-      swrKey: () => ["http://localhost:8383/v1/orders", selectedBranch?.id],
-    },
-  });
+  const { data, isLoading, mutate } = useGetV1Orders();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeOrder, setActiveOrder] = useState<GetV1Orders200Item | null>(
     null,

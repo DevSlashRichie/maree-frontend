@@ -124,7 +124,6 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
           <p className="text-[10px] uppercase tracking-[0.15em] text-text-main/40 font-semibold">
             Horarios
           </p>
-
           <button
             type="button"
             onClick={addSchedule}
@@ -141,43 +140,48 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
         {form.schedules.map((s) => (
           <div
             key={s.id}
-            className="flex items-center gap-2 p-2 rounded-xl border border-secondary/10"
+            className="flex flex-col gap-2 p-2 rounded-xl border border-secondary/10"
           >
-            <select
-              value={s.weekday}
-              onChange={(e) =>
-                updateSchedule(s.id, "weekday", Number(e.target.value))
-              }
-              className="text-sm border rounded-lg px-2 py-1"
-            >
-              {days.map((day, index) => (
-                <option key={day} value={index}>
-                  {day}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between gap-2">
+              <select
+                value={s.weekday}
+                onChange={(e) =>
+                  updateSchedule(s.id, "weekday", Number(e.target.value))
+                }
+                className="text-sm border rounded-lg px-2 py-1 flex-1"
+              >
+                {days.map((day, index) => (
+                  <option key={day} value={index}>
+                    {day}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => removeSchedule(s.id)}
+                className="text-xs text-red-400 hover:text-red-600 font-bold px-2"
+              >
+                ✕
+              </button>
+            </div>
 
-            <input
-              type="time"
-              value={s.fromTime}
-              onChange={(e) => updateSchedule(s.id, "fromTime", e.target.value)}
-              className="text-sm border rounded-lg px-2 py-1"
-            />
-
-            <input
-              type="time"
-              value={s.toTime}
-              onChange={(e) => updateSchedule(s.id, "toTime", e.target.value)}
-              className="text-sm border rounded-lg px-2 py-1"
-            />
-
-            <button
-              type="button"
-              onClick={() => removeSchedule(s.id)}
-              className="text-xs text-red-500 font-bold"
-            >
-              ✕
-            </button>
+            <div className="flex items-center gap-2">
+              <input
+                type="time"
+                value={s.fromTime}
+                onChange={(e) =>
+                  updateSchedule(s.id, "fromTime", e.target.value)
+                }
+                className="text-sm border rounded-lg px-2 py-1 flex-1"
+              />
+              <span className="text-xs text-text-main/40">—</span>
+              <input
+                type="time"
+                value={s.toTime}
+                onChange={(e) => updateSchedule(s.id, "toTime", e.target.value)}
+                className="text-sm border rounded-lg px-2 py-1 flex-1"
+              />
+            </div>
           </div>
         ))}
       </div>
@@ -196,6 +200,7 @@ export function CreateBranchForm({ onClose, onSuccess }: Props) {
         <button
           type="button"
           disabled={isCreatingBranch}
+          style={{ backgroundColor: "#C4919A" }}
           onClick={async () => {
             setError(null);
 

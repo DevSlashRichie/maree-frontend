@@ -1,4 +1,4 @@
-import { Minus, Pencil, Plus, Trash2 } from "lucide-react";
+import { Minus, Pencil, Plus, Tag, Trash2 } from "lucide-react";
 import { formatCentsToDisplay } from "@/lib/money";
 
 interface ItemCardProps {
@@ -8,6 +8,8 @@ interface ItemCardProps {
   unitPriceCents: number;
   quantity: number;
   imageUrl: string;
+  isDiscounted?: boolean;
+  discountAmountCents?: number;
   onRemove?: () => void;
   onIncrement?: () => void;
   onDecrement?: () => void;
@@ -21,12 +23,17 @@ export function ItemCard({
   unitPriceCents,
   quantity,
   imageUrl,
+  isDiscounted,
+  discountAmountCents,
   onRemove,
   onIncrement,
   onDecrement,
   onCustomize,
 }: ItemCardProps) {
   const lineTotalCents = unitPriceCents * quantity;
+  const finalLineTotalCents = isDiscounted
+    ? Math.max(0, lineTotalCents - (discountAmountCents ?? 0))
+    : lineTotalCents;
 
   return (
     <article
@@ -41,9 +48,19 @@ export function ItemCard({
         />
 
         <div className="min-w-0 flex-1">
-          <h3 className="font-display text-xl sm:text-2xl font-normal text-text-main m-0 leading-tight">
-            {name}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-display text-xl sm:text-2xl font-normal text-text-main m-0 leading-tight">
+              {name}
+            </h3>
+            {isDiscounted && (
+              <div className="flex items-center gap-1 bg-accent/20 px-2 py-1 rounded-full">
+                <Tag className="w-3 h-3 text-accent" />
+                <span className="text-xs font-semibold text-accent">
+                  Descuento
+                </span>
+              </div>
+            )}
+          </div>
           {description && (
             <p className="text-xs sm:text-sm text-text-main/55 mt-1 m-0 line-clamp-3">
               {description}
@@ -80,7 +97,7 @@ export function ItemCard({
         </div>
 
         <p className="font-display text-lg sm:text-xl text-text-main m-0">
-          ${formatCentsToDisplay(lineTotalCents)}
+          ${formatCentsToDisplay(finalLineTotalCents)}
         </p>
       </div>
 

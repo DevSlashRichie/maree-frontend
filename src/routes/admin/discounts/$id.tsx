@@ -134,7 +134,9 @@ function DiscountEditModal({
                 <select
                   id={field.name}
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value as any)}
+                  onChange={(e) =>
+                    field.handleChange(e.target.value as "percentage" | "fixed")
+                  }
                   className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary/30 outline-none"
                 >
                   {DISCOUNT_TYPES.map((t) => (
@@ -203,7 +205,9 @@ function DiscountEditModal({
                 <select
                   id={field.name}
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value as any)}
+                  onChange={(e) =>
+                    field.handleChange(e.target.value as "active" | "inactive")
+                  }
                   className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary/30 outline-none"
                 >
                   {DISCOUNT_STATES.map((s) => (
@@ -321,121 +325,113 @@ function RouteComponent() {
   }
 
   return (
-    <div className="min-h-screen bg-background-light p-8">
-      <div className="max-w-4xl mx-auto">
-        <Link
-          to="/admin/discounts"
-          className="inline-flex items-center gap-2 text-text-main/60 hover:text-text-main mb-8 transition-colors group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-semibold uppercase tracking-wider">
-            Volver al listado
-          </span>
-        </Link>
+    <div className="min-h-screen bg-background-light">
+      <div className="p-8">
+        <div className="max-w-4xl mx-auto">
+          <Link
+            to="/admin/discounts"
+            className="inline-flex items-center gap-2 text-text-main/60 hover:text-text-main mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm font-medium">Volver al listado</span>
+          </Link>
 
-        <div className="flex flex-col md:flex-row gap-8">
-          <aside className="w-full md:w-80">
-            <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgba(232,213,213,0.3)] sticky top-8">
-              <div className="flex flex-col items-center text-center mb-8">
-                <div className="w-20 h-20 rounded-3xl bg-secondary flex items-center justify-center mb-4 shadow-inner">
-                  <Tag className="w-10 h-10 text-text-main" />
+          <div className="flex flex-col md:flex-row gap-6">
+            <aside className="w-full md:w-64 flex-shrink-0">
+              <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sticky top-8">
+                <div className="flex flex-col items-center text-center mb-6">
+                  <div className="w-20 h-20 rounded-full bg-[#E8E4DF] flex items-center justify-center mb-4">
+                    <Tag className="w-8 h-8 text-text-main/40" />
+                  </div>
+                  <h1 className="text-base font-bold text-text-main leading-tight">
+                    {discount.name}
+                  </h1>
+                  <span
+                    className={`mt-1.5 px-3 py-0.5 rounded-full text-xs font-medium ${
+                      discount.state === "active"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-500"
+                    }`}
+                  >
+                    {discount.state === "active" ? "Activo" : "Inactivo"}
+                  </span>
+                  <div className="mt-4">
+                    <p className="text-xs font-bold text-text-main/40 uppercase tracking-widest mb-1">
+                      Valor
+                    </p>
+                    <p className="text-2xl font-black text-text-main">
+                      {discount.type === "percentage"
+                        ? `${discount.value}%`
+                        : `$${discount.value}`}
+                    </p>
+                  </div>
                 </div>
-                <h1 className="text-2xl font-bold text-text-main leading-tight mb-2">
-                  {discount.name}
-                </h1>
-                <span
-                  className={`px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${
-                    discount.state === "active"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
+
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#2F3437] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#2F3437]/90 transition-colors"
                 >
-                  {discount.state === "active" ? "Activo" : "Inactivo"}
-                </span>
+                  <Pencil className="w-3 h-3" />
+                  Editar
+                </button>
               </div>
+            </aside>
 
-              <div className="bg-background-light/50 rounded-2xl p-6 mb-8 border border-gray-100">
-                <div className="text-center">
-                  <p className="text-xs font-bold text-text-main/40 uppercase tracking-widest mb-1">
-                    Valor
+            <main className="flex-1">
+              <div className="bg-white rounded-2xl border border-gray-200 divide-y divide-gray-100">
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Hash className="w-5 h-5 text-text-main/40" />
+                    <span className="text-sm font-medium text-text-main/60">
+                      Código Promo
+                    </span>
+                  </div>
+                  <p className="text-text-main font-medium ml-8">
+                    {discount.code || "Sin código"}
                   </p>
-                  <p className="text-4xl font-black text-text-main">
-                    {discount.type === "percentage"
-                      ? `${discount.value}%`
-                      : `$${discount.value}`}
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Calendar className="w-5 h-5 text-text-main/40" />
+                    <span className="text-sm font-medium text-text-main/60">
+                      Vigencia
+                    </span>
+                  </div>
+                  <p className="text-text-main font-medium ml-8">
+                    {new Date(discount.startDate).toLocaleDateString("es-CL")} -{" "}
+                    {new Date(discount.endDate).toLocaleDateString("es-CL")}
                   </p>
                 </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(true)}
-                className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
-              >
-                <Pencil className="w-4 h-4" />
-                EDITAR INFORMACIÓN
-              </button>
-            </div>
-          </aside>
-
-          <main className="flex-1">
-            <div className="grid grid-cols-1 gap-6">
-              <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgba(232,213,213,0.3)] divide-y divide-gray-100">
-                <div className="py-6 first:pt-0">
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                      <Hash className="w-5 h-5 text-blue-500" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-text-main/40 uppercase tracking-widest">
-                        Código Promo
-                      </p>
-                      <p className="text-lg font-bold text-text-main">
-                        {discount.code || "Sin código"}
-                      </p>
-                    </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Users className="w-5 h-5 text-text-main/40" />
+                    <span className="text-sm font-medium text-text-main/60">
+                      Uso
+                    </span>
                   </div>
+                  <p className="text-text-main font-medium ml-8">
+                    {discount.currentUses}{" "}
+                    {discount.maxUses ? `/ ${discount.maxUses}` : "usos"}
+                  </p>
                 </div>
 
-                <div className="py-6">
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-orange-500" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-text-main/40 uppercase tracking-widest">
-                        Vigencia
-                      </p>
-                      <p className="text-lg font-bold text-text-main">
-                        {new Date(discount.startDate).toLocaleDateString(
-                          "es-CL",
-                        )}{" "}
-                        -{" "}
-                        {new Date(discount.endDate).toLocaleDateString("es-CL")}
-                      </p>
-                    </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Clock className="w-5 h-5 text-text-main/40" />
+                    <span className="text-sm font-medium text-text-main/60">
+                      Creación
+                    </span>
                   </div>
+                  <p className="text-text-main font-medium ml-8">
+                    {new Date(discount.createdAt).toLocaleString("es-CL")}
+                  </p>
                 </div>
 
-                <div className="py-6">
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-purple-500" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-text-main/40 uppercase tracking-widest">
-                        Uso
-                      </p>
-                      <p className="text-lg font-bold text-text-main">
-                        {discount.currentUses}{" "}
-                        {discount.maxUses ? `/ ${discount.maxUses}` : "usos"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="py-6 last:pb-0">
-                  <div className="flex items-center gap-4">
+                <div className="p-6">
+                  <div className="flex items-center gap-3">
                     {discount.isActive === "true" ||
                     (discount.state === "active" &&
                       new Date(discount.endDate) > new Date()) ? (
@@ -452,19 +448,8 @@ function RouteComponent() {
                   </div>
                 </div>
               </div>
-
-              <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgba(232,213,213,0.3)]">
-                <h3 className="text-lg font-bold text-text-main mb-4 uppercase tracking-wider flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-text-main/40" />
-                  Registro
-                </h3>
-                <p className="text-sm text-text-main/60">
-                  Creado el{" "}
-                  {new Date(discount.createdAt).toLocaleString("es-CL")}
-                </p>
-              </div>
-            </div>
-          </main>
+            </main>
+          </div>
         </div>
       </div>
 
