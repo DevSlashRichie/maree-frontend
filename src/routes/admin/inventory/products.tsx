@@ -17,7 +17,42 @@ import {
   Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useGetV1ProductsVariants } from "@/lib/api";
+import {
+  useDeleteV1ProductsVariantId,
+  useGetV1ProductsVariants,
+} from "@/lib/api";
+import { formatPrice } from "@/lib/money";
+
+function DeleteButton({
+  id,
+  onDeleted,
+}: {
+  id: string;
+  onDeleted: () => void;
+}) {
+  const { trigger, isMutating } = useDeleteV1ProductsVariantId(id);
+
+  async function handleDelete() {
+    if (!confirm("¿Estás seguro de que deseas eliminar este producto?")) return;
+    await trigger();
+    onDeleted();
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleDelete}
+      disabled={isMutating}
+      className="p-2 hover:bg-red-50 rounded-lg transition-colors text-text-main/40 hover:text-red-500 disabled:opacity-40"
+    >
+      {isMutating ? (
+        <Loader2 className="w-4 h-4 animate-spin" />
+      ) : (
+        <Trash2 className="w-4 h-4" />
+      )}
+    </button>
+  );
+}
 
 export const Route = createFileRoute("/admin/inventory/products")({
   component: ProductsComponent,
@@ -27,7 +62,7 @@ type Variant = {
   id: string;
   name: string;
   description: string | null;
-  price: string;
+  price: string | number;
   image: string | null;
   productId: string;
   createdAt: string;
@@ -44,90 +79,6 @@ type Variant = {
 
 const columnHelper = createColumnHelper<Variant>();
 
-const columns = [
-  columnHelper.accessor("name", {
-    header: "Producto / Variante",
-    cell: (info) => (
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center border border-secondary/20 shrink-0">
-          <Package className="w-5 h-5 text-secondary" />
-        </div>
-        <div className="flex flex-col min-w-0">
-          <span className="font-medium text-text-main truncate">
-            {info.getValue()}
-          </span>
-        </div>
-      </div>
-    ),
-  }),
-  columnHelper.accessor("product.category.name", {
-    header: "Categoría",
-    cell: (info) => (
-      <div className="flex items-center gap-2">
-        <Tag className="w-3.5 h-3.5 text-text-main/40" />
-        <span className="text-text-main/70 text-sm">
-          {info.getValue() || "Sin categoría"}
-        </span>
-      </div>
-    ),
-  }),
-  columnHelper.accessor("price", {
-    header: "Precio",
-    cell: (info) => (
-      <span className="font-semibold text-text-main text-sm">
-        ${parseFloat(info.getValue()).toLocaleString()}
-      </span>
-    ),
-  }),
-  columnHelper.accessor("product.status", {
-    header: "Estado",
-    cell: (info) => {
-      const isActive = info.getValue() === "active";
-      return (
-        <div className="flex items-center gap-1.5">
-          {isActive ? (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-100">
-              <Eye className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">
-                Activo
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 text-gray-400 border border-gray-100">
-              <EyeOff className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">
-                Inactivo
-              </span>
-            </div>
-          )}
-        </div>
-      );
-    },
-  }),
-  columnHelper.display({
-    id: "actions",
-    header: "Acciones",
-    cell: (info) => (
-      <div className="flex items-center gap-2">
-        <Link
-          to={"/admin/products/$productId" as any}
-          params={{ productId: info.row.original.productId } as any}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-text-main/40 hover:text-secondary"
-        >
-          <Pencil className="w-4 h-4" />
-        </Link>
-        <button
-          type="button"
-          onClick={() => console.log("Delete", info.row.original.id)}
-          className="p-2 hover:bg-red-50 rounded-lg transition-colors text-text-main/40 hover:text-red-500"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
-    ),
-  }),
-];
-
 function ProductsComponent() {
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -135,11 +86,11 @@ function ProductsComponent() {
     data: apiResponse,
     isLoading,
     error,
+    mutate,
   } = useGetV1ProductsVariants(undefined);
 
   const variants = useMemo(() => {
-    const rawData = apiResponse as any;
-    return rawData?.variants || rawData?.data?.variants || [];
+    return apiResponse?.status === 200 ? apiResponse.data.variants : [];
   }, [apiResponse]);
 
   const filteredData = useMemo(() => {
@@ -149,6 +100,97 @@ function ProductsComponent() {
       return matchStatus;
     });
   }, [variants, filterStatus]);
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("name", {
+        header: "Producto / Variante",
+        cell: (info) => (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center border border-secondary/20 shrink-0">
+              <Package className="w-5 h-5 text-secondary" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <Link
+                to="/admin/inventory/$productId/detail"
+                params={{ productId: info.row.original.id }}
+                className="font-medium text-text-main truncate hover:text-secondary hover:underline transition-all cursor-pointer"
+              >
+                {info.getValue()}
+              </Link>
+            </div>
+          </div>
+        ),
+      }),
+      columnHelper.accessor("product.category.name", {
+        header: "Categoría",
+        cell: (info) => (
+          <div className="flex items-center gap-2">
+            <Tag className="w-3.5 h-3.5 text-text-main/40" />
+            <span className="text-text-main/70 text-sm">
+              {info.getValue() || "Sin categoría"}
+            </span>
+          </div>
+        ),
+      }),
+      columnHelper.accessor("price", {
+        header: "Precio",
+        cell: (info) => {
+          const priceInUnits = Number(info.getValue()) / 100;
+          return (
+            <span className="font-semibold text-text-main text-sm">
+              {formatPrice(priceInUnits)}
+            </span>
+          );
+        },
+      }),
+      columnHelper.accessor("product.status", {
+        header: "Estado",
+        cell: (info) => {
+          const isActive = info.getValue() === "active";
+          return (
+            <div className="flex items-center gap-1.5">
+              {isActive ? (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-100">
+                  <Eye className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">
+                    Activo
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 text-gray-400 border border-gray-100">
+                  <EyeOff className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">
+                    Inactivo
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        },
+      }),
+      columnHelper.display({
+        id: "actions",
+        header: "Acciones",
+        cell: (info) => (
+          <div className="flex items-center gap-2">
+            <Link
+              to="/admin/inventory/$productId"
+              params={{ productId: info.row.original.id }}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-text-main/40 hover:text-secondary"
+            >
+              <Pencil className="w-4 h-4" />
+            </Link>
+            <DeleteButton
+              id={info.row.original.id}
+              onDeleted={() => mutate()}
+            />
+          </div>
+        ),
+      }),
+    ],
+    [mutate],
+  );
 
   const table = useReactTable({
     data: filteredData,
