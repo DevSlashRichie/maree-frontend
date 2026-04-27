@@ -1,9 +1,11 @@
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Check, MapPin, ShoppingBag, Utensils } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { useBranchStore } from "@/hooks/use-branch-store";
-import { useGetV1Branches } from "@/lib/api";
-import type { GetV1Branches200Item } from "@/lib/schemas";
+import { useCartStore } from "@/hooks/use-cart-store";
+import { useGetV1Branches, usePostV1Orders } from "@/lib/api";
+import type { GetV1Branches200Item, PostV1OrdersBody } from "@/lib/schemas";
 
 interface BranchSelectorProps {
   branches: GetV1Branches200Item[];
@@ -61,24 +63,70 @@ export default function OrderTypeSelector() {
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { setSelectedBranch } = useBranchStore();
+  const items = useCartStore((state) => state.items);
+  const discountId = useCartStore((state) => state.discountId);
+  const rewardId = useCartStore((state) => state.rewardId);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const clearDiscount = useCartStore((state) => state.clearDiscount);
 
   const { data, isLoading } = useGetV1Branches();
+  const { trigger: postOrder, isMutating } = usePostV1Orders();
 
   const branches =
     data?.status === 200 ? data.data.filter((b) => b.state === "active") : [];
   const selectedBranch = branches.find((b) => b.id === selectedBranchId);
 
-  const handleOrdenar = () => {
-    if (selectedBranch) {
-      setSelectedBranch({
-        id: selectedBranch.id,
-        name: selectedBranch.name,
-        state: selectedBranch.state,
-      });
-      navigate({
-        to: "/menu",
-        search: { orderType, branchId: selectedBranch.id },
-      });
+  const totalCents = items.reduce(
+    (sum, item) => sum + (item.unitPriceCents ?? 0) * item.quantity,
+    0,
+  );
+
+  const handleOrdenar = async () => {
+    if (!selectedBranch) {
+      toast.error("Selecciona una sucursal");
+      return;
+    }
+
+    if (items.length === 0) {
+      toast.error("Tu carrito está vacío");
+      return;
+    }
+
+    const payload: PostV1OrdersBody = {
+      items: items.map((item) => ({
+        id: item.variantId,
+        quantity: item.quantity,
+        notes: item.itemNotes?.trim() || undefined,
+        modifiers: item.modifiers,
+        isDiscounted: item.isDiscounted ?? false,
+        discountAmountCents: item.discountAmountCents ?? 0,
+      })),
+      totalPriceCents: totalCents,
+      branchId: selectedBranch.id,
+      orderType,
+      ...(discountId && { discountId }),
+      ...(rewardId && { rewardId }),
+    };
+
+    try {
+      const response = await postOrder(payload);
+
+      if (response.status === 201) {
+        clearCart();
+        clearDiscount();
+        setSelectedBranch({
+          id: selectedBranch.id,
+          name: selectedBranch.name,
+          state: selectedBranch.state,
+        });
+        toast.success("Pedido confirmado");
+        navigate({ to: "/order" });
+        return;
+      }
+
+      toast.error("No se pudo confirmar el pedido");
+    } catch {
+      toast.error("No se pudo confirmar el pedido");
     }
   };
 
@@ -161,10 +209,12 @@ export default function OrderTypeSelector() {
       <button
         type="button"
         onClick={handleOrdenar}
-        disabled={!selectedBranchId}
+        disabled={!selectedBranchId || isMutating}
         className="w-full bg-primary text-white py-4.5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-charcoal transition-colors shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <span className="tracking-wide uppercase text-sm">Ordenar ahora</span>
+        <span className="tracking-wide uppercase text-sm">
+          {isMutating ? "Confirmando..." : "Ordenar ahora"}
+        </span>
         <ArrowRight className="w-5 h-5" />
       </button>
     </div>

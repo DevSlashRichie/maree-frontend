@@ -4,15 +4,9 @@ import toast from "react-hot-toast";
 import { ItemCard } from "@/features/cart/components/item-card.tsx";
 import { TotalCard } from "@/features/cart/components/total-card.tsx";
 import { useCartStore } from "@/hooks/use-cart-store";
-import { usePostV1Orders } from "@/lib/api";
-import type { PostV1OrdersBody } from "@/lib/schemas";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1519676867240-f03562e64548?w=160&h=160&fit=crop";
-
-const DEFAULT_BRANCH_ID =
-  import.meta.env.VITE_DEFAULT_BRANCH_ID ??
-  "1c43d953-885e-4bb0-9d96-9e763be00428";
 
 function buildItemDescription(modifiers: { delta: number }[], notes: string) {
   const removedCount = modifiers
@@ -42,8 +36,6 @@ export function Cart() {
   const addOneToItem = useCartStore((state) => state.addOneToItem);
   const removeOneFromItem = useCartStore((state) => state.removeOneFromItem);
   const removeItem = useCartStore((state) => state.removeItem);
-  const clearCart = useCartStore((state) => state.clearCart);
-  const { trigger: postOrder, isMutating: isPostingOrder } = usePostV1Orders();
 
   const totalCents = items.reduce(
     (sum, item) => sum + (item.unitPriceCents ?? 0) * item.quantity,
@@ -66,37 +58,7 @@ export function Cart() {
       return;
     }
 
-    console.log(items);
-
-    const payload: PostV1OrdersBody & { rewardId?: string } = {
-      items: items.map((item) => ({
-        id: item.variantId,
-        quantity: item.quantity,
-        notes: item.itemNotes?.trim() || undefined,
-        modifiers: item.modifiers,
-        isDiscounted: item.isDiscounted ?? false,
-        discountAmountCents: item.discountAmountCents ?? 0,
-      })),
-      totalPriceCents: totalCents,
-      branchId: DEFAULT_BRANCH_ID,
-      ...(discountId && { discountId }),
-      ...(rewardId && { rewardId }),
-    };
-
-    try {
-      const response = await postOrder(payload);
-
-      if (response.status === 201) {
-        clearCart();
-        toast.success("Pedido confirmado");
-        navigate({ to: "/menu" });
-        return;
-      }
-
-      toast.error("No se pudo confirmar el pedido");
-    } catch {
-      toast.error("No se pudo confirmar el pedido");
-    }
+    navigate({ to: "/order-setup" });
   };
 
   return (
@@ -196,7 +158,7 @@ export function Cart() {
           discountType={discount?.type}
           discountValue={discount?.value}
           onConfirm={handleConfirmOrder}
-          isSubmitting={isPostingOrder}
+          isSubmitting={false}
           isDisabled={items.length === 0}
           onClearDiscount={clearDiscount}
         />
