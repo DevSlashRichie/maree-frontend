@@ -1,16 +1,15 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { getV1ProductsVariantId } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/inventory/$productId")({
   loader: async ({ params }) => {
-    const response = await fetch(
-      `http://localhost:8383/v1/products/variant/${params.productId}`,
-    );
+    const response = await getV1ProductsVariantId(params.productId);
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error("No se pudo encontrar el producto");
     }
 
-    const variant = await response.json();
+    const variant = response.data;
 
     return {
       ...variant,
