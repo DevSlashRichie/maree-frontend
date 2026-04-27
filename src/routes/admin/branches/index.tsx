@@ -3,7 +3,11 @@ import { MapPin, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { CreateBranchForm } from "@/features/admin/components/new-branch-form";
-import { useGetV1Branches, usePatchV1BranchesId } from "@/lib/api";
+import {
+  deleteV1BranchesId,
+  useGetV1Branches,
+  usePatchV1BranchesId,
+} from "@/lib/api";
 import type { GetV1Branches200Item } from "@/lib/schemas/getV1Branches200Item";
 import { Modal } from "../../../components/ui/modal";
 
@@ -70,16 +74,12 @@ function RouteComponent() {
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     try {
-      const result = await fetch(`http://localhost:8383/v1/branches/${id}`, {
-        credentials: "include",
-        method: "DELETE",
-      });
+      const result = await deleteV1BranchesId(id);
       if (result.status === 204) {
         toast.success("Sucursal eliminada");
         mutate();
       } else {
-        const error = await result.json();
-        toast.error(error.message || "Error al eliminar");
+        toast.error(result.data.message || "Error al eliminar");
       }
     } catch {
       toast.error("Error al eliminar");
