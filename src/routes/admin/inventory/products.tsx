@@ -113,7 +113,7 @@ function ProductsComponent() {
             <div className="flex flex-col min-w-0">
               <Link
                 to="/admin/inventory/$productId/detail"
-                params={{ productId: info.row.original.productId }}
+                params={{ productId: info.row.original.id }}
                 className="font-medium text-text-main truncate hover:text-secondary hover:underline transition-all cursor-pointer"
               >
                 {info.getValue()}
