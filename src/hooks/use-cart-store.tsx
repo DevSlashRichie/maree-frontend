@@ -3,6 +3,7 @@ import { create } from "zustand";
 export interface Modifier {
   id: string;
   delta: number;
+  build_your_own?: boolean;
 }
 
 export interface Item {

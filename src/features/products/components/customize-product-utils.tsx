@@ -16,7 +16,6 @@ interface IngredientGroup {
 export interface IngredientOption {
   id: string;
   productName: string;
-  categoryName: string;
   image?: string;
   unitPriceCents: number;
 }
@@ -98,11 +97,9 @@ export function getVisibleIngredientOptions(
 
   return dedupeById(
     filteredGroups.flatMap((group) => {
-      const categoryName = group.path.at(-1) ?? "Ingrediente";
       return group.items.map((item) => ({
         id: item.id,
         productName: item.name,
-        categoryName,
         image: item.image,
         unitPriceCents: parsePriceToCents(item.price),
       }));
