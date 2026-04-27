@@ -642,24 +642,6 @@ export function CreateProduct() {
     setAllowedIngredients((prev) => prev.filter((i) => i !== id));
   };
 
-  const _updateQuantity = (id: string, quantity: number) => {
-    setSelectedIngredients((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity } : i)),
-    );
-  };
-
-  const _toggleRemovable = (id: string) => {
-    setSelectedIngredients((prev) =>
-      prev.map((i) =>
-        i.id === id ? { ...i, isRemovable: !i.isRemovable } : i,
-      ),
-    );
-  };
-
-  const _removeIngredient = (id: string) => {
-    setSelectedIngredients((prev) => prev.filter((i) => i.id !== id));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
