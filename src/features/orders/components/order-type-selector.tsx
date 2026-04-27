@@ -66,6 +66,8 @@ export default function OrderTypeSelector() {
   const items = useCartStore((state) => state.items);
   const clearCart = useCartStore((state) => state.clearCart);
   const clearDiscount = useCartStore((state) => state.clearDiscount);
+  const discountId = useCartStore((state) => state.discountId);
+  const rewardId = useCartStore((state) => state.rewardId);
 
   const { data, isLoading } = useGetV1Branches();
   const { trigger: postOrder, isMutating } = usePostV1Orders();
