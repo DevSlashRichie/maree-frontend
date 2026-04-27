@@ -22,20 +22,34 @@ function BranchSelector({
   const selected = branches.find((b) => b.id === selectedId);
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 bg-secondary/50 px-4 py-1.5 rounded-full mb-6 border border-primary/5 hover:bg-secondary/70 transition-colors"
+        className="w-full flex items-center justify-between gap-3 bg-secondary/30 px-5 py-4 rounded-2xl border-2 border-transparent hover:border-accent transition-colors"
       >
-        <MapPin className="w-3.5 h-3.5 text-accent" />
-        <span className="text-[10px] font-bold uppercase tracking-wider text-charcoal/70">
-          {selected?.name ?? "Selecciona Sucursal"}
-        </span>
+        <div className="flex items-center gap-3">
+          <div className="bg-secondary p-2 rounded-xl">
+            <MapPin className="w-5 h-5 text-accent" />
+          </div>
+          <div className="text-left">
+            <p className="text-xs font-bold uppercase tracking-wider text-charcoal/50">
+              Sucursal
+            </p>
+            <p className="font-bold text-text-main">
+              {selected?.name ?? "Selecciona una"}
+            </p>
+          </div>
+        </div>
+        <div
+          className={`w-6 h-6 rounded-full border-2 border-accent flex items-center justify-center ${selected ? "bg-accent" : ""}`}
+        >
+          {selected && <Check className="w-3 h-3 text-white" />}
+        </div>
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
           {branches.map((branch) => (
             <button
               key={branch.id}
@@ -44,12 +58,14 @@ function BranchSelector({
                 onSelect(branch);
                 setIsOpen(false);
               }}
-              className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center justify-between ${
+              className={`w-full px-4 py-3 text-left text-sm hover:bg-gray-50 flex items-center justify-between ${
                 selectedId === branch.id ? "bg-secondary/30" : ""
               }`}
             >
-              <span>{branch.name}</span>
-              {selectedId === branch.id && <Check className="w-4 h-4" />}
+              <span className="font-medium">{branch.name}</span>
+              {selectedId === branch.id && (
+                <Check className="w-4 h-4 text-accent" />
+              )}
             </button>
           ))}
         </div>
@@ -132,10 +148,14 @@ export default function OrderTypeSelector() {
 
   return (
     <div className="w-full max-w-md mx-auto bg-card-light rounded-[2.5rem] shadow-xl p-6 sm:p-10 flex flex-col items-center relative">
-      {/* Branch Location Badge */}
+      <h2 className="font-display text-2xl sm:text-3xl text-text-main text-center mb-6 leading-tight">
+        ¿A dónde quieres
+        <br />
+        mandar tu pedido?
+      </h2>
       {isLoading ? (
-        <div className="flex items-center gap-1.5 bg-secondary/50 px-4 py-1.5 rounded-full mb-6">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-charcoal/70">
+        <div className="w-full flex items-center justify-center gap-3 bg-secondary/30 px-5 py-4 rounded-2xl mb-8">
+          <span className="text-sm font-medium text-charcoal/70">
             Cargando...
           </span>
         </div>
@@ -147,12 +167,13 @@ export default function OrderTypeSelector() {
         />
       )}
 
-      <h2 className="font-display text-2xl sm:text-3xl text-text-main text-center mb-8 leading-tight">
-        ¿Cómo recibirás tu pedido?
-      </h2>
+      <h3 className="font-display text-xl sm:text-2xl text-text-main text-center mb-6 leading-tight">
+        ¿Cómo lo quieres
+        <br />
+        recibir?
+      </h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mb-10">
-        {/* Dine-in Option */}
         <button
           type="button"
           onClick={() => setOrderType("mesa")}
@@ -178,7 +199,6 @@ export default function OrderTypeSelector() {
           </div>
         </button>
 
-        {/* Pickup Option */}
         <button
           type="button"
           onClick={() => setOrderType("recoger")}
@@ -205,7 +225,6 @@ export default function OrderTypeSelector() {
         </button>
       </div>
 
-      {/* Action Button */}
       <button
         type="button"
         onClick={handleOrdenar}
