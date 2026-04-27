@@ -4,7 +4,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useBranchStore } from "@/hooks/use-branch-store";
 import { useCartStore } from "@/hooks/use-cart-store";
-import { useGetV1Branches, usePostV1Orders } from "@/lib/api";
+import { useGetV1BranchesOpen, usePostV1Orders } from "@/lib/api";
 import type { GetV1Branches200Item, PostV1OrdersBody } from "@/lib/schemas";
 
 interface BranchSelectorProps {
@@ -85,11 +85,10 @@ export default function OrderTypeSelector() {
   const clearCart = useCartStore((state) => state.clearCart);
   const clearDiscount = useCartStore((state) => state.clearDiscount);
 
-  const { data, isLoading } = useGetV1Branches();
+  const { data, isLoading } = useGetV1BranchesOpen();
   const { trigger: postOrder, isMutating } = usePostV1Orders();
 
-  const branches =
-    data?.status === 200 ? data.data.filter((b) => b.state === "active") : [];
+  const branches = data?.status === 200 ? data.data : [];
   const selectedBranch = branches.find((b) => b.id === selectedBranchId);
 
   const totalCents = items.reduce(
