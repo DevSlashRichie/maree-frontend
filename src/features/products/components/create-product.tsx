@@ -15,32 +15,13 @@ import {
   usePutV1ProductsProductVariantId,
 } from "@/lib/api"; // ORVAL generated hooks
 import { convertToCents, formatCentsToDisplay, formatPrice } from "@/lib/money";
+import type { GetV1ProductsVariantId200 } from "@/lib/schemas";
 import type { SelectedIngredient } from "../data/mock";
 import { type Category, CategoryPicker } from "./category-picker";
 import { IngredientRow } from "./ingredient-row";
 
-export type ProductInitialData = {
-  id: string;
-  name: string;
-  description?: string;
-  status: "active" | "inactive";
-  categoryId: string;
-  price: string | number;
-  image: string | null;
-  components: Array<{
-    id: string;
-    productId: string;
-    name: string;
-    productName?: string;
-    quantity: number;
-    isRemovable: boolean;
-  }>;
-  allowedIngredients?: string[];
-  allowedCategories?: string[];
-};
-
 interface ProductFormProps {
-  initialData?: ProductInitialData;
+  initialData?: GetV1ProductsVariantId200;
 }
 
 function isIngredientCategoryName(name: string) {
@@ -112,7 +93,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
   >(
     initialData?.components.map((c) => ({
       id: c.productId,
-      productName: c.name,
+      productName: c.productName,
       categoryName: c.productName ?? "Ingrediente",
       quantity: c.quantity,
       isRemovable: c.isRemovable,
