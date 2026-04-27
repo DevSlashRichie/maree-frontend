@@ -28,8 +28,6 @@ function buildItemDescription(modifiers: { delta: number }[], notes: string) {
 export function Cart() {
   const navigate = useNavigate();
   const items = useCartStore((state) => state.items);
-  const discountId = useCartStore((state) => state.discountId);
-  const rewardId = useCartStore((state) => state.rewardId);
   const discount = useCartStore((state) => state.discount);
   const pendingDiscount = useCartStore((state) => state.pendingDiscount);
   const clearDiscount = useCartStore((state) => state.clearDiscount);
