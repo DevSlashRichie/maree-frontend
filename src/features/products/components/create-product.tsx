@@ -642,13 +642,13 @@ export function CreateProduct() {
     setAllowedIngredients((prev) => prev.filter((i) => i !== id));
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const _updateQuantity = (id: string, quantity: number) => {
     setSelectedIngredients((prev) =>
       prev.map((i) => (i.id === id ? { ...i, quantity } : i)),
     );
   };
 
-  const toggleRemovable = (id: string) => {
+  const _toggleRemovable = (id: string) => {
     setSelectedIngredients((prev) =>
       prev.map((i) =>
         i.id === id ? { ...i, isRemovable: !i.isRemovable } : i,
@@ -656,7 +656,7 @@ export function CreateProduct() {
     );
   };
 
-  const removeIngredient = (id: string) => {
+  const _removeIngredient = (id: string) => {
     setSelectedIngredients((prev) => prev.filter((i) => i.id !== id));
   };
 
@@ -761,7 +761,7 @@ export function CreateProduct() {
                   </span>
                 </div>
                 {!lastPayload.allowedIngredients ||
-                  lastPayload.allowedIngredients.length === 0 ? (
+                lastPayload.allowedIngredients.length === 0 ? (
                   <p className="mt-2 text-sm text-text-main/45 m-0">
                     No hay productos aplicables.
                   </p>
