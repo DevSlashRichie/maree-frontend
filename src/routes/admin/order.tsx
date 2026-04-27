@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { BranchSelector } from "@/features/admin/components/selector-branch";
 import { Orders } from "@/features/orders/components/orders";
 
 export const Route = createFileRoute("/admin/order")({
@@ -6,5 +7,24 @@ export const Route = createFileRoute("/admin/order")({
 });
 
 function RouteComponent() {
-  return <Orders />;
+  return (
+    <div className="min-h-screen bg-background-light">
+      <div className="p-6 border-b border-secondary/20">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="font-display text-4xl text-text-main font-bold mb-2 uppercase tracking-wide">
+              Pedidos
+            </h1>
+            <p className="font-body text-text-main/60">
+              Gestiona los pedidos de cada sucursal
+            </p>
+          </div>
+          <BranchSelector />
+        </div>
+      </div>
+      <div className="p-6">
+        <Orders />
+      </div>
+    </div>
+  );
 }

@@ -372,7 +372,7 @@ function RouteComponent() {
             className="w-full mt-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#2F3437] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#2F3437]/90 transition-colors"
           >
             <Pencil className="w-3 h-3" />
-            Editar información
+            Editar
           </button>
         </div>
 

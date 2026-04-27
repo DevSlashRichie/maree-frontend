@@ -28,7 +28,6 @@ const adminNavItems = [
   { to: "/admin/discounts", label: "Descuentos", icon: "sell" },
   { to: "/admin/rewards", label: "Recompensas", icon: "card_giftcard" },
   { to: "/admin/order", label: "Pedidos", icon: "receipt_long" },
-  { to: "/admin/reports", label: "Reportes", icon: "bar_chart" },
 ];
 
 export function AdminNavbar() {
@@ -63,7 +62,7 @@ export function AdminNavbar() {
           }`}
         >
           {!isCollapsed && (
-            <Link to="/admin/reports" className="flex items-center gap-2">
+            <Link to="/admin" className="flex items-center gap-2">
               <img src="/logo.png" alt="Maree" className="h-8" />
             </Link>
           )}

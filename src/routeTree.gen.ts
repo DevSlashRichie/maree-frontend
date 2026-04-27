@@ -38,6 +38,9 @@ import { Route as AdminInventoryCategoriesRouteImport } from './routes/admin/inv
 import { Route as AdminDiscountsIdRouteImport } from './routes/admin/discounts/$id'
 import { Route as AdminBranchesBranchIdRouteImport } from './routes/admin/branches/$branchId'
 import { Route as ClientOrderOrderIdRouteImport } from './routes/_client/order/$orderId'
+import { Route as AdminInventoryProductIdRouteRouteImport } from './routes/admin/inventory/$productId/route'
+import { Route as AdminInventoryProductIdIndexRouteImport } from './routes/admin/inventory/$productId/index'
+import { Route as AdminInventoryProductIdDetailRouteImport } from './routes/admin/inventory/$productId/detail'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -185,6 +188,24 @@ const ClientOrderOrderIdRoute = ClientOrderOrderIdRouteImport.update({
   path: '/order/$orderId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInventoryProductIdRouteRoute =
+  AdminInventoryProductIdRouteRouteImport.update({
+    id: '/$productId',
+    path: '/$productId',
+    getParentRoute: () => AdminInventoryRouteRoute,
+  } as any)
+const AdminInventoryProductIdIndexRoute =
+  AdminInventoryProductIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminInventoryProductIdRouteRoute,
+  } as any)
+const AdminInventoryProductIdDetailRoute =
+  AdminInventoryProductIdDetailRouteImport.update({
+    id: '/detail',
+    path: '/detail',
+    getParentRoute: () => AdminInventoryProductIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -204,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/inventory/$productId': typeof AdminInventoryProductIdRouteRouteWithChildren
   '/order/$orderId': typeof ClientOrderOrderIdRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/discounts/$id': typeof AdminDiscountsIdRoute
@@ -216,6 +238,8 @@ export interface FileRoutesByFullPath {
   '/admin/discounts/': typeof AdminDiscountsIndexRoute
   '/admin/staff/': typeof AdminStaffIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/admin/inventory/$productId/detail': typeof AdminInventoryProductIdDetailRoute
+  '/admin/inventory/$productId/': typeof AdminInventoryProductIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -246,6 +270,8 @@ export interface FileRoutesByTo {
   '/admin/discounts': typeof AdminDiscountsIndexRoute
   '/admin/staff': typeof AdminStaffIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
+  '/admin/inventory/$productId/detail': typeof AdminInventoryProductIdDetailRoute
+  '/admin/inventory/$productId': typeof AdminInventoryProductIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -266,6 +292,7 @@ export interface FileRoutesById {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/inventory/$productId': typeof AdminInventoryProductIdRouteRouteWithChildren
   '/_client/order/$orderId': typeof ClientOrderOrderIdRoute
   '/admin/branches/$branchId': typeof AdminBranchesBranchIdRoute
   '/admin/discounts/$id': typeof AdminDiscountsIdRoute
@@ -278,6 +305,8 @@ export interface FileRoutesById {
   '/admin/discounts/': typeof AdminDiscountsIndexRoute
   '/admin/staff/': typeof AdminStaffIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/admin/inventory/$productId/detail': typeof AdminInventoryProductIdDetailRoute
+  '/admin/inventory/$productId/': typeof AdminInventoryProductIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -299,6 +328,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/rewards'
     | '/admin/'
+    | '/admin/inventory/$productId'
     | '/order/$orderId'
     | '/admin/branches/$branchId'
     | '/admin/discounts/$id'
@@ -311,6 +341,8 @@ export interface FileRouteTypes {
     | '/admin/discounts/'
     | '/admin/staff/'
     | '/admin/users/'
+    | '/admin/inventory/$productId/detail'
+    | '/admin/inventory/$productId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -341,6 +373,8 @@ export interface FileRouteTypes {
     | '/admin/discounts'
     | '/admin/staff'
     | '/admin/users'
+    | '/admin/inventory/$productId/detail'
+    | '/admin/inventory/$productId'
   id:
     | '__root__'
     | '/'
@@ -360,6 +394,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/rewards'
     | '/admin/'
+    | '/admin/inventory/$productId'
     | '/_client/order/$orderId'
     | '/admin/branches/$branchId'
     | '/admin/discounts/$id'
@@ -372,6 +407,8 @@ export interface FileRouteTypes {
     | '/admin/discounts/'
     | '/admin/staff/'
     | '/admin/users/'
+    | '/admin/inventory/$productId/detail'
+    | '/admin/inventory/$productId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -595,15 +632,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientOrderOrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/inventory/$productId': {
+      id: '/admin/inventory/$productId'
+      path: '/$productId'
+      fullPath: '/admin/inventory/$productId'
+      preLoaderRoute: typeof AdminInventoryProductIdRouteRouteImport
+      parentRoute: typeof AdminInventoryRouteRoute
+    }
+    '/admin/inventory/$productId/': {
+      id: '/admin/inventory/$productId/'
+      path: '/'
+      fullPath: '/admin/inventory/$productId/'
+      preLoaderRoute: typeof AdminInventoryProductIdIndexRouteImport
+      parentRoute: typeof AdminInventoryProductIdRouteRoute
+    }
+    '/admin/inventory/$productId/detail': {
+      id: '/admin/inventory/$productId/detail'
+      path: '/detail'
+      fullPath: '/admin/inventory/$productId/detail'
+      preLoaderRoute: typeof AdminInventoryProductIdDetailRouteImport
+      parentRoute: typeof AdminInventoryProductIdRouteRoute
+    }
   }
 }
 
+interface AdminInventoryProductIdRouteRouteChildren {
+  AdminInventoryProductIdDetailRoute: typeof AdminInventoryProductIdDetailRoute
+  AdminInventoryProductIdIndexRoute: typeof AdminInventoryProductIdIndexRoute
+}
+
+const AdminInventoryProductIdRouteRouteChildren: AdminInventoryProductIdRouteRouteChildren =
+  {
+    AdminInventoryProductIdDetailRoute: AdminInventoryProductIdDetailRoute,
+    AdminInventoryProductIdIndexRoute: AdminInventoryProductIdIndexRoute,
+  }
+
+const AdminInventoryProductIdRouteRouteWithChildren =
+  AdminInventoryProductIdRouteRoute._addFileChildren(
+    AdminInventoryProductIdRouteRouteChildren,
+  )
+
 interface AdminInventoryRouteRouteChildren {
+  AdminInventoryProductIdRouteRoute: typeof AdminInventoryProductIdRouteRouteWithChildren
   AdminInventoryCategoriesRoute: typeof AdminInventoryCategoriesRoute
   AdminInventoryProductsRoute: typeof AdminInventoryProductsRoute
 }
 
 const AdminInventoryRouteRouteChildren: AdminInventoryRouteRouteChildren = {
+  AdminInventoryProductIdRouteRoute:
+    AdminInventoryProductIdRouteRouteWithChildren,
   AdminInventoryCategoriesRoute: AdminInventoryCategoriesRoute,
   AdminInventoryProductsRoute: AdminInventoryProductsRoute,
 }

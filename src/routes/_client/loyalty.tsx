@@ -1,16 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import { ChevronLeft, ChevronRight, Gift, Search } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { Button } from "@/components/button";
 import { HistoryItem } from "@/components/ui/history-item";
 import { Modal } from "@/components/ui/modal";
 import { LoyaltyCard } from "@/features/loyalty/components/loyalty-card";
 import { RewardCard } from "@/features/loyalty/components/reward-card";
+import { useCartStore } from "@/hooks/use-cart-store";
 import { requireAuth } from "@/hooks/with-auth";
 import {
+  getV1ProductsVariantId,
   useGetV1Branches,
   useGetV1Loyalty,
+  useGetV1Rewards,
   useGetV1RewardsHistory,
 } from "@/lib/api";
 
@@ -37,6 +41,11 @@ type RewardItem = {
 
 function RouteComponent() {
   const { data, isLoading } = useGetV1Loyalty();
+  const { data: rewardsData, isLoading: rewardsLoading } = useGetV1Rewards();
+  const navigate = useNavigate();
+  const setDiscount = useCartStore((state) => state.setDiscount);
+  const setPendingDiscount = useCartStore((state) => state.setPendingDiscount);
+  const addDiscountedItem = useCartStore((state) => state.addDiscountedItem);
 
   const [selectedReward, setSelectedReward] = useState<RewardItem | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -120,14 +129,80 @@ function RouteComponent() {
     }
   };
 
-  const confirmRedemption = () => {
-    if (selectedReward) {
-      console.log(`Confirmado: Canjeando ${selectedReward.title}`);
-      setIsConfirmModalOpen(false);
+  const confirmRedemption = async () => {
+    if (!selectedReward || !rewardsData?.data) return;
+
+    const fullReward = rewardsData.data.find((r) => r.id === selectedReward.id);
+
+    if (!fullReward || !fullReward.discount) {
+      toast.error("No se pudo cargar los detalles de la recompensa");
+      return;
     }
+
+    const discount = {
+      id: fullReward.discountId,
+      name: fullReward.discount.name,
+      type: fullReward.discount.type,
+      appliesTo: fullReward.discount.appliesTo,
+      value: BigInt(fullReward.discount.value),
+    };
+
+    // Case 1: 100% discount on a specific product → Auto-add free item
+    const isFreeItem =
+      discount.type === "percentage" &&
+      Number(discount.value) === 100 &&
+      discount.appliesTo.length === 1;
+
+    // Case 2: Empty appliesTo → Order-level discount (applies to whole order)
+    const isOrderLevelDiscount = discount.appliesTo.length === 0;
+
+    if (isFreeItem) {
+      try {
+        const response = await getV1ProductsVariantId(discount.appliesTo[0]);
+        if (response?.status !== 200) {
+          toast.error("No se pudo cargar el producto de la recompensa");
+          return;
+        }
+        const variant = response.data;
+        const variantPriceCents = Number(variant.price ?? 0);
+        addDiscountedItem(
+          {
+            variantId: variant.id,
+            itemNotes: "",
+            modifiers: [],
+            displayName: variant.name,
+            displayImage: variant.image ?? undefined,
+            unitPriceCents: variantPriceCents,
+          },
+          variantPriceCents, // Full discount
+        );
+        setDiscount(discount, fullReward.id);
+        toast.success(`¡${selectedReward.title} agregado al carrito!`);
+      } catch {
+        toast.error("No se pudo cargar el producto de la recompensa");
+        return;
+      }
+    } else if (isOrderLevelDiscount) {
+      // Order-level discount - apply to whole order
+      setDiscount(discount, fullReward.id);
+      toast.success(
+        `¡Descuento de ${selectedReward.title} aplicado al pedido!`,
+      );
+    } else {
+      // Case 3: Partial discount or specific product → Set as pending
+      // User will add items and first item gets the discount
+      setPendingDiscount(discount, fullReward.id);
+      toast.success(
+        `¡Descuento listo! Agrega un artículo al carrito para aplicarlo.`,
+      );
+    }
+
+    setIsConfirmModalOpen(false);
+    setSelectedReward(null);
+    navigate({ to: "/cart" });
   };
 
-  if (isLoading) {
+  if (isLoading || rewardsLoading) {
     return (
       <div className="h-screen flex items-center justify-center font-display text-accent">
         Cargando...
