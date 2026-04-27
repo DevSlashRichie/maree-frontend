@@ -495,6 +495,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     ].map((id) => ({
       id,
       delta: 1,
+      build_your_own: true,
     }));
 
     const finalNotes = isArmaTuCrepa
