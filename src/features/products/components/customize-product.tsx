@@ -117,9 +117,6 @@ function ArmaCategorySelector({
                 className="w-full text-left px-3 py-2.5 border-b border-pink-soft/10 last:border-b-0 hover:bg-pink-soft/10 transition-colors"
               >
                 <span className="block text-sm text-text-main">{opt.name}</span>
-                <span className="block text-[11px] text-text-main/35">
-                  +${formatCentsToDisplay(opt.price)}
-                </span>
               </button>
             ))}
           </div>
@@ -135,9 +132,6 @@ function ArmaCategorySelector({
             >
               <div className="min-w-0">
                 <p className="text-sm text-text-main truncate">{ing.name}</p>
-                <p className="text-[10px] text-text-main/40">
-                  +${formatCentsToDisplay(ing.price)}
-                </p>
               </div>
               <button
                 type="button"
@@ -185,22 +179,11 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     toppings: [],
   });
   const [notes, setNotes] = useState("");
+  const [baseType, setBaseType] = useState<"Crepa" | "Waffle">("Crepa");
   const [ingredientSearch, setIngredientSearch] = useState("");
   const [showIngredientDropdown, setShowIngredientDropdown] = useState(false);
   const [showAddedToCartScreen, setShowAddedToCartScreen] = useState(false);
   const [draftKey, setDraftKey] = useState<string | null>(null);
-
-  const MAX_TOTAL_ARMA = 3;
-
-  const totalArmaSelected = useMemo(
-    () =>
-      [
-        ...selectedArma.untables,
-        ...selectedArma.fruta,
-        ...selectedArma.toppings,
-      ].length,
-    [selectedArma],
-  );
 
   const hasValidVariant = Boolean(
     variantResponse && variantResponse.status === 200,
@@ -228,6 +211,24 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
         components: Component[];
       },
     [hasValidVariant, variantResponse],
+  );
+
+  const isArmaTuCrepa = variant.name.toLowerCase().includes("arma tu crepa");
+
+  const MAX_TOTAL_ARMA = useMemo(() => {
+    if (!isArmaTuCrepa) return 0;
+    const match = variant.name.match(/\((\d+)\s+Ingrediente/i);
+    return match ? Number.parseInt(match[1], 10) : 3; // Default to 3 if not specified
+  }, [variant.name, isArmaTuCrepa]);
+
+  const totalArmaSelected = useMemo(
+    () =>
+      [
+        ...selectedArma.untables,
+        ...selectedArma.fruta,
+        ...selectedArma.toppings,
+      ].length,
+    [selectedArma],
   );
 
   const ingredientOptions = useMemo(
@@ -302,18 +303,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     return Number.isFinite(val) ? val : 0;
   }, [variant.price]);
 
-  const armaTuCrepaTotalCents = useMemo(
-    () =>
-      [
-        ...selectedArma.untables,
-        ...selectedArma.fruta,
-        ...selectedArma.toppings,
-      ].reduce((sum, id) => {
-        const option = ingredientOptions.find((opt) => opt.id === id);
-        return sum + (option ? Number(option.price) : 0);
-      }, 0),
-    [selectedArma, ingredientOptions],
-  );
+  const armaTuCrepaTotalCents = 0;
 
   const extrasTotalCents = useMemo(
     () =>
@@ -447,7 +437,18 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
       }
 
       setSelectedArma(nextArma);
-      setNotes(editingItem.itemNotes);
+
+      // Parse baseType from notes if present
+      if (editingItem.itemNotes.startsWith("Base: Waffle")) {
+        setBaseType("Waffle");
+        setNotes(editingItem.itemNotes.replace(/^Base: Waffle\s*\|\s*/, ""));
+      } else if (editingItem.itemNotes.startsWith("Base: Crepa")) {
+        setBaseType("Crepa");
+        setNotes(editingItem.itemNotes.replace(/^Base: Crepa\s*\|\s*/, ""));
+      } else {
+        setNotes(editingItem.itemNotes);
+      }
+
       setDraftKey(nextKey);
       return;
     }
@@ -496,9 +497,13 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
       delta: 1,
     }));
 
+    const finalNotes = isArmaTuCrepa
+      ? `Base: ${baseType}${notes.trim() ? ` | ${notes.trim()}` : ""}`
+      : notes.trim();
+
     const payload = {
       variantId: variant.id,
-      itemNotes: notes.trim(),
+      itemNotes: finalNotes,
       modifiers: [...removedModifiers, ...extraModifiers, ...armaModifiers],
       displayName: variant.name,
       displayImage: variant.image ?? undefined,
@@ -581,53 +586,95 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
           </div>
         </div>
 
-        {/* Arma tu Crepa Section */}
-        <section className="rounded-3xl border border-pink-soft/35 bg-card-light px-4 py-4 sm:px-5 sm:py-5 shadow-sm flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-text-main/35 m-0">
-              Arma tu Crepa
-            </p>
-            <span
-              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                totalArmaSelected >= MAX_TOTAL_ARMA
-                  ? "bg-red-100 text-red-500"
-                  : "bg-secondary/20 text-secondary"
-              }`}
-            >
-              {totalArmaSelected} / {MAX_TOTAL_ARMA} seleccionados
-            </span>
-          </div>
+        {isArmaTuCrepa && (
+          <>
+            {/* Base Type Selector */}
+            <section className="rounded-3xl border border-pink-soft/35 bg-card-light px-4 py-4 sm:px-5 sm:py-5 shadow-sm flex flex-col gap-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-text-main/35 m-0">
+                Elige tu Base
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {(["Crepa", "Waffle"] as const).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setBaseType(type)}
+                    className={`relative py-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-2 ${
+                      baseType === type
+                        ? "border-secondary bg-secondary/5 shadow-sm"
+                        : "border-pink-soft/20 bg-background-light hover:bg-secondary/5"
+                    }`}
+                  >
+                    <span
+                      className={`font-bold text-sm ${
+                        baseType === type
+                          ? "text-secondary"
+                          : "text-text-main/60"
+                      }`}
+                    >
+                      {type}
+                    </span>
+                    {baseType === type && (
+                      <div className="absolute top-2 right-2">
+                        <div className="rounded-full bg-secondary p-0.5">
+                          <Check className="w-2.5 h-2.5 text-white" />
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </section>
 
-          <div className="flex flex-col gap-6">
-            <ArmaCategorySelector
-              label="Untables"
-              options={untablesOptions}
-              selectedIds={selectedArma.untables}
-              onAdd={(id) => handleAddArma("untables", id)}
-              onRemove={(id) => handleRemoveArma("untables", id)}
-              totalSelected={totalArmaSelected}
-              maxLimit={MAX_TOTAL_ARMA}
-            />
-            <ArmaCategorySelector
-              label="Fruta"
-              options={frutaOptions}
-              selectedIds={selectedArma.fruta}
-              onAdd={(id) => handleAddArma("fruta", id)}
-              onRemove={(id) => handleRemoveArma("fruta", id)}
-              totalSelected={totalArmaSelected}
-              maxLimit={MAX_TOTAL_ARMA}
-            />
-            <ArmaCategorySelector
-              label="Toppings"
-              options={toppingsOptions}
-              selectedIds={selectedArma.toppings}
-              onAdd={(id) => handleAddArma("toppings", id)}
-              onRemove={(id) => handleRemoveArma("toppings", id)}
-              totalSelected={totalArmaSelected}
-              maxLimit={MAX_TOTAL_ARMA}
-            />
-          </div>
-        </section>
+            {/* Arma tu Crepa Section */}
+            <section className="rounded-3xl border border-pink-soft/35 bg-card-light px-4 py-4 sm:px-5 sm:py-5 shadow-sm flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-text-main/35 m-0">
+                  Arma tu {baseType}
+                </p>
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    totalArmaSelected >= MAX_TOTAL_ARMA
+                      ? "bg-red-100 text-red-500"
+                      : "bg-secondary/20 text-secondary"
+                  }`}
+                >
+                  {totalArmaSelected} / {MAX_TOTAL_ARMA} seleccionados
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-6">
+                <ArmaCategorySelector
+                  label="Untables"
+                  options={untablesOptions}
+                  selectedIds={selectedArma.untables}
+                  onAdd={(id) => handleAddArma("untables", id)}
+                  onRemove={(id) => handleRemoveArma("untables", id)}
+                  totalSelected={totalArmaSelected}
+                  maxLimit={MAX_TOTAL_ARMA}
+                />
+                <ArmaCategorySelector
+                  label="Fruta"
+                  options={frutaOptions}
+                  selectedIds={selectedArma.fruta}
+                  onAdd={(id) => handleAddArma("fruta", id)}
+                  onRemove={(id) => handleRemoveArma("fruta", id)}
+                  totalSelected={totalArmaSelected}
+                  maxLimit={MAX_TOTAL_ARMA}
+                />
+                <ArmaCategorySelector
+                  label="Toppings"
+                  options={toppingsOptions}
+                  selectedIds={selectedArma.toppings}
+                  onAdd={(id) => handleAddArma("toppings", id)}
+                  onRemove={(id) => handleRemoveArma("toppings", id)}
+                  totalSelected={totalArmaSelected}
+                  maxLimit={MAX_TOTAL_ARMA}
+                />
+              </div>
+            </section>
+          </>
+        )}
 
         {/* Base Ingredients */}
         <section className="rounded-3xl border border-pink-soft/35 bg-card-light px-4 py-4 sm:px-5 sm:py-5 shadow-sm flex flex-col gap-3">
