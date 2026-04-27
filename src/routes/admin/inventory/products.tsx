@@ -113,7 +113,7 @@ function ProductsComponent() {
             <div className="flex flex-col min-w-0">
               <Link
                 to="/admin/inventory/$productId/detail"
-                params={{ productId: info.row.original.id }}
+                params={{ productId: info.row.original.productId }}
                 className="font-medium text-text-main truncate hover:text-secondary hover:underline transition-all cursor-pointer"
               >
                 {info.getValue()}
@@ -136,7 +136,7 @@ function ProductsComponent() {
       columnHelper.accessor("price", {
         header: "Precio",
         cell: (info) => {
-          const priceInUnits = Number(info.getValue()) / 100;
+          const priceInUnits = Number(info.getValue());
           return (
             <span className="font-semibold text-text-main text-sm">
               {formatPrice(priceInUnits)}
@@ -176,7 +176,7 @@ function ProductsComponent() {
           <div className="flex items-center gap-2">
             <Link
               to="/admin/inventory/$productId"
-              params={{ productId: info.row.original.id }}
+              params={{ productId: info.row.original.productId }}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-text-main/40 hover:text-secondary"
             >
               <Pencil className="w-4 h-4" />
@@ -215,9 +215,7 @@ function ProductsComponent() {
         <div className="p-4 rounded-full bg-red-50">
           <AlertCircle className="w-8 h-8 text-red-500" />
         </div>
-        <p className="font-display font-bold text-red-500 text-lg">
-          Error al conectar con la base de datos
-        </p>
+        <p className="font-display font-bold text-red-500 text-lg">Error</p>
       </div>
     );
   }
