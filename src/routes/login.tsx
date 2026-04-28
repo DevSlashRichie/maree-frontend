@@ -1,3 +1,4 @@
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import z from "zod";
@@ -7,6 +8,8 @@ import { PhoneInput } from "@/components/phone-input";
 import { Heading, Paragraph } from "@/components/typography";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { getV1UsersMe, postAuthLogin, postAuthRegister } from "@/lib/api";
+
+const AUTH_MODE: "phone" | "google" = "google"; // Toggle between 'phone' and 'google' login methods
 
 export const Route = createFileRoute("/login")({
   beforeLoad: ({ search }) => {
@@ -36,6 +39,44 @@ function LoginPage() {
   const router = useRouter();
   const { next: redirectTo } = Route.useSearch();
   const { setAuth } = useAuthStore();
+
+  const handleGoogleLogin = async (credential: string) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const r = await postAuthLogin(
+        {
+          identity: "google-auth",
+          method: {
+            type: "google",
+            value: credential,
+          },
+        },
+        {
+          credentials: "include",
+        },
+      );
+
+      if (r.status === 200) {
+        const result = r.data;
+        if (result.type === "token") {
+          const { data: user, status } = await getV1UsersMe();
+          if (user && status === 200) {
+            setAuth(user, result.expiresAt);
+          }
+          await router.invalidate();
+          router.navigate({ to: redirectTo || "/" });
+          return;
+        }
+      }
+      setError("Error al iniciar sesión con Google");
+    } catch (error) {
+      console.error("Google login failed", error);
+      setError("Error de conexión con el servidor");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRegister = async () => {
     setError(null);
@@ -141,119 +182,153 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen texture-bg flex justify-center px-4 py-12 mt-8">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Heading className="text-2xl">
-            {mode === "login" ? "Bienvenido" : "Crea tu cuenta"}
-          </Heading>
-          <Paragraph className="mt-2">
-            {mode === "register"
-              ? "Completa tus datos para registrarte."
-              : step === "phone"
-                ? "Introduce tu número de teléfono para continuar."
-                : `Hemos enviado un código a ${phone}.`}
-          </Paragraph>
-        </div>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <div className="min-h-screen texture-bg flex justify-center px-4 py-12 mt-8">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <Heading className="text-2xl">
+              {mode === "login" ? "Bienvenido" : "Crea tu cuenta"}
+            </Heading>
+            <Paragraph className="mt-2">
+              {AUTH_MODE === "google"
+                ? "Inicia sesión con tu cuenta de Google para continuar."
+                : mode === "register"
+                  ? "Completa tus datos para registrarte."
+                  : step === "phone"
+                    ? "Introduce tu número de teléfono para continuar."
+                    : `Hemos enviado un código a ${phone}.`}
+            </Paragraph>
+          </div>
 
-        <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(232,213,213,0.3)] border border-pink-powder p-8">
-          <form
-            className="flex flex-col gap-6"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (mode === "register") {
-                handleRegister();
-              } else {
-                handleLogin();
-              }
-            }}
-          >
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
-                {error}
+          <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(232,213,213,0.3)] border border-pink-powder p-8">
+            {AUTH_MODE === "google" ? (
+              <div className="flex flex-col items-center gap-6">
+                {error && (
+                  <div className="w-full bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+                    {error}
+                  </div>
+                )}
+                <div className="w-full flex justify-center">
+                  <GoogleLogin
+                    onSuccess={(credentialResponse) => {
+                      if (credentialResponse.credential) {
+                        handleGoogleLogin(credentialResponse.credential);
+                      }
+                    }}
+                    onError={() => {
+                      setError("Error al autenticar con Google");
+                    }}
+                    useOneTap
+                    theme="outline"
+                    shape="pill"
+                    width="100%"
+                  />
+                </div>
               </div>
-            )}
-
-            {mode === "register" && (
-              <>
-                <Input
-                  label="Nombre"
-                  type="text"
-                  placeholder="Juan"
-                  name="firstName"
-                  required
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-                <Input
-                  label="Apellido"
-                  type="text"
-                  placeholder="Pérez"
-                  name="lastName"
-                  required
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-              </>
-            )}
-
-            {step === "phone" ? (
-              <PhoneInput
-                label="Teléfono"
-                placeholder="+52 442 753 62 11"
-                required
-                value={phone}
-                readOnly={mode === "register"}
-                onChange={(val) => {
-                  setPhone(val);
-                }}
-              />
             ) : (
-              <Input
-                label="Código de verificación"
-                type="text"
-                placeholder="123456"
-                name="code"
-                required
-                maxLength={6}
-                value={code}
-                onChange={(e) => {
-                  setCode(e.target.value);
+              <form
+                className="flex flex-col gap-6"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (mode === "register") {
+                    handleRegister();
+                  } else {
+                    handleLogin();
+                  }
                 }}
-              />
+              >
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+                    {error}
+                  </div>
+                )}
+
+                {mode === "register" && (
+                  <>
+                    <Input
+                      label="Nombre"
+                      type="text"
+                      placeholder="Juan"
+                      name="firstName"
+                      required
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                    />
+                    <Input
+                      label="Apellido"
+                      type="text"
+                      placeholder="Pérez"
+                      name="lastName"
+                      required
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                    />
+                  </>
+                )}
+
+                {step === "phone" ? (
+                  <PhoneInput
+                    label="Teléfono"
+                    placeholder="+52 442 753 62 11"
+                    required
+                    value={phone}
+                    readOnly={mode === "register"}
+                    onChange={(val) => {
+                      setPhone(val);
+                    }}
+                  />
+                ) : (
+                  <Input
+                    label="Código de verificación"
+                    type="text"
+                    placeholder="123456"
+                    name="code"
+                    required
+                    maxLength={6}
+                    value={code}
+                    onChange={(e) => {
+                      setCode(e.target.value);
+                    }}
+                  />
+                )}
+
+                <div className="flex flex-col gap-3">
+                  <Button
+                    type="submit"
+                    className="w-full mt-2"
+                    disabled={loading}
+                  >
+                    {loading
+                      ? "Cargando..."
+                      : mode === "register"
+                        ? "Registrarse"
+                        : step === "phone"
+                          ? "Continuar"
+                          : "Verificar código"}
+                  </Button>
+
+                  {(step === "code" || mode === "register") && (
+                    <button
+                      type="button"
+                      className="text-sm text-text-main/60 hover:text-text-main transition-colors py-2"
+                      onClick={() => {
+                        setStep("phone");
+                        setMode("login");
+                        setError(null);
+                        setCode("");
+                      }}
+                    >
+                      {mode === "register"
+                        ? "Cancelar"
+                        : "Cambiar número de teléfono"}
+                    </button>
+                  )}
+                </div>
+              </form>
             )}
-
-            <div className="flex flex-col gap-3">
-              <Button type="submit" className="w-full mt-2" disabled={loading}>
-                {loading
-                  ? "Cargando..."
-                  : mode === "register"
-                    ? "Registrarse"
-                    : step === "phone"
-                      ? "Continuar"
-                      : "Verificar código"}
-              </Button>
-
-              {(step === "code" || mode === "register") && (
-                <button
-                  type="button"
-                  className="text-sm text-text-main/60 hover:text-text-main transition-colors py-2"
-                  onClick={() => {
-                    setStep("phone");
-                    setMode("login");
-                    setError(null);
-                    setCode("");
-                  }}
-                >
-                  {mode === "register"
-                    ? "Cancelar"
-                    : "Cambiar número de teléfono"}
-                </button>
-              )}
-            </div>
-          </form>
+          </div>
         </div>
       </div>
-    </div>
+    </GoogleOAuthProvider>
   );
 }
