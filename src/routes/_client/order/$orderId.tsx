@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { OrderDetail } from "@/features/admin/components/order-details";
+import { useAuthStore } from "@/hooks/use-auth-store";
 import { requireAuth } from "@/hooks/with-auth";
 import { useGetV1OrdersMeId } from "@/lib/api";
-import { useAuthStore } from "@/hooks/use-auth-store";
 
 export const Route = createFileRoute("/_client/order/$orderId")({
   beforeLoad: async ({ location }) => {
