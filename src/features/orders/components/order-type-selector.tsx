@@ -1,10 +1,17 @@
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Check, MapPin, ShoppingBag, Utensils } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  MapPin,
+  ShoppingBag,
+  Utensils,
+} from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useBranchStore } from "@/hooks/use-branch-store";
 import { useCartStore } from "@/hooks/use-cart-store";
-import { useGetV1BranchesOpen, usePostV1Orders } from "@/lib/api";
+import { useGetV1Branches, usePostV1Orders } from "@/lib/api";
 import type { GetV1Branches200Item, PostV1OrdersBody } from "@/lib/schemas";
 
 interface BranchSelectorProps {
@@ -22,6 +29,7 @@ function BranchSelector({
   const selected = branches.find((b) => b.id === selectedId);
 
   return (
+    // Portal-style: position relative on this wrapper, overflow visible on parent
     <div className="relative w-full">
       <button
         type="button"
@@ -41,34 +49,52 @@ function BranchSelector({
             </p>
           </div>
         </div>
-        <div
-          className={`w-6 h-6 rounded-full border-2 border-accent flex items-center justify-center ${selected ? "bg-accent" : ""}`}
-        >
-          {selected && <Check className="w-3 h-3 text-white" />}
+        <div className="flex items-center gap-2">
+          {selected ? (
+            <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center">
+              <Check className="w-3 h-3 text-white" />
+            </div>
+          ) : (
+            <ChevronDown
+              className={`w-5 h-5 text-charcoal/40 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+            />
+          )}
         </div>
       </button>
 
+      {/* Dropdown renders outside the card via z-index; parent must NOT have overflow:hidden */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
-          {branches.map((branch) => (
-            <button
-              key={branch.id}
-              type="button"
-              onClick={() => {
-                onSelect(branch);
-                setIsOpen(false);
-              }}
-              className={`w-full px-4 py-3 text-left text-sm hover:bg-gray-50 flex items-center justify-between ${
-                selectedId === branch.id ? "bg-secondary/30" : ""
-              }`}
-            >
-              <span className="font-medium">{branch.name}</span>
-              {selectedId === branch.id && (
-                <Check className="w-4 h-4 text-accent" />
-              )}
-            </button>
-          ))}
-        </div>
+        <>
+          {/* Backdrop to close on outside click */}
+          <button
+            type="button"
+            aria-label="Cerrar selector de sucursal"
+            className="fixed inset-0 z-40 cursor-default"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+            {branches.map((branch) => (
+              <button
+                key={branch.id}
+                type="button"
+                onClick={() => {
+                  onSelect(branch);
+                  setIsOpen(false);
+                }}
+                className={`w-full px-5 py-3.5 text-left text-sm hover:bg-secondary/20 flex items-center justify-between transition-colors ${
+                  selectedId === branch.id ? "bg-secondary/30" : ""
+                }`}
+              >
+                <span className="font-medium text-text-main">
+                  {branch.name}
+                </span>
+                {selectedId === branch.id && (
+                  <Check className="w-4 h-4 text-accent" />
+                )}
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
@@ -85,7 +111,7 @@ export default function OrderTypeSelector() {
   const discountId = useCartStore((state) => state.discountId);
   const rewardId = useCartStore((state) => state.rewardId);
 
-  const { data, isLoading } = useGetV1BranchesOpen();
+  const { data, isLoading } = useGetV1Branches({ state: "active" });
   const { trigger: postOrder, isMutating } = usePostV1Orders();
 
   const branches = data?.status === 200 ? data.data : [];
@@ -101,7 +127,6 @@ export default function OrderTypeSelector() {
       toast.error("Selecciona una sucursal");
       return;
     }
-
     if (items.length === 0) {
       toast.error("Tu carrito está vacío");
       return;
@@ -125,7 +150,6 @@ export default function OrderTypeSelector() {
 
     try {
       const response = await postOrder(payload);
-
       if (response.status === 201) {
         clearCart();
         clearDiscount();
@@ -138,7 +162,6 @@ export default function OrderTypeSelector() {
         navigate({ to: "/order" });
         return;
       }
-
       toast.error("No se pudo confirmar el pedido");
     } catch {
       toast.error("No se pudo confirmar el pedido");
@@ -146,89 +169,91 @@ export default function OrderTypeSelector() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-card-light rounded-[2.5rem] shadow-xl p-6 sm:p-10 flex flex-col items-center relative">
+    // KEY FIX: overflow-visible so the branch dropdown can escape the card bounds
+    <div className="w-full max-w-md mx-auto bg-card-light rounded-[2.5rem] shadow-xl p-6 sm:p-10 flex flex-col items-center relative overflow-visible">
+      {/* Title */}
       <h2 className="font-display text-2xl sm:text-3xl text-text-main text-center mb-6 leading-tight">
         ¿A dónde quieres
         <br />
         mandar tu pedido?
       </h2>
-      {isLoading ? (
-        <div className="w-full flex items-center justify-center gap-3 bg-secondary/30 px-5 py-4 rounded-2xl mb-8">
-          <span className="text-sm font-medium text-charcoal/70">
-            Cargando...
-          </span>
-        </div>
-      ) : (
-        <BranchSelector
-          branches={branches}
-          selectedId={selectedBranchId}
-          onSelect={(branch) => setSelectedBranchId(branch.id)}
-        />
-      )}
 
-      <h3 className="font-display text-xl sm:text-2xl text-text-main text-center mb-6 leading-tight">
+      {/* Branch selector */}
+      <div className="w-full mb-8">
+        {isLoading ? (
+          <div className="w-full flex items-center justify-center gap-3 bg-secondary/30 px-5 py-4 rounded-2xl">
+            <span className="text-sm font-medium text-charcoal/70">
+              Cargando sucursales...
+            </span>
+          </div>
+        ) : (
+          <BranchSelector
+            branches={branches}
+            selectedId={selectedBranchId}
+            onSelect={(branch) => setSelectedBranchId(branch.id)}
+          />
+        )}
+      </div>
+
+      {/* Divider */}
+      <div className="w-full h-px bg-secondary/60 mb-8" />
+
+      {/* Order type title */}
+      <h3 className="font-display text-2xl sm:text-3xl text-text-main text-center mb-6 leading-tight">
         ¿Cómo lo quieres
         <br />
         recibir?
       </h3>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mb-10">
-        <button
-          type="button"
-          onClick={() => setOrderType("mesa")}
-          className={`relative p-5 sm:p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
-            orderType === "mesa"
-              ? "border-accent bg-pink-powder/40 shadow-sm"
-              : "border-transparent bg-background-light hover:bg-secondary/50"
-          }`}
-        >
-          {orderType === "mesa" && (
-            <div className="absolute top-3 right-3">
-              <div className="rounded-full border border-accent p-0.5">
-                <div className="w-2 h-2 bg-accent rounded-full" />
+      {/* Order type buttons */}
+      <div className="grid grid-cols-2 gap-4 w-full mb-10">
+        {(["mesa", "recoger"] as const).map((type) => {
+          const isSelected = orderType === type;
+          const isMesa = type === "mesa";
+          return (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setOrderType(type)}
+              className={`relative p-5 sm:p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
+                isSelected
+                  ? "border-accent bg-pink-powder/40 shadow-sm"
+                  : "border-transparent bg-background-light hover:bg-secondary/50"
+              }`}
+            >
+              {isSelected && (
+                <div className="absolute top-3 right-3">
+                  <div className="rounded-full border border-accent p-0.5">
+                    <div className="w-2 h-2 bg-accent rounded-full" />
+                  </div>
+                </div>
+              )}
+              <div className="bg-secondary p-4 rounded-2xl">
+                {isMesa ? (
+                  <Utensils className="w-6 h-6 text-primary" />
+                ) : (
+                  <ShoppingBag className="w-6 h-6 text-primary" />
+                )}
               </div>
-            </div>
-          )}
-          <div className="bg-secondary p-4 rounded-2xl">
-            <Utensils className="w-6 h-6 text-primary" />
-          </div>
-          <div className="text-center">
-            <p className="font-bold text-text-main text-lg">Para Mesa</p>
-            <p className="text-xs text-charcoal/60">Servicio a tu mesa</p>
-          </div>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setOrderType("recoger")}
-          className={`relative p-5 sm:p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
-            orderType === "recoger"
-              ? "border-accent bg-pink-powder/40 shadow-sm"
-              : "border-transparent bg-background-light hover:bg-secondary/50"
-          }`}
-        >
-          {orderType === "recoger" && (
-            <div className="absolute top-3 right-3">
-              <div className="rounded-full border border-accent p-0.5">
-                <div className="w-2 h-2 bg-accent rounded-full" />
+              <div className="text-center">
+                <p className="font-bold text-text-main text-base sm:text-lg">
+                  {isMesa ? "Para Mesa" : "Para Recoger"}
+                </p>
+                <p className="text-xs text-charcoal/60 mt-0.5">
+                  {isMesa ? "Servicio a tu mesa" : "Listo en 15-20 min"}
+                </p>
               </div>
-            </div>
-          )}
-          <div className="bg-secondary p-4 rounded-2xl">
-            <ShoppingBag className="w-6 h-6 text-primary" />
-          </div>
-          <div className="text-center">
-            <p className="font-bold text-text-main text-lg">Para Recoger</p>
-            <p className="text-xs text-charcoal/60">Listo en 15-20 min</p>
-          </div>
-        </button>
+            </button>
+          );
+        })}
       </div>
 
+      {/* CTA */}
       <button
         type="button"
         onClick={handleOrdenar}
         disabled={!selectedBranchId || isMutating}
-        className="w-full bg-primary text-white py-4.5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-charcoal transition-colors shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-primary text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-charcoal transition-colors shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <span className="tracking-wide uppercase text-sm">
           {isMutating ? "Confirmando..." : "Ordenar ahora"}
