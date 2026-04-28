@@ -19,7 +19,14 @@ export function FoodCard({
 }: CardProps) {
   return (
     <div className="group bg-white rounded-3xl overflow-hidden shadow-[0_4px_25px_rgba(232,213,213,0.2)] border border-pink-soft/10 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(232,213,213,0.4)] hover:-translate-y-2">
-      <div className="relative aspect-[4/3] overflow-hidden bg-secondary/10">
+      <div
+        className="relative aspect-[4/3] overflow-hidden bg-secondary/10 cursor-pointer"
+        onClick={onAdd}
+        onKeyDown={(e) => e.key === "Enter" && onAdd?.()}
+        role="button"
+        tabIndex={0}
+        aria-label={`Agregar ${title} al carrito`}
+      >
         <img
           src={image}
           alt={title}
