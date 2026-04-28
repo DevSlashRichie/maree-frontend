@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { OrderColumn } from "@/features/orders/components/order-card-group";
 import { useBranchStore } from "@/hooks/use-branch-store";
-import { patchV1OrdersIdStatus, useGetV1Orders } from "@/lib/api.ts";
+import {
+  patchV1OrdersIdStatus,
+  useGetV1Orders,
+  useGetV1OrdersId,
+} from "@/lib/api.ts";
 import type { GetV1Orders200Item } from "@/lib/schemas";
 import { OrderDetails } from "./order-details";
 
@@ -12,6 +16,11 @@ export function Orders() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeOrder, setActiveOrder] = useState<GetV1Orders200Item | null>(
     null,
+  );
+
+  const { data: orderDetails, isLoading: isLoadingDetails } = useGetV1OrdersId(
+    activeOrder?.order.id ?? "",
+    { swr: { enabled: !!activeOrder?.order.id } },
   );
 
   const handleStatusChange = async (
@@ -83,6 +92,10 @@ export function Orders() {
         {activeOrder && (
           <OrderDetails
             order={activeOrder}
+            orderDetails={
+              orderDetails?.status === 200 ? orderDetails.data : null
+            }
+            isLoadingDetails={isLoadingDetails}
             onForward={() => handleForward(activeOrder.order.id)}
             onBackward={
               activeOrder.order.status !== "pending"
