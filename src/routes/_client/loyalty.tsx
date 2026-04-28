@@ -57,7 +57,7 @@ function RouteComponent() {
     swr: { enabled: isHistoryModalOpen },
   });
 
-  const { data: branchesData } = useGetV1Branches({
+  const { data: branchesData } = useGetV1Branches(undefined, {
     swr: { enabled: isHistoryModalOpen },
   });
 
