@@ -19,6 +19,7 @@ import {
 import { useMemo, useState } from "react";
 import {
   useDeleteV1ProductsVariantId,
+  useGetV1ProductsCategories,
   useGetV1ProductsVariants,
 } from "@/lib/api";
 import { formatPrice } from "@/lib/money";
@@ -71,9 +72,7 @@ type Variant = {
     image: string | null;
     name: string;
     status: string;
-    category?: {
-      name: string;
-    };
+    categoryId: string;
   };
 };
 
@@ -88,6 +87,21 @@ function ProductsComponent() {
     error,
     mutate,
   } = useGetV1ProductsVariants(undefined);
+
+  const { data: categoriesResponse } = useGetV1ProductsCategories();
+
+  const categoryMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (categoriesResponse?.status !== 200) return map;
+    const flatten = (items: { id: string; name: string; children?: { id: string; name: string; children?: unknown[] }[] }[]) => {
+      for (const item of items) {
+        map.set(item.id, item.name);
+        if (item.children) flatten(item.children as { id: string; name: string; children?: unknown[] }[]);
+      }
+    };
+    flatten(categoriesResponse.data.categories);
+    return map;
+  }, [categoriesResponse]);
 
   const variants = useMemo(() => {
     return apiResponse?.status === 200 ? apiResponse.data.variants : [];
@@ -122,13 +136,13 @@ function ProductsComponent() {
           </div>
         ),
       }),
-      columnHelper.accessor("product.category.name", {
+      columnHelper.accessor("product.categoryId", {
         header: "Categoría",
         cell: (info) => (
           <div className="flex items-center gap-2">
             <Tag className="w-3.5 h-3.5 text-text-main/40" />
             <span className="text-text-main/70 text-sm">
-              {info.getValue() || "Sin categoría"}
+              {categoryMap.get(info.getValue()) ?? "Sin categoría"}
             </span>
           </div>
         ),
@@ -189,7 +203,7 @@ function ProductsComponent() {
         ),
       }),
     ],
-    [mutate],
+    [mutate, categoryMap],
   );
 
   const table = useReactTable({
