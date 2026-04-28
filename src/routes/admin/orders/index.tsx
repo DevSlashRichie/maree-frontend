@@ -16,29 +16,7 @@ import {
 import { useMemo, useState } from "react";
 import { useGetV1Orders } from "@/lib/api";
 import { formatPrice } from "@/lib/money";
-
-type OrderRow = {
-  order: {
-    id: string;
-    userId: string;
-    branchId: string;
-    discountId: string | null;
-    total: string;
-    status: string;
-    note: string | null;
-    orderNumber: string;
-    orderType: string;
-    createdAt: string;
-  };
-  user?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    phone: string;
-    email: string | null;
-    createdAt: string;
-  } | null;
-};
+import type { GetV1Orders200Item } from "@/lib/schemas";
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; dot: string }> =
   {
@@ -78,7 +56,7 @@ export const Route = createFileRoute("/admin/orders/")({
   component: OrdersComponent,
 });
 
-const columnHelper = createColumnHelper<OrderRow>();
+const columnHelper = createColumnHelper<GetV1Orders200Item>();
 
 function OrdersComponent() {
   const [filterStatus, setFilterStatus] = useState("all");
@@ -86,7 +64,7 @@ function OrdersComponent() {
 
   const { data: apiResponse, isLoading, error } = useGetV1Orders(undefined);
 
-  const rows = useMemo<OrderRow[]>(() => {
+  const rows = useMemo<GetV1Orders200Item[]>(() => {
     return apiResponse?.status === 200 ? apiResponse.data : [];
   }, [apiResponse]);
 
