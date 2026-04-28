@@ -2,9 +2,12 @@ import { useNavigate } from "@tanstack/react-router";
 import { Check, Minus, Plus, Search, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCartStore } from "@/hooks/use-cart-store";
-import { useGetV1ProductsVariantId, useGetV1ProductsVariants } from "@/lib/api";
+import {
+  useGetV1ProductsVariantId,
+  useGetV1ProductsVariantsAllowed,
+} from "@/lib/api";
 import { formatCentsToDisplay } from "@/lib/money";
-import type { GetV1ProductsVariants200VariantsItem } from "@/lib/schemas/getV1ProductsVariants200VariantsItem";
+import type { GetV1ProductsVariantsAllowed200Item } from "@/lib/schemas/getV1ProductsVariantsAllowed200Item.ts";
 import { normalizeText } from "./customize-product-utils.tsx";
 
 interface Component {
@@ -38,7 +41,7 @@ function ArmaCategorySelector({
   maxLimit,
 }: {
   label: string;
-  options: GetV1ProductsVariants200VariantsItem[];
+  options: GetV1ProductsVariantsAllowed200Item[];
   selectedIds: string[];
   onAdd: (id: string) => void;
   onRemove: (id: string) => void;
@@ -64,7 +67,7 @@ function ArmaCategorySelector({
     () =>
       selectedIds
         .map((id) => options.find((opt) => opt.id === id))
-        .filter(Boolean) as GetV1ProductsVariants200VariantsItem[],
+        .filter(Boolean) as GetV1ProductsVariantsAllowed200Item[],
     [selectedIds, options],
   );
 
@@ -160,7 +163,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   const { data: variantResponse, isLoading: variantLoading } =
     useGetV1ProductsVariantId(resolvedVariantId);
   const { data: ingredientsResponse, isLoading: ingredientsLoading } =
-    useGetV1ProductsVariants();
+    useGetV1ProductsVariantsAllowed({ variantId });
 
   const [removedComponents, setRemovedComponents] = useState<Set<string>>(
     new Set(),
@@ -229,7 +232,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   );
 
   const ingredientOptions = useMemo(
-    () => (ingredientsResponse?.status === 200 ? ingredientsResponse.data.variants : []),
+    () => (ingredientsResponse?.status === 200 ? ingredientsResponse.data : []),
     [ingredientsResponse],
   );
 
@@ -323,7 +326,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     });
   };
 
-  const addExtra = (ingredient: GetV1ProductsVariants200VariantsItem) => {
+  const addExtra = (ingredient: GetV1ProductsVariantsAllowed200Item) => {
     setAddedExtras((prev) => {
       const existing = prev.find((extra) => extra.productId === ingredient.id);
       if (existing) {
