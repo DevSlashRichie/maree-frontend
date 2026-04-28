@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronLeft, Clock, Package } from "lucide-react";
 import { Heading } from "@/components/typography";
+import ReviewForm from "@/features/review/components/review-form";
+import { useAuthStore } from "@/hooks/use-auth-store";
 import { requireAuth } from "@/hooks/with-auth";
 import { useGetV1OrdersMeId } from "@/lib/api";
 import { formatPrice } from "@/lib/money";
@@ -14,6 +16,7 @@ export const Route = createFileRoute("/_client/order/$orderId")({
 
 function RouteComponent() {
   const { orderId } = Route.useParams();
+  const actor = useAuthStore((state) => state.actor);
   const { data: response, isLoading, error } = useGetV1OrdersMeId(orderId);
 
   if (isLoading) {
@@ -63,8 +66,11 @@ function RouteComponent() {
                 Detalles del
               </span>
             </div>
-            <Heading className="text-4xl md:text-4xl font-display lowercase italic tracking-tight text-gray-900">
-              pedido #{order.orderNumber}
+            <Heading className="text-4xl md:text-4xl font-display tracking-tight text-gray-900">
+              pedido #
+              <span className="lowercase">
+                {order.orderNumber.substring(order.orderNumber.length - 6)}
+              </span>
             </Heading>
           </div>
         </div>
@@ -177,6 +183,24 @@ function RouteComponent() {
               <p className="text-sm italic text-charcoal/80">"{order.note}"</p>
             </div>
           )}
+
+          {/* Review Section */}
+          <div className="pt-8">
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex items-center gap-3 w-full">
+                <span className="h-px flex-grow bg-charcoal/10" />
+                <span className="text-[10px] font-bold tracking-[0.4em] text-charcoal/40 uppercase whitespace-nowrap">
+                  ¿Qué te pareció?
+                </span>
+                <span className="h-px flex-grow bg-charcoal/10" />
+              </div>
+              <ReviewForm
+                orderId={order.id}
+                userId={actor?.id || ""}
+                branchId={order.branchId}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
