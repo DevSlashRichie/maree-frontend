@@ -30,6 +30,7 @@ function ProfileComponent() {
     defaultValues: {
       firstName: actor?.firstName || "",
       lastName: actor?.lastName || "",
+      email: actor?.email || "",
     },
     onSubmit: async ({ value }) => {
       try {
@@ -175,12 +176,36 @@ function ProfileComponent() {
               )}
             </form.Field>
 
+            <form.Field name="email">
+              {() => (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="email"
+                    className="text-[10px] font-bold tracking-[0.2em] text-charcoal/60 uppercase pl-1"
+                  >
+                    Email
+                  </label>
+                  <div
+                    className={`px-4 py-3 bg-pink-soft/5 rounded-2xl font-medium ${
+                      !actor.email ? "text-gray-400 italic" : "text-gray-800"
+                    }`}
+                  >
+                    {actor.email || "No proporcionado"}
+                  </div>
+                </div>
+              )}
+            </form.Field>
+
             <div className="space-y-2">
               <span className="block text-[10px] font-bold tracking-[0.2em] text-charcoal/60 uppercase pl-1">
                 Teléfono
               </span>
-              <div className="px-4 py-3 bg-pink-soft/5 rounded-2xl text-gray-800 font-medium">
-                {actor.phone}
+              <div
+                className={`px-4 py-3 bg-pink-soft/5 rounded-2xl font-medium ${
+                  !actor.phone ? "text-gray-400 italic" : "text-gray-800"
+                }`}
+              >
+                {actor.phone || "No proporcionado"}
               </div>
             </div>
           </div>

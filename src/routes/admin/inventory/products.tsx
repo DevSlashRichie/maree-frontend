@@ -113,7 +113,7 @@ function ProductsComponent() {
             <div className="flex flex-col min-w-0">
               <Link
                 to="/admin/inventory/$productId/detail"
-                params={{ productId: info.row.original.productId }}
+                params={{ productId: info.row.original.id }}
                 className="font-medium text-text-main truncate hover:text-secondary hover:underline transition-all cursor-pointer"
               >
                 {info.getValue()}
@@ -176,7 +176,7 @@ function ProductsComponent() {
           <div className="flex items-center gap-2">
             <Link
               to="/admin/inventory/$productId"
-              params={{ productId: info.row.original.productId }}
+              params={{ productId: info.row.original.id }}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-text-main/40 hover:text-secondary"
             >
               <Pencil className="w-4 h-4" />

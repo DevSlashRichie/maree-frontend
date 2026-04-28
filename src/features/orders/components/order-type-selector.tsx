@@ -64,10 +64,11 @@ export default function OrderTypeSelector() {
   const navigate = useNavigate();
   const { setSelectedBranch } = useBranchStore();
   const items = useCartStore((state) => state.items);
-  const discountId = useCartStore((state) => state.discountId);
-  const rewardId = useCartStore((state) => state.rewardId);
+
   const clearCart = useCartStore((state) => state.clearCart);
   const clearDiscount = useCartStore((state) => state.clearDiscount);
+  const discountId = useCartStore((state) => state.discountId);
+  const rewardId = useCartStore((state) => state.rewardId);
 
   const { data, isLoading } = useGetV1Branches();
   const { trigger: postOrder, isMutating } = usePostV1Orders();

@@ -1,12 +1,14 @@
-import { useState } from "react";
-import { usePostV1Review } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { useGetV1ReviewOrderId, usePostV1Review } from "@/lib/api";
 
 const StarPicker = ({
   value,
   onChange,
+  readOnly = false,
 }: {
   value: number;
   onChange: (v: number) => void;
+  readOnly?: boolean;
 }) => {
   const [hovered, setHovered] = useState(0);
   return (
@@ -25,17 +27,18 @@ const StarPicker = ({
           key={v}
           type="button"
           aria-label={`${v} estrella${v > 1 ? "s" : ""}`}
-          onMouseEnter={() => setHovered(v)}
-          onMouseLeave={() => setHovered(0)}
-          onClick={() => onChange(v)}
+          onMouseEnter={() => !readOnly && setHovered(v)}
+          onMouseLeave={() => !readOnly && setHovered(0)}
+          onClick={() => !readOnly && onChange(v)}
           style={{
             width: "44px",
             height: "44px",
-            cursor: "pointer",
+            cursor: readOnly ? "default" : "pointer",
             clipPath:
               "polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)",
             background: v <= (hovered || value) ? "#b08080" : "#eae6df",
-            transform: v <= (hovered || value) ? "scale(1.15)" : "scale(1)",
+            transform:
+              v <= (hovered || value) && !readOnly ? "scale(1.15)" : "scale(1)",
             transition: "background 0.12s, transform 0.1s",
             border: "none",
             padding: 0,
@@ -55,11 +58,29 @@ export default function ReviewForm({
   userId: string;
   branchId: string;
 }) {
+  const {
+    data: reviewResponse,
+    isLoading: isLoadingReview,
+    mutate,
+  } = useGetV1ReviewOrderId(orderId);
   const { trigger, isMutating } = usePostV1Review();
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
+
+  const existingReview =
+    reviewResponse?.status === 200 ? reviewResponse.data : null;
+  const isReadOnly = !!existingReview;
+
+  useEffect(() => {
+    if (existingReview) {
+      setRating(existingReview.satisfactionRate);
+      setText(existingReview.notes || "");
+    }
+  }, [existingReview]);
+
   const requiresComment = rating > 0 && rating < 5;
-  const isDisabled = !rating || (requiresComment && !text.trim()) || isMutating;
+  const isDisabled =
+    !rating || (requiresComment && !text.trim()) || isMutating || isReadOnly;
 
   const handleSubmit = async () => {
     if (isDisabled) return;
@@ -70,9 +91,16 @@ export default function ReviewForm({
       satisfactionRate: rating,
       notes: text || undefined,
     });
-    setRating(0);
-    setText("");
+    mutate();
   };
+
+  if (isLoadingReview) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pink-soft" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -83,6 +111,7 @@ export default function ReviewForm({
         padding: "20px 22px",
         fontFamily: "'Lato', sans-serif",
         maxWidth: "480px",
+        width: "100%",
       }}
     >
       <div
@@ -101,12 +130,12 @@ export default function ReviewForm({
             marginBottom: "6px",
           }}
         >
-          Tu calificación
+          {isReadOnly ? "Tu calificación enviada" : "Tu calificación"}
         </span>
-        <StarPicker value={rating} onChange={setRating} />
+        <StarPicker value={rating} onChange={setRating} readOnly={isReadOnly} />
       </div>
 
-      {requiresComment && (
+      {(requiresComment || (isReadOnly && text)) && (
         <div style={{ marginBottom: "14px" }}>
           <label
             htmlFor="review-comment"
@@ -118,24 +147,25 @@ export default function ReviewForm({
               marginBottom: "6px",
             }}
           >
-            ¿Qué podríamos mejorar?
+            {isReadOnly ? "Tu comentario" : "¿Qué podríamos mejorar?"}
           </label>
           <textarea
             id="review-comment"
             value={text}
             onChange={(e) => setText(e.target.value)}
+            readOnly={isReadOnly}
             placeholder="Cuéntanos qué salió mal o qué podríamos hacer mejor..."
             style={{
               width: "100%",
               minHeight: "80px",
-              resize: "vertical",
+              resize: isReadOnly ? "none" : "vertical",
               border: "0.5px solid rgba(58,64,66,0.18)",
               borderRadius: "10px",
               padding: "10px 12px",
               fontFamily: "'Lato', sans-serif",
               fontSize: "14px",
               color: "#2d2a26",
-              background: "#f7f5f0",
+              background: isReadOnly ? "#fdfcfb" : "#f7f5f0",
               outline: "none",
               boxSizing: "border-box",
             }}
@@ -143,7 +173,7 @@ export default function ReviewForm({
         </div>
       )}
 
-      {rating > 0 && (
+      {rating > 0 && !isReadOnly && (
         <button
           type="button"
           onClick={handleSubmit}
