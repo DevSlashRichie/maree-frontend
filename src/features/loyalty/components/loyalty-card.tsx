@@ -4,8 +4,8 @@ import { useState } from "react";
 // @ts-expect-error - bad imports for some reason.
 import { QRCode } from "react-qr-code";
 import { Modal } from "@/components/ui/modal";
-import { useGetV1Loyalty, useGetV1LoyaltyGoogleWallet } from "@/lib/api";
 import { useAuthStore } from "@/hooks/use-auth-store";
+import { useGetV1Loyalty, useGetV1LoyaltyGoogleWallet } from "@/lib/api";
 
 export function LoyaltyCard() {
   const [isQRExpanded, setIsQRExpanded] = useState(false);
