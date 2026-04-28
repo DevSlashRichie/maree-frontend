@@ -1,5 +1,3 @@
-import { Button } from "./button";
-
 interface CardProps {
   image: string;
   title: string;
@@ -19,12 +17,10 @@ export function FoodCard({
 }: CardProps) {
   return (
     <div className="group bg-white rounded-3xl overflow-hidden shadow-[0_4px_25px_rgba(232,213,213,0.2)] border border-pink-soft/10 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(232,213,213,0.4)] hover:-translate-y-2">
-      <div
-        className="relative aspect-[4/3] overflow-hidden bg-secondary/10 cursor-pointer"
+      <button
+        type="button"
+        className="relative aspect-[4/3] overflow-hidden bg-secondary/10 cursor-pointer w-full p-0 border-0 block"
         onClick={onAdd}
-        onKeyDown={(e) => e.key === "Enter" && onAdd?.()}
-        role="button"
-        tabIndex={0}
         aria-label={`Agregar ${title} al carrito`}
       >
         <img
@@ -39,17 +35,7 @@ export function FoodCard({
             </span>
           </div>
         )}
-        <div className="absolute bottom-4 right-4 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-          <Button
-            type="button"
-            variant="primary"
-            onClick={onAdd}
-            className="!w-10 !h-10 !p-0 !px-0 rounded-full flex items-center justify-center shadow-xl"
-          >
-            +
-          </Button>
-        </div>
-      </div>
+      </button>
 
       <div className="p-6">
         <div className="flex justify-between items-start mb-2 gap-2">

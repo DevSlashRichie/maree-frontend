@@ -103,7 +103,6 @@ export default function OrderTypeSelector() {
       })),
       totalPriceCents: totalCents,
       branchId: selectedBranch.id,
-      orderType,
       ...(discountId && { discountId }),
       ...(rewardId && { rewardId }),
     };
