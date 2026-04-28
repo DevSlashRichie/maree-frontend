@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BranchSelector } from "@/features/admin/components/selector-branch";
 import { Orders } from "@/features/orders/components/orders";
+import { requirePolicy } from "@/hooks/with-auth";
 
 export const Route = createFileRoute("/admin/order")({
+  beforeLoad: () => requirePolicy("read:orders"),
   component: RouteComponent,
 });
 

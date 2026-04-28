@@ -26,6 +26,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
 import { Tooltip } from "@/components/ui/tooltip";
+import { requirePolicy } from "@/hooks/with-auth";
 import {
   deleteV1RewardsRewardId,
   patchV1RewardsRewardId,
@@ -36,6 +37,7 @@ import {
 import type { RewardSchema } from "@/lib/schemas/rewardSchema";
 
 export const Route = createFileRoute("/admin/rewards")({
+  beforeLoad: () => requirePolicy("read:rewards"),
   component: RouteComponent,
 });
 

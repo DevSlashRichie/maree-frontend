@@ -14,10 +14,12 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { QRScannerModal } from "@/components/ui/qr-scanner-modal";
+import { requirePolicy } from "@/hooks/with-auth";
 import { useGetV1Users } from "@/lib/api";
 import { formatCentsToDisplay } from "@/lib/money";
 
 export const Route = createFileRoute("/admin/users/")({
+  beforeLoad: () => requirePolicy("read:users"),
   component: RouteComponent,
 });
 

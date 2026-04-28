@@ -82,3 +82,20 @@ export async function requireAuth({
     },
   });
 }
+
+/**
+ * Policy guard to be used in TanStack Router's `beforeLoad` hook.
+ */
+export function requirePolicy(requiredPolicy: string) {
+  const { actor, isInDev } = useAuthStore.getState();
+
+  if (isInDev) return;
+
+  if (actor?.policies?.includes("manage:all")) return;
+
+  if (!actor?.policies?.includes(requiredPolicy)) {
+    throw redirect({
+      to: "/admin",
+    });
+  }
+}

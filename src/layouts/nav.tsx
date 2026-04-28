@@ -74,18 +74,6 @@ export function Nav() {
           </span>
           <span className="text-[9px] uppercase tracking-[0.2em]">Perfil</span>
         </Link>
-
-        <Link
-          to="/admin"
-          activeProps={{ className: "text-accent font-bold" }}
-          inactiveProps={{ className: "text-text-main/40" }}
-          className="flex flex-col items-center transition-all duration-300 group"
-        >
-          <span className="material-symbols-outlined text-[22px] mb-1 group-hover:scale-110 transition-transform">
-            shield_person
-          </span>
-          <span className="text-[9px] uppercase tracking-[0.2em]">Admin</span>
-        </Link>
       </div>
     </nav>
   );

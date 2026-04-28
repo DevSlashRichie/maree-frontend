@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 import { PhoneInput } from "@/components/phone-input";
 import { Modal } from "@/components/ui/modal";
 import { useBranchStore } from "@/hooks/use-branch-store";
+import { requirePolicy } from "@/hooks/with-auth";
 import {
   deleteV1UsersStaffUserId,
   useGetV1BranchesIdStaff,
@@ -29,6 +30,7 @@ import type { Actor } from "@/lib/schemas";
 import { BranchSelector } from "../../../features/admin/components/selector-branch";
 
 export const Route = createFileRoute("/admin/staff/")({
+  beforeLoad: () => requirePolicy("read:staff"),
   component: RouteComponent,
 });
 

@@ -20,10 +20,12 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { CategoryForm } from "@/features/admin/inventory/components/category-form";
+import { requirePolicy } from "@/hooks/with-auth";
 import { useGetV1ProductsCategories } from "@/lib/api";
 import type { GetCategoriesDtoItem } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/inventory/categories")({
+  beforeLoad: () => requirePolicy("read:categories"),
   component: CategoriesPage,
 });
 
