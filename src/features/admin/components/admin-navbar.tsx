@@ -28,6 +28,7 @@ const adminNavItems = [
   { to: "/admin/discounts", label: "Descuentos", icon: "sell" },
   { to: "/admin/rewards", label: "Recompensas", icon: "card_giftcard" },
   { to: "/admin/order", label: "Pedidos", icon: "receipt_long" },
+  { to: "/admin/orders", label: "Historial de ordenes", icon: "history" },
 ];
 
 export function AdminNavbar() {
