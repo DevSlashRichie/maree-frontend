@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { PhoneInput } from "@/components/phone-input";
 import { Modal } from "@/components/ui/modal";
 import { useBranchStore } from "@/hooks/use-branch-store";
 import {
@@ -296,24 +297,16 @@ function StaffFormModal({
 
         <form.Field name="phone">
           {(field) => (
-            <div>
-              <label
-                htmlFor={field.name}
-                className="block text-sm font-medium text-text-main mb-2"
-              >
-                Teléfono
-              </label>
-              <input
-                id={field.name}
-                type="tel"
-                required
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
-                placeholder="+56912345678"
-              />
-            </div>
+            <PhoneInput
+              id={field.name}
+              label="Teléfono"
+              required
+              value={field.state.value}
+              onChange={(val) => field.handleChange(val)}
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-secondary/30 focus-within:border-secondary transition-all"
+              labelClassName="block text-sm font-medium text-text-main mb-2"
+              placeholder="+56912345678"
+            />
           )}
         </form.Field>
 

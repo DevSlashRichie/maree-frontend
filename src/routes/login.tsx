@@ -3,6 +3,7 @@ import { useState } from "react";
 import z from "zod";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
+import { PhoneInput } from "@/components/phone-input";
 import { Heading, Paragraph } from "@/components/typography";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { getV1UsersMe, postAuthLogin, postAuthRegister } from "@/lib/api";
@@ -197,16 +198,14 @@ function LoginPage() {
             )}
 
             {step === "phone" ? (
-              <Input
+              <PhoneInput
                 label="Teléfono"
-                type="text"
                 placeholder="+52 442 753 62 11"
-                name="phone"
                 required
                 value={phone}
                 readOnly={mode === "register"}
-                onChange={(e) => {
-                  setPhone(e.target.value);
+                onChange={(val) => {
+                  setPhone(val);
                 }}
               />
             ) : (
