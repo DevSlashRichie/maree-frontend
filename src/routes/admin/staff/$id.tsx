@@ -5,20 +5,11 @@ import { useState } from "react";
 import { PhoneInput } from "@/components/phone-input";
 import { Modal } from "@/components/ui/modal";
 import { useGetV1UsersStaffUserId } from "@/lib/api";
+import type { Actor } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/staff/$id")({
   component: RouteComponent,
 });
-
-type Staff = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string | null;
-  phone: string;
-  createdAt: string;
-  role: string | null;
-};
 
 const ROLES = [
   { value: "admin", label: "Administrador" },
@@ -46,7 +37,7 @@ function StaffEditModal({
   isOpen,
   onClose,
 }: {
-  staff: Staff;
+  staff: Actor;
   isOpen: boolean;
   onClose: () => void;
 }) {
@@ -156,7 +147,7 @@ function StaffEditModal({
               id={field.name}
               label="Teléfono"
               required
-              value={field.state.value}
+              value={field.state.value || ""}
               onChange={(val) => field.handleChange(val)}
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-secondary/30 focus-within:border-secondary transition-all"
               labelClassName="block text-sm font-medium text-text-main mb-2"
@@ -228,7 +219,7 @@ function RouteComponent() {
     },
   });
 
-  const staff: Staff | null =
+  const staff: Actor | null =
     data && data.status === 200
       ? {
           id: data.data.id,

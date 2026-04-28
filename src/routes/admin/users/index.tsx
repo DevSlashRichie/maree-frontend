@@ -16,23 +16,13 @@ import { useMemo, useState } from "react";
 import { QRScannerModal } from "@/components/ui/qr-scanner-modal";
 import { useGetV1Users } from "@/lib/api";
 import { formatCentsToDisplay } from "@/lib/money";
+import type { UserListUsersItem } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/users/")({
   component: RouteComponent,
 });
 
-type User = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  email: string | null;
-  createdAt: string;
-  totalConsumed: number;
-  totalVisits: number;
-};
-
-const columnHelper = createColumnHelper<User>();
+const columnHelper = createColumnHelper<UserListUsersItem>();
 
 const columns = [
   columnHelper.accessor("firstName", {
