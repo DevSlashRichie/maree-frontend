@@ -187,6 +187,15 @@ function RouteComponent() {
                           item.image ??
                           "https://images.unsplash.com/photo-1519676867240-f03562e64548?q=80&w=500"
                         }
+                        onClick={() =>
+                          navigate({
+                            to: "/customize-product",
+                            search: {
+                              itemId: "",
+                              variantId: item.id,
+                            },
+                          })
+                        }
                         onAdd={() =>
                           navigate({
                             to: "/customize-product",
@@ -237,6 +246,15 @@ function RouteComponent() {
                                 item.image ??
                                 "https://images.unsplash.com/photo-1519676867240-f03562e64548?q=80&w=500"
                               }
+                              onClick={() => {
+                                navigate({
+                                  to: "/customize-product",
+                                  search: {
+                                    itemId: "",
+                                    variantId: item.id,
+                                  },
+                                });
+                              }}
                               onAdd={() => {
                                 navigate({
                                   to: "/customize-product",

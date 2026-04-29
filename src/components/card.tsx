@@ -7,6 +7,7 @@ interface CardProps {
   description?: string | null;
   badge?: string;
   onAdd?: () => void;
+  onClick?: () => void;
 }
 
 export function FoodCard({
@@ -16,9 +17,24 @@ export function FoodCard({
   description,
   badge,
   onAdd,
+  onClick,
 }: CardProps) {
+  const handleCardClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    onClick?.();
+  };
+
+  const handleAddClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    onAdd?.();
+  };
+
   return (
-    <div className="group bg-white rounded-3xl overflow-hidden shadow-[0_4px_25px_rgba(232,213,213,0.2)] border border-pink-soft/10 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(232,213,213,0.4)] hover:-translate-y-2">
+    <button
+      type="button"
+      className="group bg-white rounded-3xl overflow-hidden shadow-[0_4px_25px_rgba(232,213,213,0.2)] border border-pink-soft/10 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(232,213,213,0.4)] hover:-translate-y-2 w-full text-left"
+      onClick={handleCardClick}
+    >
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary/10">
         <img
           src={image}
@@ -36,7 +52,7 @@ export function FoodCard({
           <Button
             type="button"
             variant="primary"
-            onClick={onAdd}
+            onClick={handleAddClick}
             className="!w-10 !h-10 !p-0 !px-0 rounded-full flex items-center justify-center shadow-xl"
           >
             +
@@ -63,13 +79,13 @@ export function FoodCard({
           </span>
           <button
             type="button"
-            onClick={onAdd}
+            onClick={handleAddClick}
             className="text-accent text-xs font-bold uppercase tracking-widest hover:text-accent/70 transition-colors sm:hidden"
           >
             Agregar +
           </button>
         </div>
       </div>
-    </div>
+    </button>
   );
 }

@@ -53,12 +53,10 @@ function RouteComponent() {
   const [historySearch, setHistorySearch] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const { data: fullHistoryData } = useGetV1RewardsHistory({
-    swr: { enabled: isHistoryModalOpen },
-  });
+  const { data: fullHistoryData } = useGetV1RewardsHistory();
 
   const { data: branchesData } = useGetV1Branches({
-    swr: { enabled: isHistoryModalOpen },
+    state: "active",
   });
 
   const apiHistory = useMemo(() => {
