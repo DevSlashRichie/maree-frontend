@@ -5,6 +5,7 @@ import {
   ChevronDown,
   MapPin,
   ShoppingBag,
+  Truck,
   Utensils,
 } from "lucide-react";
 import { useState } from "react";
@@ -29,7 +30,6 @@ function BranchSelector({
   const selected = branches.find((b) => b.id === selectedId);
 
   return (
-    // Portal-style: position relative on this wrapper, overflow visible on parent
     <div className="relative w-full">
       <button
         type="button"
@@ -65,7 +65,6 @@ function BranchSelector({
       {/* Dropdown renders outside the card via z-index; parent must NOT have overflow:hidden */}
       {isOpen && (
         <>
-          {/* Backdrop to close on outside click */}
           <button
             type="button"
             aria-label="Cerrar selector de sucursal"
@@ -81,9 +80,8 @@ function BranchSelector({
                   onSelect(branch);
                   setIsOpen(false);
                 }}
-                className={`w-full px-5 py-3.5 text-left text-sm hover:bg-secondary/20 flex items-center justify-between transition-colors ${
-                  selectedId === branch.id ? "bg-secondary/30" : ""
-                }`}
+                className={`w-full px-5 py-3.5 text-left text-sm hover:bg-secondary/20 flex items-center justify-between transition-colors ${selectedId === branch.id ? "bg-secondary/30" : ""
+                  }`}
               >
                 <span className="font-medium text-text-main">
                   {branch.name}
@@ -170,16 +168,13 @@ export default function OrderTypeSelector() {
   };
 
   return (
-    // KEY FIX: overflow-visible so the branch dropdown can escape the card bounds
-    <div className="w-full max-w-md mx-auto bg-card-light rounded-[2.5rem] shadow-xl p-6 sm:p-10 flex flex-col items-center relative overflow-visible">
-      {/* Title */}
+    <div className="w-full max-w-lg mx-auto bg-card-light rounded-[2.5rem] shadow-xl p-8 sm:p-12 flex flex-col items-center relative overflow-visible">
       <h2 className="font-display text-2xl sm:text-3xl text-text-main text-center mb-6 leading-tight">
         ¿A dónde quieres
         <br />
         mandar tu pedido?
       </h2>
 
-      {/* Branch selector */}
       <div className="w-full mb-8">
         {isLoading ? (
           <div className="w-full flex items-center justify-center gap-3 bg-secondary/30 px-5 py-4 rounded-2xl">
@@ -196,60 +191,90 @@ export default function OrderTypeSelector() {
         )}
       </div>
 
-      {/* Divider */}
       <div className="w-full h-px bg-secondary/60 mb-8" />
 
-      {/* Order type title */}
       <h3 className="font-display text-2xl sm:text-3xl text-text-main text-center mb-6 leading-tight">
         ¿Cómo lo quieres
         <br />
         recibir?
       </h3>
 
-      {/* Order type buttons */}
-      <div className="grid grid-cols-2 gap-4 w-full mb-10">
-        {(["mesa", "recoger"] as const).map((type) => {
-          const isSelected = orderType === type;
-          const isMesa = type === "mesa";
-          return (
-            <button
-              key={type}
-              type="button"
-              onClick={() => setOrderType(type)}
-              className={`relative p-5 sm:p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
-                isSelected
-                  ? "border-accent bg-pink-powder/40 shadow-sm"
-                  : "border-transparent bg-background-light hover:bg-secondary/50"
-              }`}
-            >
-              {isSelected && (
-                <div className="absolute top-3 right-3">
-                  <div className="rounded-full border border-accent p-0.5">
-                    <div className="w-2 h-2 bg-accent rounded-full" />
-                  </div>
-                </div>
-              )}
-              <div className="bg-secondary p-4 rounded-2xl">
-                {isMesa ? (
-                  <Utensils className="w-6 h-6 text-primary" />
-                ) : (
-                  <ShoppingBag className="w-6 h-6 text-primary" />
-                )}
+      <div className="grid grid-cols-3 gap-3 w-full mb-10">
+        <button
+          type="button"
+          onClick={() => setOrderType("mesa")}
+          className={`relative flex flex-col items-center gap-3 p-4 rounded-3xl border-2 transition-all duration-300 ${orderType === "mesa"
+              ? "border-accent bg-pink-powder/40 shadow-sm"
+              : "border-transparent bg-background-light hover:bg-secondary/50"
+            }`}
+        >
+          {orderType === "mesa" && (
+            <div className="absolute top-2.5 right-2.5">
+              <div className="rounded-full border border-accent p-0.5">
+                <div className="w-2 h-2 bg-accent rounded-full" />
               </div>
-              <div className="text-center">
-                <p className="font-bold text-text-main text-base sm:text-lg">
-                  {isMesa ? "Para Mesa" : "Para Recoger"}
-                </p>
-                <p className="text-xs text-charcoal/60 mt-0.5">
-                  {isMesa ? "Servicio a tu mesa" : "Listo en 15-20 min"}
-                </p>
+            </div>
+          )}
+          <div className="bg-secondary p-3.5 rounded-2xl">
+            <Utensils className="w-5 h-5 text-primary" />
+          </div>
+          <div className="text-center">
+            <p className="font-bold text-text-main text-sm leading-tight">
+              Para Mesa
+            </p>
+            <p className="text-[10px] text-charcoal/60 mt-0.5 leading-tight">
+              Servicio a tu mesa
+            </p>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setOrderType("recoger")}
+          className={`relative flex flex-col items-center gap-3 p-4 rounded-3xl border-2 transition-all duration-300 ${orderType === "recoger"
+              ? "border-accent bg-pink-powder/40 shadow-sm"
+              : "border-transparent bg-background-light hover:bg-secondary/50"
+            }`}
+        >
+          {orderType === "recoger" && (
+            <div className="absolute top-2.5 right-2.5">
+              <div className="rounded-full border border-accent p-0.5">
+                <div className="w-2 h-2 bg-accent rounded-full" />
               </div>
-            </button>
-          );
-        })}
+            </div>
+          )}
+          <div className="bg-secondary p-3.5 rounded-2xl">
+            <ShoppingBag className="w-5 h-5 text-primary" />
+          </div>
+          <div className="text-center">
+            <p className="font-bold text-text-main text-sm leading-tight">
+              Para Recoger
+            </p>
+            <p className="text-[10px] text-charcoal/60 mt-0.5 leading-tight">
+              Listo en 15-20 min
+            </p>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => toast("Próximamente", { icon: "🚀" })}
+          className="relative flex flex-col items-center gap-3 p-4 rounded-3xl border-2 border-dashed border-charcoal/20 bg-background-light hover:bg-secondary/20 transition-all duration-300 opacity-50"
+        >
+          <div className="bg-secondary p-3.5 rounded-2xl">
+            <Truck className="w-5 h-5 text-primary" />
+          </div>
+          <div className="text-center">
+            <p className="font-bold text-text-main text-sm leading-tight">
+              Delivery
+            </p>
+            <p className="text-[10px] text-charcoal/60 mt-0.5 leading-tight">
+              Próximamente
+            </p>
+          </div>
+        </button>
       </div>
 
-      {/* CTA */}
       <button
         type="button"
         onClick={handleOrdenar}
