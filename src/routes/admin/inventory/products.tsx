@@ -93,10 +93,23 @@ function ProductsComponent() {
   const categoryMap = useMemo(() => {
     const map = new Map<string, string>();
     if (categoriesResponse?.status !== 200) return map;
-    const flatten = (items: { id: string; name: string; children?: { id: string; name: string; children?: unknown[] }[] }[]) => {
+    const flatten = (
+      items: {
+        id: string;
+        name: string;
+        children?: { id: string; name: string; children?: unknown[] }[];
+      }[],
+    ) => {
       for (const item of items) {
         map.set(item.id, item.name);
-        if (item.children) flatten(item.children as { id: string; name: string; children?: unknown[] }[]);
+        if (item.children)
+          flatten(
+            item.children as {
+              id: string;
+              name: string;
+              children?: unknown[];
+            }[],
+          );
       }
     };
     flatten(categoriesResponse.data.categories);

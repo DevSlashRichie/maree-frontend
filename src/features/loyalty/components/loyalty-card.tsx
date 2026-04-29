@@ -13,6 +13,7 @@ import {
 export function LoyaltyCard() {
   const [isQRExpanded, setIsQRExpanded] = useState(false);
 
+  const { actor } = useAuthStore();
   const { data, isLoading } = useGetV1Loyalty();
 
   const { mutate: fetchGoogleWallet, isValidating: isGeneratingGoogle } =
@@ -133,7 +134,7 @@ export function LoyaltyCard() {
               className="text-white/50 text-xs font-mono"
               data-testid="user-phone"
             >
-              Tel: {data.data.phone}
+              Id: {data.data.phone ?? actor?.email ?? actor?.id}
             </p>
           </div>
 
@@ -211,7 +212,7 @@ export function LoyaltyCard() {
       >
         <div className="flex flex-col items-center py-4">
           <div className="bg-white p-4 rounded-2xl shadow-xl mb-4">
-            <QRCode size={200} value={data.data.phone} />
+            <QRCode size={200} value={actor?.id ?? data.data.phone ?? "?"} />
           </div>
 
           <p className="font-display text-xl text-primary">

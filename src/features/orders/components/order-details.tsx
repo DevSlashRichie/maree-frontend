@@ -1,4 +1,5 @@
 import { Button } from "@/components/button.tsx";
+import { formatPrice } from "@/lib/money";
 import type { GetV1Orders200Item, GetV1OrdersId200 } from "@/lib/schemas";
 
 interface OrderDetailsProps {
@@ -45,7 +46,7 @@ export function OrderDetails({
           </span>
         )}
         <p className="font-display text-xl text-text-main ml-auto font-semibold">
-          ${order.order.total}
+          {formatPrice(order.order.total)}
         </p>
       </div>
 
@@ -75,22 +76,51 @@ export function OrderDetails({
           items.map((item) => (
             <div
               key={item.id}
-              className="flex justify-between items-center py-2 border-b border-pink-soft/10 last:border-0"
+              className="flex flex-col py-2 border-b border-pink-soft/10 last:border-0"
             >
-              <div className="flex-1">
-                <p className="text-sm font-medium text-text-main">
-                  {item.quantity}x{" "}
-                  {item.productVariantsTable?.name ?? "Producto"}
-                </p>
-                {item.notes && (
-                  <p className="text-xs text-text-main/50 mt-0.5">
-                    {item.notes}
+              <div className="flex justify-between items-center">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-text-main">
+                    {item.quantity}x{" "}
+                    {item.productVariantsTable?.name ?? "Producto"}
                   </p>
-                )}
+                  {item.notes && (
+                    <p className="text-xs text-text-main/50 mt-0.5">
+                      {item.notes}
+                    </p>
+                  )}
+                </div>
+                <p className="text-sm text-text-main/70 font-medium">
+                  {formatPrice(Number(item.pricingSnapshot))}
+                </p>
               </div>
-              <p className="text-sm text-text-main/70 font-medium">
-                ${Number(item.pricingSnapshot) / 100}
-              </p>
+              {item.modifiers && item.modifiers.length > 0 && (
+                <div className="ml-4 mt-2 flex flex-col gap-1">
+                  {item.modifiers.map((mod) => {
+                    if (mod.buildYourOwn) {
+                      return (
+                        <span
+                          key={mod.id}
+                          className="text-sm font-medium text-text-main"
+                        >
+                          {mod.productVariantsTable?.name ?? "Base"}
+                        </span>
+                      );
+                    }
+                    if (mod.quantityDelta > 0) {
+                      return (
+                        <span
+                          key={mod.id}
+                          className="text-sm font-medium text-text-main/80"
+                        >
+                          + {mod.productVariantsTable?.name ?? "Extra"}
+                        </span>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              )}
             </div>
           ))
         ) : (

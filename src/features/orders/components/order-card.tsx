@@ -1,4 +1,5 @@
 import { Button } from "@/components/button";
+import { formatPrice } from "@/lib/money";
 import type { GetV1Orders200Item } from "@/lib/schemas";
 
 interface OrderCardProps {
@@ -19,7 +20,7 @@ export function OrderCard({ order, orderOnClickHandler }: OrderCardProps) {
           </p>
         </div>
         <span className="font-display text-xl text-text-main font-semibold shrink-0">
-          ${order.order.total}
+          {formatPrice(order.order.total)}
         </span>
       </div>
       <Button variant="action" onClick={orderOnClickHandler}>
