@@ -1,13 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { MapPin, Pencil, Plus, Trash2 } from "lucide-react";
+import { MapPin, Pencil, Plus } from "lucide-react";
 import { useState } from "react";
-import toast from "react-hot-toast";
 import { CreateBranchForm } from "@/features/admin/components/new-branch-form";
-import {
-  deleteV1BranchesId,
-  useGetV1Branches,
-  usePatchV1BranchesId,
-} from "@/lib/api";
+import { useGetV1Branches, usePatchV1BranchesId } from "@/lib/api";
 import type { GetV1Branches200Item } from "@/lib/schemas/getV1Branches200Item";
 import { Modal } from "../../../components/ui/modal";
 
@@ -68,25 +63,7 @@ function StateToggle({
 function RouteComponent() {
   const { data, isLoading, mutate } = useGetV1Branches();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
-    try {
-      const result = await deleteV1BranchesId(id);
-      if (result.status === 204) {
-        toast.success("Sucursal eliminada");
-        mutate();
-      } else {
-        toast.error(result.data.message || "Error al eliminar");
-      }
-    } catch {
-      toast.error("Error al eliminar");
-    } finally {
-      setDeletingId(null);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -203,14 +180,6 @@ function RouteComponent() {
                         className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors duration-150"
                       >
                         <Pencil className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(branch.id)}
-                        disabled={deletingId === branch.id}
-                        className="p-1.5 rounded-md text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors duration-150 disabled:opacity-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>

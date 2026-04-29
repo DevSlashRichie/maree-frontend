@@ -106,7 +106,6 @@ export default function OrderTypeSelector() {
   const navigate = useNavigate();
   const { setSelectedBranch } = useBranchStore();
   const items = useCartStore((state) => state.items);
-
   const clearCart = useCartStore((state) => state.clearCart);
   const clearDiscount = useCartStore((state) => state.clearDiscount);
   const discountId = useCartStore((state) => state.discountId);
