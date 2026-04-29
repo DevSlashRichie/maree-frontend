@@ -40,13 +40,14 @@ export function LoyaltyCard() {
   const handleAppleWalletClick = async () => {
     try {
       const result = await fetchAppleWallet();
-
       if (result?.status === 200 && result.data instanceof Blob) {
         const url = URL.createObjectURL(result.data);
         const a = document.createElement("a");
         a.href = url;
         a.download = "maree-loyalty.pkpass";
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
     } catch (error) {
