@@ -199,10 +199,14 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   }, [allVariantsResponse]);
 
   const isInitialArma = useMemo(() => {
-    const v = allVariantsResponse?.data?.variants?.find(
-      (v) => v.id === (editingItem?.variantId ?? variantId),
-    );
-    return v?.name.toLowerCase().includes("arma tu crepa") ?? false;
+    if (allVariantsResponse?.status === 200 && allVariantsResponse.data) {
+      const v = allVariantsResponse?.data?.variants?.find(
+        (v) => v.id === (editingItem?.variantId ?? variantId),
+      );
+      return v?.name.toLowerCase().includes("arma tu crepa") ?? false;
+    }
+
+    return [];
   }, [allVariantsResponse, variantId, editingItem?.variantId]);
 
   const targetVariantId = useMemo(() => {
@@ -272,12 +276,6 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     const counts = Object.keys(armaVariantsMap).map(Number);
     return counts.length > 0 ? Math.max(...counts) : 3;
   }, [armaVariantsMap]);
-
-  const _MAX_TOTAL_ARMA = useMemo(() => {
-    if (!isArmaTuCrepa) return 0;
-    const match = variant.name.match(/\((\d+)\s+Ingrediente/i);
-    return match ? Number.parseInt(match[1], 10) : 3; // Default to 3 if not specified
-  }, [variant.name, isArmaTuCrepa]);
 
   const ingredientOptions = useMemo(
     () => (ingredientsResponse?.status === 200 ? ingredientsResponse.data : []),
