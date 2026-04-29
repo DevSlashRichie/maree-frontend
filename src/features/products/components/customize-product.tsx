@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCartStore } from "@/hooks/use-cart-store";
 import {
   useGetV1ProductsVariantId,
+  useGetV1ProductsVariants,
   useGetV1ProductsVariantsAllowed,
 } from "@/lib/api";
 import { formatCentsToDisplay } from "@/lib/money";
@@ -157,13 +158,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   const editingItem = useCartStore((state) =>
     itemId ? state.items.find((item) => item.itemId === itemId) : undefined,
   );
-  const resolvedVariantId = editingItem?.variantId ?? variantId;
   const isEditing = Boolean(itemId && editingItem);
-
-  const { data: variantResponse, isLoading: variantLoading } =
-    useGetV1ProductsVariantId(resolvedVariantId);
-  const { data: ingredientsResponse, isLoading: ingredientsLoading } =
-    useGetV1ProductsVariantsAllowed({ variantId });
 
   const [removedComponents, setRemovedComponents] = useState<Set<string>>(
     new Set(),
@@ -178,6 +173,64 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
     fruta: [],
     toppings: [],
   });
+
+  const totalArmaSelected =
+    selectedArma.untables.length +
+    selectedArma.fruta.length +
+    selectedArma.toppings.length;
+
+  const { data: allVariantsResponse } = useGetV1ProductsVariants();
+
+  const armaVariantsMap = useMemo(() => {
+    if (allVariantsResponse?.status !== 200) return {};
+    const variants = allVariantsResponse.data.variants ?? [];
+    return variants
+      .filter((v) => v.name.toLowerCase().includes("arma tu crepa"))
+      .reduce(
+        (acc, v) => {
+          const match = v.name.match(/\((\d+)\s+ingrediente/i);
+          if (match) {
+            acc[Number.parseInt(match[1], 10)] = v.id;
+          }
+          return acc;
+        },
+        {} as Record<number, string>,
+      );
+  }, [allVariantsResponse]);
+
+  const isInitialArma = useMemo(() => {
+    const v = allVariantsResponse?.data?.variants?.find(
+      (v) => v.id === (editingItem?.variantId ?? variantId),
+    );
+    return v?.name.toLowerCase().includes("arma tu crepa") ?? false;
+  }, [allVariantsResponse, variantId, editingItem?.variantId]);
+
+  const targetVariantId = useMemo(() => {
+    if (isInitialArma && totalArmaSelected > 0) {
+      const counts = Object.keys(armaVariantsMap)
+        .map(Number)
+        .sort((a, b) => b - a);
+      const bestCount =
+        counts.find((c) => c <= totalArmaSelected) || counts[counts.length - 1];
+      if (bestCount && armaVariantsMap[bestCount]) {
+        return armaVariantsMap[bestCount];
+      }
+    }
+    return editingItem?.variantId ?? variantId;
+  }, [
+    isInitialArma,
+    totalArmaSelected,
+    armaVariantsMap,
+    variantId,
+    editingItem?.variantId,
+  ]);
+
+  const resolvedVariantId = editingItem?.variantId ?? variantId;
+
+  const { data: variantResponse, isLoading: variantLoading } =
+    useGetV1ProductsVariantId(resolvedVariantId);
+  const { data: ingredientsResponse, isLoading: ingredientsLoading } =
+    useGetV1ProductsVariantsAllowed({ variantId: resolvedVariantId });
   const [notes, setNotes] = useState("");
   const [baseType, setBaseType] = useState<"Crepa" | "Waffle">("Crepa");
   const [ingredientSearch, setIngredientSearch] = useState("");
@@ -215,21 +268,16 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
 
   const isArmaTuCrepa = variant.name.toLowerCase().includes("arma tu crepa");
 
-  const MAX_TOTAL_ARMA = useMemo(() => {
+  const MAX_VARIANTS_ARMA = useMemo(() => {
+    const counts = Object.keys(armaVariantsMap).map(Number);
+    return counts.length > 0 ? Math.max(...counts) : 3;
+  }, [armaVariantsMap]);
+
+  const _MAX_TOTAL_ARMA = useMemo(() => {
     if (!isArmaTuCrepa) return 0;
     const match = variant.name.match(/\((\d+)\s+Ingrediente/i);
     return match ? Number.parseInt(match[1], 10) : 3; // Default to 3 if not specified
   }, [variant.name, isArmaTuCrepa]);
-
-  const totalArmaSelected = useMemo(
-    () =>
-      [
-        ...selectedArma.untables,
-        ...selectedArma.fruta,
-        ...selectedArma.toppings,
-      ].length,
-    [selectedArma],
-  );
 
   const ingredientOptions = useMemo(
     () => (ingredientsResponse?.status === 200 ? ingredientsResponse.data : []),
@@ -299,9 +347,19 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   );
 
   const basePriceCents = useMemo(() => {
+    // Try to find the price of the target variant in the list of all variants
+    if (allVariantsResponse?.status === 200) {
+      const targetVariant = allVariantsResponse.data.variants?.find(
+        (v) => v.id === targetVariantId,
+      );
+      if (targetVariant) {
+        return Number.parseInt(targetVariant.price ?? "0", 10);
+      }
+    }
+    // Fallback to the current variant's price
     const val = Number.parseInt(variant.price, 10);
     return Number.isFinite(val) ? val : 0;
-  }, [variant.price]);
+  }, [variant.price, allVariantsResponse, targetVariantId]);
 
   const armaTuCrepaTotalCents = 0;
 
@@ -503,7 +561,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
       : notes.trim();
 
     const payload = {
-      variantId: variant.id,
+      variantId: targetVariantId,
       itemNotes: finalNotes,
       modifiers: [...removedModifiers, ...extraModifiers, ...armaModifiers],
       displayName: variant.name,
@@ -520,7 +578,10 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   };
 
   const handleAddArma = (cat: keyof typeof selectedArma, id: string) => {
-    if (totalArmaSelected >= MAX_TOTAL_ARMA) return;
+    // We allow adding more than MAX_TOTAL_ARMA if there are higher variants available
+    // or if we just want to treat them as extras later (though here they are in the Arma section)
+    // For now, let's allow up to the maximum variant found in the system
+    if (totalArmaSelected >= MAX_VARIANTS_ARMA) return;
     setSelectedArma((prev) => ({
       ...prev,
       [cat]: [...prev[cat], id],
@@ -635,12 +696,12 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                 </p>
                 <span
                   className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    totalArmaSelected >= MAX_TOTAL_ARMA
+                    totalArmaSelected >= MAX_VARIANTS_ARMA
                       ? "bg-red-100 text-red-500"
                       : "bg-secondary/20 text-secondary"
                   }`}
                 >
-                  {totalArmaSelected} / {MAX_TOTAL_ARMA} seleccionados
+                  {totalArmaSelected} / {MAX_VARIANTS_ARMA} seleccionados
                 </span>
               </div>
 
@@ -652,7 +713,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                   onAdd={(id) => handleAddArma("untables", id)}
                   onRemove={(id) => handleRemoveArma("untables", id)}
                   totalSelected={totalArmaSelected}
-                  maxLimit={MAX_TOTAL_ARMA}
+                  maxLimit={MAX_VARIANTS_ARMA}
                 />
                 <ArmaCategorySelector
                   label="Fruta"
@@ -661,7 +722,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                   onAdd={(id) => handleAddArma("fruta", id)}
                   onRemove={(id) => handleRemoveArma("fruta", id)}
                   totalSelected={totalArmaSelected}
-                  maxLimit={MAX_TOTAL_ARMA}
+                  maxLimit={MAX_VARIANTS_ARMA}
                 />
                 <ArmaCategorySelector
                   label="Toppings"
@@ -670,7 +731,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                   onAdd={(id) => handleAddArma("toppings", id)}
                   onRemove={(id) => handleRemoveArma("toppings", id)}
                   totalSelected={totalArmaSelected}
-                  maxLimit={MAX_TOTAL_ARMA}
+                  maxLimit={MAX_VARIANTS_ARMA}
                 />
               </div>
             </section>

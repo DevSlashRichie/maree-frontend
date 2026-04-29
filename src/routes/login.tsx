@@ -9,7 +9,7 @@ import { Heading, Paragraph } from "@/components/typography";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { getV1UsersMe, postAuthLogin, postAuthRegister } from "@/lib/api";
 
-const AUTH_MODE: "phone" | "google" = "google"; // Toggle between 'phone' and 'google' login methods
+const AUTH_MODE: "phone" | "google" = "phone"; // Toggle between 'phone' and 'google' login methods
 
 export const Route = createFileRoute("/login")({
   beforeLoad: ({ search }) => {
@@ -114,7 +114,7 @@ function LoginPage() {
           method:
             step === "phone"
               ? {
-                  type: "test",
+                  type: "phone",
                 }
               : {
                   type: "code",
