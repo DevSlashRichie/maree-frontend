@@ -78,11 +78,10 @@ function ArmaCategorySelector({
 
       <div className="relative">
         <div
-          className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 bg-background-light transition-all ${
-            isLimitReached
+          className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 bg-background-light transition-all ${isLimitReached
               ? "bg-gray-50 border-pink-soft/20"
               : "border-pink-soft/30 hover:border-pink-soft/60"
-          }`}
+            }`}
         >
           <Search className="w-4 h-4 text-text-main/30" />
           <input
@@ -251,22 +250,22 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
       (hasValidVariant
         ? variantResponse?.data
         : {
-            id: "",
-            name: "",
-            image: null,
-            price: "0",
-            categoryId: "",
-            path: [],
-            components: [],
-          }) as {
-        id: string;
-        name: string;
-        image: string | null;
-        price: string;
-        categoryId: string;
-        path?: string[];
-        components: Component[];
-      },
+          id: "",
+          name: "",
+          image: null,
+          price: 0,
+          categoryId: "",
+          path: [],
+          components: [],
+        }) as unknown as {
+          id: string;
+          name: string;
+          image: string | null;
+          price: number;
+          categoryId: string;
+          path?: string[];
+          components: Component[];
+        },
     [hasValidVariant, variantResponse],
   );
 
@@ -355,7 +354,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
       }
     }
     // Fallback to the current variant's price
-    const val = Number.parseInt(variant.price, 10);
+    const val = Number(variant.price);
     return Number.isFinite(val) ? val : 0;
   }, [variant.price, allVariantsResponse, targetVariantId]);
 
@@ -659,18 +658,16 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                     key={type}
                     type="button"
                     onClick={() => setBaseType(type)}
-                    className={`relative py-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-2 ${
-                      baseType === type
+                    className={`relative py-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-2 ${baseType === type
                         ? "border-secondary bg-secondary/5 shadow-sm"
                         : "border-pink-soft/20 bg-background-light hover:bg-secondary/5"
-                    }`}
+                      }`}
                   >
                     <span
-                      className={`font-bold text-sm ${
-                        baseType === type
+                      className={`font-bold text-sm ${baseType === type
                           ? "text-secondary"
                           : "text-text-main/60"
-                      }`}
+                        }`}
                     >
                       {type}
                     </span>
@@ -693,11 +690,10 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                   Arma tu {baseType}
                 </p>
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    totalArmaSelected >= MAX_VARIANTS_ARMA
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${totalArmaSelected >= MAX_VARIANTS_ARMA
                       ? "bg-red-100 text-red-500"
                       : "bg-secondary/20 text-secondary"
-                  }`}
+                    }`}
                 >
                   {totalArmaSelected} / {MAX_VARIANTS_ARMA} seleccionados
                 </span>
@@ -747,20 +743,18 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
               return (
                 <article
                   key={component.id}
-                  className={`rounded-2xl border px-3 py-3 transition-colors ${
-                    isRemoved
+                  className={`rounded-2xl border px-3 py-3 transition-colors ${isRemoved
                       ? "border-red-200/70 bg-red-50/45"
                       : "border-pink-soft/30 bg-background-light"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p
-                        className={`text-sm m-0 ${
-                          isRemoved
+                        className={`text-sm m-0 ${isRemoved
                             ? "line-through text-text-main/35"
                             : "text-text-main"
-                        }`}
+                          }`}
                       >
                         {component.productName}
                       </p>
@@ -772,11 +766,10 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
                       <button
                         type="button"
                         onClick={() => toggleComponent(component)}
-                        className={`rounded-xl px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-all cursor-pointer ${
-                          isRemoved
+                        className={`rounded-xl px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-all cursor-pointer ${isRemoved
                             ? "border border-pink-soft/40 text-text-main/60 bg-background-light"
                             : "border border-red-200 text-red-500 bg-red-50 hover:bg-red-100"
-                        }`}
+                          }`}
                       >
                         {isRemoved ? "Reactivar" : "Quitar"}
                       </button>
