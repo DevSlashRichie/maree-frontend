@@ -80,8 +80,9 @@ function BranchSelector({
                   onSelect(branch);
                   setIsOpen(false);
                 }}
-                className={`w-full px-5 py-3.5 text-left text-sm hover:bg-secondary/20 flex items-center justify-between transition-colors ${selectedId === branch.id ? "bg-secondary/30" : ""
-                  }`}
+                className={`w-full px-5 py-3.5 text-left text-sm hover:bg-secondary/20 flex items-center justify-between transition-colors ${
+                  selectedId === branch.id ? "bg-secondary/30" : ""
+                }`}
               >
                 <span className="font-medium text-text-main">
                   {branch.name}
@@ -203,10 +204,11 @@ export default function OrderTypeSelector() {
         <button
           type="button"
           onClick={() => setOrderType("mesa")}
-          className={`relative flex flex-col items-center gap-3 p-4 rounded-3xl border-2 transition-all duration-300 ${orderType === "mesa"
+          className={`relative flex flex-col items-center gap-3 p-4 rounded-3xl border-2 transition-all duration-300 ${
+            orderType === "mesa"
               ? "border-accent bg-pink-powder/40 shadow-sm"
               : "border-transparent bg-background-light hover:bg-secondary/50"
-            }`}
+          }`}
         >
           {orderType === "mesa" && (
             <div className="absolute top-2.5 right-2.5">
@@ -231,10 +233,11 @@ export default function OrderTypeSelector() {
         <button
           type="button"
           onClick={() => setOrderType("recoger")}
-          className={`relative flex flex-col items-center gap-3 p-4 rounded-3xl border-2 transition-all duration-300 ${orderType === "recoger"
+          className={`relative flex flex-col items-center gap-3 p-4 rounded-3xl border-2 transition-all duration-300 ${
+            orderType === "recoger"
               ? "border-accent bg-pink-powder/40 shadow-sm"
               : "border-transparent bg-background-light hover:bg-secondary/50"
-            }`}
+          }`}
         >
           {orderType === "recoger" && (
             <div className="absolute top-2.5 right-2.5">
