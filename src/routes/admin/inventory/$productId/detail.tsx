@@ -116,46 +116,39 @@ function ProductDetailComponent() {
               </tr>
             </thead>
             <tbody className="font-body">
-              {data.components.map(
-                (component: {
-                  id: string;
-                  name: string;
-                  quantity: number;
-                  isRemovable: boolean;
-                }) => (
-                  <tr
-                    key={component.id}
-                    className="hover:bg-gray-50/50 transition-colors border-b border-gray-50 last:border-0"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center border border-secondary/20 shrink-0">
-                          <Package className="w-4 h-4 text-secondary" />
-                        </div>
-                        <span className="font-medium text-text-main">
-                          {component.name}
-                        </span>
+              {data.components.map((component) => (
+                <tr
+                  key={component.id}
+                  className="hover:bg-gray-50/50 transition-colors border-b border-gray-50 last:border-0"
+                >
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center border border-secondary/20 shrink-0">
+                        <Package className="w-4 h-4 text-secondary" />
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="font-semibold text-text-main text-sm">
-                        {component.quantity}
+                      <span className="font-medium text-text-main">
+                        {component.productName}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {component.isRemovable ? (
-                        <span className="px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-100 text-[10px] font-bold uppercase tracking-wider">
-                          Sí
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-1 rounded-full bg-gray-50 text-gray-400 border border-gray-100 text-[10px] font-bold uppercase tracking-wider">
-                          No
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ),
-              )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="font-semibold text-text-main text-sm">
+                      {component.quantity}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    {component.isRemovable ? (
+                      <span className="px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-100 text-[10px] font-bold uppercase tracking-wider">
+                        Sí
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 rounded-full bg-gray-50 text-gray-400 border border-gray-100 text-[10px] font-bold uppercase tracking-wider">
+                        No
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         )}
