@@ -6,8 +6,8 @@ import { QRCode } from "react-qr-code";
 import { Modal } from "@/components/ui/modal";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import {
+  getV1LoyaltyAppleWallet,
   useGetV1Loyalty,
-  useGetV1LoyaltyAppleWallet,
   useGetV1LoyaltyGoogleWallet,
 } from "@/lib/api";
 
@@ -20,8 +20,7 @@ export function LoyaltyCard() {
   const { mutate: fetchGoogleWallet, isValidating: isGeneratingGoogle } =
     useGetV1LoyaltyGoogleWallet();
 
-  const { mutate: fetchAppleWallet, isValidating: isGeneratingApple } =
-    useGetV1LoyaltyAppleWallet();
+  const [isGeneratingApple, setIsGeneratingApple] = useState(false);
 
   const TOTAL_STAMPS = 6;
 
@@ -38,8 +37,9 @@ export function LoyaltyCard() {
   };
 
   const handleAppleWalletClick = async () => {
+    setIsGeneratingApple(true);
     try {
-      const result = await fetchAppleWallet();
+      const result = await getV1LoyaltyAppleWallet();
       if (result?.status === 200 && result.data instanceof Blob) {
         const url = URL.createObjectURL(result.data);
         const a = document.createElement("a");
@@ -52,6 +52,8 @@ export function LoyaltyCard() {
       }
     } catch (error) {
       console.error("Error generating Apple Wallet pass:", error);
+    } finally {
+      setIsGeneratingApple(false);
     }
   };
 
