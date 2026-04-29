@@ -16,7 +16,7 @@ const BASE_URL_INDEXES = {
 
 const SOURCE_INPUT_URL = {
   DEVELOPMENT: "http://localhost:8383/docs/openapi.json",
-  PRODUCTION: "https://cloud.maree.binarysails.com/docs/openapi.json",
+  PRODUCTION: "https://cloud.bluekeys.mareecrepe.com",
 };
 
 const choosenIndex = BASE_URL_INDEXES[env];
