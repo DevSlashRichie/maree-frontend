@@ -4,8 +4,11 @@ import { useState } from "react";
 // @ts-expect-error - bad imports for some reason.
 import { QRCode } from "react-qr-code";
 import { Modal } from "@/components/ui/modal";
-import { useAuthStore } from "@/hooks/use-auth-store";
-import { useGetV1Loyalty, useGetV1LoyaltyGoogleWallet } from "@/lib/api";
+import {
+  useGetV1Loyalty,
+  useGetV1LoyaltyAppleWallet,
+  useGetV1LoyaltyGoogleWallet,
+} from "@/lib/api";
 
 export function LoyaltyCard() {
   const [isQRExpanded, setIsQRExpanded] = useState(false);
@@ -15,6 +18,9 @@ export function LoyaltyCard() {
 
   const { mutate: fetchGoogleWallet, isValidating: isGeneratingGoogle } =
     useGetV1LoyaltyGoogleWallet();
+
+  const { mutate: fetchAppleWallet, isValidating: isGeneratingApple } =
+    useGetV1LoyaltyAppleWallet();
 
   const TOTAL_STAMPS = 6;
 
@@ -27,6 +33,23 @@ export function LoyaltyCard() {
       }
     } catch (error) {
       console.error("Error generating wallet link:", error);
+    }
+  };
+
+  const handleAppleWalletClick = async () => {
+    try {
+      const result = await fetchAppleWallet();
+
+      if (result?.status === 200 && result.data instanceof Blob) {
+        const url = URL.createObjectURL(result.data);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "maree-loyalty.pkpass";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Error generating Apple Wallet pass:", error);
     }
   };
 
@@ -126,13 +149,32 @@ export function LoyaltyCard() {
       </div>
 
       <div className="flex flex-col gap-3 items-center w-full max-w-[210px] mx-auto">
-        <button type="button" className="w-full active:scale-95 transition-all">
-          <img
-            src="/apple-wallet-button.svg"
-            alt="Apple Wallet"
-            className="h-12 w-full object-contain"
-          />
-        </button>
+        <div className="w-full h-12 relative">
+          <button
+            type="button"
+            disabled={isGeneratingApple}
+            onClick={handleAppleWalletClick}
+            className={cn(
+              "w-full h-full cursor-pointer transition-all active:scale-95 flex items-center justify-center",
+              { "bg-black rounded-[8px]": isGeneratingApple },
+            )}
+          >
+            {isGeneratingApple ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-white/70" />
+                <span className="text-white/70 text-xs font-medium">
+                  Cargando...
+                </span>
+              </div>
+            ) : (
+              <img
+                src="/apple-wallet-button.svg"
+                alt="Apple Wallet"
+                className="h-12 w-full object-contain"
+              />
+            )}
+          </button>
+        </div>
 
         <div className="w-full h-12 relative">
           <button
