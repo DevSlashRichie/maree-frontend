@@ -10,7 +10,7 @@ const productIdRoute = getRouteApi("/admin/inventory/$productId");
 
 function ProductDetailComponent() {
   const data = productIdRoute.useLoaderData();
-  const priceInUnits = Number(data.price) / 100;
+  const priceInUnits = Number(data.priceInCents) / 100;
   const isActive = data.status === "active";
 
   return (

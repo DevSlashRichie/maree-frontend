@@ -197,15 +197,15 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
             id: "",
             name: "",
             image: null,
-            price: "0",
+            price: 0,
             categoryId: "",
             path: [],
             components: [],
-          }) as {
+          }) as unknown as {
         id: string;
         name: string;
         image: string | null;
-        price: string;
+        price: number;
         categoryId: string;
         path?: string[];
         components: Component[];
@@ -299,7 +299,7 @@ export function CustomizeProduct({ variantId, itemId }: CustomizeOrderProps) {
   );
 
   const basePriceCents = useMemo(() => {
-    const val = Number.parseInt(variant.price, 10);
+    const val = Number(variant.price);
     return Number.isFinite(val) ? val : 0;
   }, [variant.price]);
 
