@@ -6,7 +6,7 @@ import { QRCode } from "react-qr-code";
 import { Modal } from "@/components/ui/modal";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import {
-  getV1LoyaltyAppleWallet,
+  getGetV1LoyaltyAppleWalletUrl,
   useGetV1Loyalty,
   useGetV1LoyaltyGoogleWallet,
 } from "@/lib/api";
@@ -39,9 +39,12 @@ export function LoyaltyCard() {
   const handleAppleWalletClick = async () => {
     setIsGeneratingApple(true);
     try {
-      const result = await getV1LoyaltyAppleWallet();
-      if (result?.status === 200 && result.data instanceof Blob) {
-        const url = URL.createObjectURL(result.data);
+      const res = await fetch(getGetV1LoyaltyAppleWalletUrl(), {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = "maree-loyalty.pkpass";
