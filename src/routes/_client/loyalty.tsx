@@ -57,12 +57,9 @@ function RouteComponent() {
     swr: { enabled: isHistoryModalOpen },
   });
 
-  const { data: branchesData } = useGetV1Branches(
-    {},
-    {
-      swr: { enabled: isHistoryModalOpen },
-    },
-  );
+  const { data: branchesData } = useGetV1Branches(undefined, {
+    swr: { enabled: isHistoryModalOpen },
+  });
 
   const apiHistory = useMemo(() => {
     if (data?.status !== 200) return [];
