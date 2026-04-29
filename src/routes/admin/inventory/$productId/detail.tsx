@@ -10,7 +10,6 @@ const productIdRoute = getRouteApi("/admin/inventory/$productId");
 
 function ProductDetailComponent() {
   const data = productIdRoute.useLoaderData();
-  const priceInUnits = Number(data.price) / 100;
   const isActive = data.status === "active";
 
   return (
@@ -46,7 +45,7 @@ function ProductDetailComponent() {
             Precio
           </span>
           <span className="font-display text-3xl font-bold text-text-main">
-            {formatPrice(priceInUnits)}
+            {formatPrice(data.price)}
           </span>
         </div>
 

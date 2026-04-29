@@ -80,7 +80,7 @@ function RouteComponent() {
                   className="block"
                 >
                   <HistoryItem
-                    title={`Pedido #${order.orderNumber}`}
+                    title={`Pedido #${order.orderNumber.slice(-5)}`}
                     location={formatPrice(order.total)}
                     date={order.createdAt}
                     status={order.status}
