@@ -8,7 +8,7 @@ ENV VITE_GOOGLE_CLIENT_ID=664563004670-vbpp81aiu5khnrq1o8p75pg2f786l512.apps.goo
 # Install dependencies
 COPY package.json bun.lock ./
 COPY orval.config.ts .
-RUN bun install --ignore-scripts
+RUN bun install
 
 # Copy source and build
 COPY . .
