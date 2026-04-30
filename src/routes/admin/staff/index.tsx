@@ -26,7 +26,7 @@ import {
   useGetV1UsersStaff,
   usePostAuthRegister,
 } from "@/lib/api";
-import type { Actor } from "@/lib/schemas";
+import type { BranchStaff } from "@/lib/schemas";
 import { BranchSelector } from "../../../features/admin/components/selector-branch";
 
 export const Route = createFileRoute("/admin/staff/")({
@@ -55,7 +55,7 @@ const roleLabels: Record<string, string> = {
   cashier: "Cajero",
 };
 
-const columnHelper = createColumnHelper<Actor>();
+const columnHelper = createColumnHelper<BranchStaff>();
 
 const columns = [
   columnHelper.accessor("firstName", {

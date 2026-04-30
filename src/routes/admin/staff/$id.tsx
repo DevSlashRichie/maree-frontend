@@ -219,18 +219,7 @@ function RouteComponent() {
     },
   });
 
-  const staff: Actor | null =
-    data && data.status === 200
-      ? {
-          id: data.data.id,
-          firstName: data.data.firstName,
-          lastName: data.data.lastName,
-          phone: data.data.phone,
-          email: data.data.email,
-          createdAt: data.data.createdAt,
-          role: data.data.role,
-        }
-      : null;
+  const staff: Actor | null = data && data.status === 200 ? data.data : null;
 
   if (error || (data && data.status !== 200)) {
     return (
