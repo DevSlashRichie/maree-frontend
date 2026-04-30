@@ -327,9 +327,10 @@ function RouteComponent() {
                     {staff.firstName} {staff.lastName}
                   </h1>
                   <span
-                    className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${roleColors[staff.role || ""] ||
+                    className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+                      roleColors[staff.role || ""] ||
                       "bg-gray-100 text-gray-700"
-                      }`}
+                    }`}
                   >
                     {roleLabels[staff.role || ""] || "Sin rol"}
                   </span>
