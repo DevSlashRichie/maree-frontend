@@ -111,8 +111,9 @@ export function AdminNavbar() {
     >
       <div>
         <div
-          className={`flex items-center justify-between p-4 ${isCollapsed ? "justify-center" : "justify-between"
-            }`}
+          className={`flex items-center justify-between p-4 ${
+            isCollapsed ? "justify-center" : "justify-between"
+          }`}
         >
           {!isCollapsed && (
             <Link to="/admin" className="flex items-center gap-2">
@@ -136,9 +137,10 @@ export function AdminNavbar() {
                   className={`
                     w-full flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm
                     font-medium transition-all duration-200 outline-none cursor-pointer
-                    ${open
-                      ? "bg-text-main text-white border-text-main"
-                      : "bg-transparent text-text-main border-text-main/30 hover:border-text-main"
+                    ${
+                      open
+                        ? "bg-text-main text-white border-text-main"
+                        : "bg-transparent text-text-main border-text-main/30 hover:border-text-main"
                     }
                     ${isCollapsed ? "justify-center" : ""}
                   `}
@@ -149,8 +151,9 @@ export function AdminNavbar() {
                     </span>
                   )}
                   <ChevronDown
-                    className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""
-                      }`}
+                    className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
+                      open ? "rotate-180" : ""
+                    }`}
                   />
                 </PopoverButton>
 
@@ -207,10 +210,11 @@ export function AdminNavbar() {
               key={item.to}
               to={item.to}
               style={isActive(item.to) ? { backgroundColor: "#C4919A" } : {}}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${isActive(item.to)
+              className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
+                isActive(item.to)
                   ? "text-white"
                   : "text-text-main/60 hover:bg-secondary/10 hover:text-text-main"
-                } ${isCollapsed ? "justify-center" : ""}`}
+              } ${isCollapsed ? "justify-center" : ""}`}
             >
               <span className="material-symbols-outlined text-[22px]">
                 {item.icon}
