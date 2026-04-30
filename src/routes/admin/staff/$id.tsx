@@ -4,7 +4,7 @@ import { ArrowLeft, Calendar, Mail, Pencil, Phone, Shield } from "lucide-react";
 import { useState } from "react";
 import { PhoneInput } from "@/components/phone-input";
 import { Modal } from "@/components/ui/modal";
-import { useGetV1UsersStaffUserId } from "@/lib/api";
+import { patchV1UsersStaffUserId, useGetV1UsersStaffUserId } from "@/lib/api";
 import type { Actor } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/staff/$id")({
@@ -36,10 +36,12 @@ function StaffEditModal({
   staff,
   isOpen,
   onClose,
+  onUpdate,
 }: {
   staff: Actor;
   isOpen: boolean;
   onClose: () => void;
+  onUpdate: (actor: Actor) => void;
 }) {
   const form = useForm({
     defaultValues: {
@@ -50,7 +52,10 @@ function StaffEditModal({
       role: staff.role || "barista",
     },
     onSubmit: async ({ value }) => {
-      console.log("Updating staff:", staff.id, value);
+      const s = await patchV1UsersStaffUserId(staff.id, value);
+      if (s.status === 200) {
+        onUpdate(s.data);
+      }
       onClose();
     },
   });
@@ -211,13 +216,16 @@ function RouteComponent() {
   const params = Route.useParams();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const { data, isLoading, error } = useGetV1UsersStaffUserId(params.id, {
-    swr: {
-      keepPreviousData: true,
-      revalidateOnFocus: false,
-      shouldRetryOnError: false,
+  const { data, isLoading, error, mutate } = useGetV1UsersStaffUserId(
+    params.id,
+    {
+      swr: {
+        keepPreviousData: true,
+        revalidateOnFocus: false,
+        shouldRetryOnError: false,
+      },
     },
-  });
+  );
 
   const staff: Actor | null = data && data.status === 200 ? data.data : null;
 
@@ -319,10 +327,9 @@ function RouteComponent() {
                     {staff.firstName} {staff.lastName}
                   </h1>
                   <span
-                    className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${
-                      roleColors[staff.role || ""] ||
+                    className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${roleColors[staff.role || ""] ||
                       "bg-gray-100 text-gray-700"
-                    }`}
+                      }`}
                   >
                     {roleLabels[staff.role || ""] || "Sin rol"}
                   </span>
@@ -402,6 +409,9 @@ function RouteComponent() {
         staff={staff}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
+        onUpdate={() => {
+          mutate();
+        }}
       />
     </div>
   );
