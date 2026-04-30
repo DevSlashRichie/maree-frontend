@@ -10,6 +10,8 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   useGetV1ProductsIngredients,
+  usePostV1ProductsImage,
+  usePostV1ProductsProductVariant,
   usePutV1ProductsProductVariantId,
 } from "@/lib/api"; // ORVAL generated hooks
 import { convertToCents, formatCentsToDisplay, formatPrice } from "@/lib/money";
