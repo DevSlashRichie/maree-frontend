@@ -44,6 +44,14 @@ export function Footer() {
                 </svg>
               </a>
             ))}
+            <a
+              href="https://github.com/D1egoM3ndez/Aviso-de-Privacidad-MAREE"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[9px] uppercase tracking-widest font-light text-text-main/30 hover:text-text-main/60 transition-colors duration-200"
+            >
+              Aviso de Privacidad
+            </a>
           </div>
         </div>
       </div>
