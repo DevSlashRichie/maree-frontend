@@ -114,12 +114,13 @@ function LoginPage() {
           method:
             step === "phone"
               ? {
-                  type: "phone",
-                }
+                type:
+                  import.meta.env.VITE_IS_TEST === "true" ? "test" : "phone",
+              }
               : {
-                  type: "code",
-                  value: code,
-                },
+                type: "code",
+                value: code,
+              },
         },
         {
           credentials: "include",

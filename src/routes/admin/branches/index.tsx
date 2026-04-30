@@ -3,6 +3,7 @@ import { MapPin, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { CreateBranchForm } from "@/features/admin/components/new-branch-form";
+import { requirePolicy } from "@/hooks/with-auth";
 import {
   deleteV1BranchesId,
   useGetV1Branches,
@@ -12,6 +13,7 @@ import type { GetV1Branches200Item } from "@/lib/schemas/getV1Branches200Item";
 import { Modal } from "../../../components/ui/modal";
 
 export const Route = createFileRoute("/admin/branches/")({
+  beforeLoad: () => requirePolicy("read:branches"),
   component: RouteComponent,
 });
 

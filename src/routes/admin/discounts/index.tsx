@@ -10,6 +10,7 @@ import { Calendar, Hash, Percent, Plus, Tag, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
+import { requirePolicy } from "@/hooks/with-auth";
 import {
   deleteV1DiscountsId,
   useGetV1Discounts,
@@ -18,6 +19,7 @@ import {
 import type { GetV1Discounts200Item } from "@/lib/schemas";
 
 export const Route = createFileRoute("/admin/discounts/")({
+  beforeLoad: () => requirePolicy("read:discounts"),
   component: RouteComponent,
 });
 
