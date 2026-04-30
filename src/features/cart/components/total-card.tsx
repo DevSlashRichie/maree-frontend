@@ -27,7 +27,7 @@ export function TotalCard({
   const itemDiscountAmount = discountAmountCents ?? 0;
 
   let orderDiscountAmount = 0;
-  if (discountValue && discountType) {
+  if (discountValue && discountType && itemDiscountAmount === 0) {
     const discountValueNum = Number(discountValue);
 
     if (discountType === "percentage") {
